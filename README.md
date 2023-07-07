@@ -1,6 +1,6 @@
 # eslint-plugin-lingui
 
-ESlint plugin to check if all strings are translated
+Set of eslint rules for `js-lingui` projects
 
 ## Installation
 
