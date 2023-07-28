@@ -1,11 +1,14 @@
-import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import {
+  RuleContext,
+  RuleRecommendation,
+  RuleModule,
+} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { TSESTree } from '@typescript-eslint/utils'
 
-export default {
+const rule: RuleModule<string, readonly unknown[]> = {
   meta: {
     docs: {
       description: "doesn't allow <Trans></Trans> to wrap a single element unnecessarily.",
-      category: 'Best Practices',
       recommended: 'error' as RuleRecommendation,
     },
     messages: {
@@ -51,3 +54,5 @@ export default {
     }
   },
 }
+
+export default rule

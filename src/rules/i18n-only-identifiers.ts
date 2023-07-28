@@ -1,12 +1,15 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import {
+  RuleContext,
+  RuleRecommendation,
+  RuleModule,
+} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { getNearestAncestor, isTTaggedTemplateExpression } from '../helpers'
 
-export default {
+const rule: RuleModule<string, readonly unknown[]> = {
   meta: {
     docs: {
       description: "doesn't allow functions or member expressions in templates",
-      category: 'Best Practices',
       recommended: 'error' as RuleRecommendation,
     },
     messages: {
@@ -54,3 +57,5 @@ export default {
     }
   },
 }
+
+export default rule

@@ -1,12 +1,15 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import {
+  RuleContext,
+  RuleRecommendation,
+  RuleModule,
+} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { isTTaggedTemplateExpression } from '../helpers'
 
-export default {
+const rule: RuleModule<string, readonly unknown[]> = {
   meta: {
     docs: {
       description: 'allow t call only inside functions',
-      category: 'Best Practices',
       recommended: 'error' as RuleRecommendation,
     },
     messages: {
@@ -68,3 +71,5 @@ export default {
     }
   },
 }
+
+export default rule

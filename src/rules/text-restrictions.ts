@@ -1,4 +1,8 @@
-import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import {
+  RuleContext,
+  RuleRecommendation,
+  RuleModule,
+} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { TSESTree } from '@typescript-eslint/utils'
 
 import { getQuasisValue, isNodeTranslated } from '../helpers'
@@ -21,11 +25,10 @@ export type Option = {
   rules: Rule[]
 }
 
-export default {
+const rule: RuleModule<string, Option[]> = {
   meta: {
     docs: {
       description: 'Text restrictions',
-      category: 'Best Practices',
       recommended: 'error' as RuleRecommendation,
     },
     messages: {
@@ -117,3 +120,5 @@ export default {
     }
   },
 }
+
+export default rule

@@ -1,5 +1,9 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import {
+  RuleContext,
+  RuleRecommendation,
+  RuleModule,
+} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import type * as ts from 'typescript'
 import {
   isUpperCase,
@@ -15,11 +19,10 @@ export type Option = {
   ignoreFunction?: string[]
   ignoreAttribute?: string[]
 }
-export default {
+const rule: RuleModule<string, Option[]> = {
   meta: {
     docs: {
       description: 'disallow literal string',
-      category: 'Best Practices',
       recommended: 'error' as RuleRecommendation,
     },
     messages: {
@@ -519,3 +522,5 @@ function generateCalleeWhitelists(option: Option) {
   })
   return result
 }
+
+export default rule
