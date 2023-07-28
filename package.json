@@ -5,7 +5,10 @@
   "keywords": [
     "eslint",
     "eslintplugin",
-    "eslint-plugin"
+    "eslint-plugin",
+    "lingui",
+    "linguijs",
+    "lingui-js"
   ],
   "author": "Igor Dolzhenkov",
   "main": "lib/index.js",
