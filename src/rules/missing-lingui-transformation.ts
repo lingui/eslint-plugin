@@ -186,7 +186,7 @@ const rule: RuleModule<string, Option[]> = {
       }
     }
 
-    const onProperty = (node: TSESTree.StringLiteral | TSESTree.TemplateLiteral) => {
+    const onProperty = (node: TSESTree.Literal | TSESTree.TemplateLiteral) => {
       const { parent } = node
 
       if (parent.type === TSESTree.AST_NODE_TYPES.Property) {
@@ -227,7 +227,7 @@ const rule: RuleModule<string, Option[]> = {
       }
     }
 
-    const onBinaryExpression = (node: TSESTree.StringLiteral | TSESTree.TemplateLiteral) => {
+    const onBinaryExpression = (node: TSESTree.Literal | TSESTree.TemplateLiteral) => {
       if (node.parent.type === TSESTree.AST_NODE_TYPES.BinaryExpression) {
         const {
           parent: { operator },
@@ -241,7 +241,7 @@ const rule: RuleModule<string, Option[]> = {
     }
 
     const onCallExpression = (
-      node: TSESTree.StringLiteral | TSESTree.TemplateLiteral,
+      node: TSESTree.Literal | TSESTree.TemplateLiteral,
       parentName: TSESTree.AST_NODE_TYPES.CallExpression | TSESTree.AST_NODE_TYPES.NewExpression,
     ) => {
       const parent =
@@ -292,51 +292,51 @@ const rule: RuleModule<string, Option[]> = {
       context.report({ node, messageId: 'default', data: { message } })
     }
 
-    const stringLiteralVisitor: {
-      [key: string]: (node: TSESTree.StringLiteral) => void
+    const literalVisitor: {
+      [key: string]: (node: TSESTree.Literal) => void
     } = {
-      'ImportDeclaration Literal'(node: TSESTree.StringLiteral) {
+      'ImportDeclaration Literal'(node: TSESTree.Literal) {
         // allow (import abc form 'abc')
         visited.add(node)
       },
 
-      'ExportAllDeclaration Literal'(node: TSESTree.StringLiteral) {
+      'ExportAllDeclaration Literal'(node: TSESTree.Literal) {
         // allow export * from 'mod'
         visited.add(node)
       },
 
-      'ExportNamedDeclaration > Literal'(node: TSESTree.StringLiteral) {
+      'ExportNamedDeclaration > Literal'(node: TSESTree.Literal) {
         // allow export { named } from 'mod'
         visited.add(node)
       },
 
-      'JSXElement > Literal'(node: TSESTree.StringLiteral) {
+      'JSXElement > Literal'(node: TSESTree.Literal) {
         processTextNode(node, `${node.value}`.trim())
       },
 
-      'JSXElement > JSXExpressionContainer > Literal'(node: TSESTree.StringLiteral) {
+      'JSXElement > JSXExpressionContainer > Literal'(node: TSESTree.Literal) {
         processTextNode(node, `${node.value}`.trim())
       },
 
-      'JSXAttribute Literal'(node: TSESTree.StringLiteral) {
+      'JSXAttribute Literal'(node: TSESTree.Literal) {
         onJSXAttribute(node)
       },
 
-      'TSLiteralType Literal'(node: TSESTree.StringLiteral) {
+      'TSLiteralType Literal'(node: TSESTree.Literal) {
         // allow var a: Type['member'];
         visited.add(node)
       },
       // ─────────────────────────────────────────────────────────────────
 
-      'ClassProperty > Literal'(node: TSESTree.StringLiteral) {
+      'ClassProperty > Literal'(node: TSESTree.Literal) {
         onClassProperty(node)
       },
 
-      'TSEnumDeclaration > Literal'(node: TSESTree.StringLiteral) {
+      'TSEnumDeclaration > Literal'(node: TSESTree.Literal) {
         visited.add(node)
       },
 
-      'VariableDeclarator > Literal'(node: TSESTree.StringLiteral) {
+      'VariableDeclarator > Literal'(node: TSESTree.Literal) {
         // allow statements like const A_B = "test"
         if (
           node.parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator &&
@@ -346,33 +346,33 @@ const rule: RuleModule<string, Option[]> = {
           visited.add(node)
         }
       },
-      'Property > Literal'(node: TSESTree.StringLiteral) {
+      'Property > Literal'(node: TSESTree.Literal) {
         onProperty(node)
       },
-      'BinaryExpression > Literal'(node: TSESTree.StringLiteral) {
+      'BinaryExpression > Literal'(node: TSESTree.Literal) {
         onBinaryExpression(node)
       },
 
-      'CallExpression Literal'(node: TSESTree.StringLiteral) {
+      'CallExpression Literal'(node: TSESTree.Literal) {
         onCallExpression(node, TSESTree.AST_NODE_TYPES.CallExpression)
       },
 
-      'NewExpression Literal'(node: TSESTree.StringLiteral) {
+      'NewExpression Literal'(node: TSESTree.Literal) {
         onCallExpression(node, TSESTree.AST_NODE_TYPES.NewExpression)
       },
 
-      'SwitchCase > Literal'(node: TSESTree.StringLiteral) {
+      'SwitchCase > Literal'(node: TSESTree.Literal) {
         visited.add(node)
       },
 
-      'TaggedTemplateExpression > TemplateLiteral Literal'(node: TSESTree.StringLiteral) {
+      'TaggedTemplateExpression > TemplateLiteral Literal'(node: TSESTree.Literal) {
         visited.add(node)
       },
 
-      'Literal:exit'(node: TSESTree.StringLiteral) {
+      'Literal:exit'(node: TSESTree.Literal) {
         // visited and passed linting
         if (visited.has(node)) return
-        const trimed = node.value.trim()
+        const trimed = `${node.value}`.trim()
         if (!trimed) return
 
         // allow statements like const a = "FOO"
@@ -469,7 +469,7 @@ const rule: RuleModule<string, Option[]> = {
     }
 
     function wrapVisitor<
-      Type extends TSESTree.StringLiteral | TSESTree.TemplateLiteral | TSESTree.JSXText
+      Type extends TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText
     >(visitor: { [key: string]: (node: Type) => void }) {
       const newVisitor: {
         [key: string]: (node: Type) => void
@@ -488,7 +488,7 @@ const rule: RuleModule<string, Option[]> = {
     }
 
     return {
-      ...wrapVisitor<TSESTree.StringLiteral>(stringLiteralVisitor),
+      ...wrapVisitor<TSESTree.Literal>(literalVisitor),
       ...wrapVisitor<TSESTree.TemplateLiteral>(templateLiteralVisitor),
       ...wrapVisitor<TSESTree.JSXText>(jsxTextLiteralVisitor),
     }
