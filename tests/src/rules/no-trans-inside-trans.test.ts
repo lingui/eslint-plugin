@@ -1,5 +1,5 @@
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-import rule from '../../../src/rules/trans-inside-trans'
+import rule from '../../../src/rules/no-trans-inside-trans'
 import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 
 //------------------------------------------------------------------------------

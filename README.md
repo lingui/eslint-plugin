@@ -38,7 +38,7 @@ Then configure the rules you want to use under the rules section.
     "lingui/no-single-varibles-to-translate": 2,
     "lingui/i18n-only-identifiers": 2,
     "lingui/no-single-tag-to-translate": 2,
-    "lingui/trans-inside-trans": 2,
+    "lingui/no-trans-inside-trans": 2,
     "lingui/text-restrictions": [
       2,
       {
@@ -104,6 +104,10 @@ Check that `t` calls are inside `function`. It is necessary for language swit
 ## i18n-only-identifiers
 
 Check that t`` doesn't contain member or function expressions like t`\${obj.prop} or t`func()`
+
+## no-trans-inside-trans
+
+Check that no `Trans` inside `Trans` components
 
 ## no-single-varibles-to-translate
 
