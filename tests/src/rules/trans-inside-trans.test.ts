@@ -1,11 +1,6 @@
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-
-//------------------------------------------------------------------------------
-// Requirements
-//------------------------------------------------------------------------------
-
-const rule = require('../../../src/rules/trans-inside-trans.ts'),
-  RuleTester = require('eslint').RuleTester
+import rule from '../../../src/rules/trans-inside-trans'
+import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 
 //------------------------------------------------------------------------------
 // Tests
@@ -31,15 +26,15 @@ const tests = {
   invalid: [
     {
       code: '<Trans>Hello, <Trans>John</Trans></Trans>',
-      errors: [{ message: "Trans couldn't be wrapped into Trans" }],
+      errors: [{ messageId: 'default' }],
     },
     {
       code: ` <Trans>
       All <Trans>done</Trans>
   </Trans>`,
-      errors: [{ message: "Trans couldn't be wrapped into Trans" }],
+      errors: [{ messageId: 'default' }],
     },
   ],
 }
 
-jsxTester.run('trans-inside-trans', rule, tests)
+jsxTester.run<string, readonly unknown[]>('trans-inside-trans', rule, tests)

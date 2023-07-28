@@ -1,5 +1,5 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { RuleContext } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import {
   getQuasisValue,
   getNearestAncestor,
@@ -7,12 +7,12 @@ import {
   isTTaggedTemplateExpression,
 } from '../helpers'
 
-module.exports = {
+export default {
   meta: {
     docs: {
       description: "doesn't allow single variables without text to translate",
       category: 'Best Practices',
-      recommended: true,
+      recommended: 'error' as RuleRecommendation,
     },
     messages: {
       asJsx: "You couldn't translate just a variable, remove Trans or add some text inside",
@@ -25,10 +25,13 @@ module.exports = {
         additionalProperties: false,
       },
     ],
+    type: 'problem' as const,
   },
 
+  defaultOptions: [],
+
   create: function (context: RuleContext<string, readonly unknown[]>) {
-    const hasSomeJSXTextWithContent = (nodes: TSESTree.JSXChild[]) => {
+    const hasSomeJSXTextWithContent = (nodes: TSESTree.JSXChild[]): boolean => {
       return nodes.some((jsxChild) => {
         switch (jsxChild.type) {
           case TSESTree.AST_NODE_TYPES.JSXText:

@@ -1,25 +1,32 @@
-import { RuleContext } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { TSESTree } from '@typescript-eslint/utils'
 
 import { getQuasisValue, isNodeTranslated } from '../helpers'
 
-type Rule = {
-  patterns: RegExp[]
-  flags: string
+export type Rule = {
+  patterns: string[]
   message: string
-  isOnlyForTranslation: boolean
+  flags?: string
+  isOnlyForTranslation?: boolean
 }
 
-type Option = {
+type RegexRule = {
+  patterns: RegExp[]
+  message: string
+  flags?: string
+  isOnlyForTranslation?: boolean
+}
+
+export type Option = {
   rules: Rule[]
 }
 
-module.exports = {
+export default {
   meta: {
     docs: {
       description: 'Text restrictions',
       category: 'Best Practices',
-      recommended: true,
+      recommended: 'error' as RuleRecommendation,
     },
     messages: {
       default: '{{ message }}',
@@ -55,7 +62,10 @@ module.exports = {
         additionalProperties: false,
       },
     ],
+    type: 'problem' as const,
   },
+
+  defaultOptions: [],
 
   create: function (context: RuleContext<string, Option[]>) {
     const {
@@ -64,19 +74,9 @@ module.exports = {
     if (option && option.rules) {
       const { rules } = option
 
-      const rulePatterns = rules.map(
-        ({
-          patterns,
-          message,
-          flags,
-          isOnlyForTranslation,
-        }: {
-          patterns: RegExp[]
-          message: string
-          flags: string
-          isOnlyForTranslation: boolean
-        }) => ({
-          patterns: patterns.map((item: RegExp) => new RegExp(item, flags)),
+      const rulePatterns: RegexRule[] = rules.map(
+        ({ patterns, message, flags, isOnlyForTranslation }: Rule) => ({
+          patterns: patterns.map((item: string) => new RegExp(item, flags)),
           message,
           isOnlyForTranslation,
         }),
@@ -86,28 +86,18 @@ module.exports = {
         value: string,
         node: TSESTree.TemplateLiteral | TSESTree.Literal | TSESTree.JSXText,
       ) => {
-        rulePatterns.forEach(
-          ({
-            patterns,
-            message,
-            isOnlyForTranslation,
-          }: {
-            patterns: RegExp[]
-            message: string
-            isOnlyForTranslation: boolean
-          }) => {
-            if (isOnlyForTranslation && !isNodeTranslated(node)) {
-              return
-            }
-            if (
-              patterns.some((item: RegExp) => {
-                return item.test(value)
-              })
-            ) {
-              context.report({ node, messageId: 'default', data: { message: message } })
-            }
-          },
-        )
+        rulePatterns.forEach(({ patterns, message, isOnlyForTranslation }: RegexRule) => {
+          if (isOnlyForTranslation && !isNodeTranslated(node)) {
+            return
+          }
+          if (
+            patterns.some((item: RegExp) => {
+              return item.test(value)
+            })
+          ) {
+            context.report({ node, messageId: 'default', data: { message: message } })
+          }
+        })
       }
       return {
         'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {

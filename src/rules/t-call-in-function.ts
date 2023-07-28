@@ -1,13 +1,13 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { RuleContext } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { isTTaggedTemplateExpression } from '../helpers'
 
-module.exports = {
+export default {
   meta: {
     docs: {
       description: 'allow t call only inside functions',
       category: 'Best Practices',
-      recommended: true,
+      recommended: 'error' as RuleRecommendation,
     },
     messages: {
       default: 't`` call should be inside function',
@@ -19,7 +19,11 @@ module.exports = {
         additionalProperties: false,
       },
     ],
+    type: 'problem' as const,
   },
+
+  defaultOptions: [],
+
   create: (context: RuleContext<string, readonly unknown[]>) => {
     const visited = new WeakSet()
 

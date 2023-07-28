@@ -1,4 +1,4 @@
-exports.DOM_TAGS = [
+export const DOM_TAGS = [
   'a',
   'abbr',
   'acronym',
@@ -118,7 +118,7 @@ exports.DOM_TAGS = [
   'wbr',
 ]
 
-exports.SVG_TAGS = [
+export const SVG_TAGS = [
   'a',
   'animate',
   'animateMotion',

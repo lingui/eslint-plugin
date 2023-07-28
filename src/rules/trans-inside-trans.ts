@@ -1,13 +1,13 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { RuleContext } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { hasAncestorWithName, getIdentifierName } from '../helpers'
 
-module.exports = {
+export default {
   meta: {
     docs: {
       description: "doesn't allow Trans component be inside Trans component",
       category: 'Best Practices',
-      recommended: true,
+      recommended: 'error' as RuleRecommendation,
     },
     messages: {
       default: "Trans couldn't be wrapped into Trans",
@@ -19,7 +19,10 @@ module.exports = {
         additionalProperties: false,
       },
     ],
+    type: 'problem' as const,
   },
+
+  defaultOptions: [],
 
   create: function (context: RuleContext<string, readonly unknown[]>) {
     return {

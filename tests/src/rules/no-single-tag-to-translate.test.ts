@@ -1,11 +1,6 @@
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-
-//------------------------------------------------------------------------------
-// Requirements
-//------------------------------------------------------------------------------
-
-const rule = require('../../../src/rules/no-single-tag-to-translate.ts'),
-  RuleTester = require('eslint').RuleTester
+import rule from '../../../src/rules/no-single-tag-to-translate'
+import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 
 //------------------------------------------------------------------------------
 // Tests
@@ -21,8 +16,6 @@ const tsTester = new RuleTester({
     },
   },
 })
-
-const TRANS_ERROR_MESSAGE = `<Trans></Trans> should not wrap a single element unnecessarily`
 
 const tests = {
   valid: [
@@ -62,4 +55,4 @@ const tests = {
   ],
 }
 
-tsTester.run('no-single-tag-to-translate (ts)', rule, tests)
+tsTester.run<string, readonly unknown[]>('no-single-tag-to-translate (ts)', rule, tests)

@@ -1,31 +1,25 @@
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-
-//------------------------------------------------------------------------------
-// Requirements
-//------------------------------------------------------------------------------
-
-const rule = require('../../../src/rules/text-restrictions.ts'),
-  RuleTester = require('eslint').RuleTester
-
+import rule, { Option, Rule } from '../../../src/rules/text-restrictions'
+import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 //------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
 
-const quotesRule = {
+const quotesRule: Rule = {
   patterns: ["''", '’', '“'],
   message: `Quotes should be ' or "`,
 }
 
-const bracketRule = {
+const bracketRule: Rule = {
   patterns: ['<', '>', '&lt;', '&gt;'],
   message: 'Exclude <,> symbols from translations',
   isOnlyForTranslation: true,
 }
 
-const wordRule = {
+const wordRule: Rule = {
   patterns: ['e-mail'],
-  flags: 'i',
   message: `Use email instead of e-mail`,
+  flags: 'i',
 }
 
 const tsTester = new RuleTester({
@@ -192,4 +186,4 @@ const tests = {
   ],
 }
 
-tsTester.run('text-restrictions (ts)', rule, tests)
+tsTester.run<string, Option[]>('text-restrictions (ts)', rule, tests)

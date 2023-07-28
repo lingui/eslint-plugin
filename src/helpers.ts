@@ -1,6 +1,6 @@
 import { TSESTree } from '@typescript-eslint/utils'
 
-const { DOM_TAGS, SVG_TAGS } = require('./constants')
+import { DOM_TAGS, SVG_TAGS } from './constants'
 
 export function isUpperCase(str: string) {
   return /^[A-Z_-]+$/.test(str)

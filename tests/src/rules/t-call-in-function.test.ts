@@ -1,16 +1,10 @@
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-
-//------------------------------------------------------------------------------
-// Requirements
-//------------------------------------------------------------------------------
-
-var rule = require('../../../src/rules/t-call-in-function.ts'),
-  RuleTester = require('eslint').RuleTester
+import rule from '../../../src/rules/t-call-in-function'
+import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 
 //------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
-const message = 't`` call should be inside function'
 const errors = [{ messageId: 'default' }] // default errors
 
 var ruleTester = new RuleTester({
@@ -22,7 +16,7 @@ var ruleTester = new RuleTester({
     },
   },
 })
-ruleTester.run('t-call-in-function', rule, {
+ruleTester.run<string, readonly unknown[]>('t-call-in-function', rule, {
   valid: [
     {
       code: 'function hello() { return t`Hello`}',

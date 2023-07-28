@@ -1,17 +1,27 @@
-import { RuleContext } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { TSESTree } from '@typescript-eslint/utils'
 
-module.exports = {
+export default {
   meta: {
     docs: {
       description: "doesn't allow <Trans></Trans> to wrap a single element unnecessarily.",
       category: 'Best Practices',
-      recommended: true,
+      recommended: 'error' as RuleRecommendation,
     },
     messages: {
       default: '<Trans></Trans> should not wrap a single element unnecessarily',
     },
+    schema: [
+      {
+        type: 'object',
+        properties: {},
+        additionalProperties: false,
+      },
+    ],
+    type: 'problem' as const,
   },
+
+  defaultOptions: [],
 
   create: function (context: RuleContext<string, readonly unknown[]>) {
     return {

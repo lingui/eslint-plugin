@@ -1,18 +1,6 @@
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-
-//------------------------------------------------------------------------------
-// Requirements
-//------------------------------------------------------------------------------
-
-var rule = require('../../../src/rules/no-single-varibles-to-translate.ts'),
-  RuleTester = require('eslint').RuleTester
-
-//------------------------------------------------------------------------------
-// Tests
-//------------------------------------------------------------------------------
-const messageForTrans =
-  "You couldn't translate just a variable, remove Trans or add some text inside"
-const messageForT = "You couldn't translate just a variable, remove t`` or add some text inside"
+import rule from '../../../src/rules/no-single-varibles-to-translate'
+import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 
 const errorsForTrans = [{ messageId: 'asJsx' }]
 const errorsForT = [{ messageId: 'asFunction' }]
@@ -26,7 +14,7 @@ var ruleTester = new RuleTester({
     },
   },
 })
-ruleTester.run('no-single-varibles-to-translate', rule, {
+ruleTester.run<string, readonly unknown[]>('no-single-varibles-to-translate', rule, {
   valid: [
     {
       code: 't`Hello`',

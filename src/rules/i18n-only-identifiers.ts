@@ -1,13 +1,13 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { RuleContext } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { getNearestAncestor, isTTaggedTemplateExpression } from '../helpers'
 
-module.exports = {
+export default {
   meta: {
     docs: {
       description: "doesn't allow functions or member expressions in templates",
       category: 'Best Practices',
-      recommended: true,
+      recommended: 'error' as RuleRecommendation,
     },
     messages: {
       default: 'Should be ${variable}, not ${object.property} or ${my_function()}',
@@ -19,7 +19,10 @@ module.exports = {
         additionalProperties: false,
       },
     ],
+    type: 'problem' as const,
   },
+
+  defaultOptions: [],
 
   create: function (context: RuleContext<string, readonly unknown[]>) {
     return {

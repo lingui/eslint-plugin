@@ -1,14 +1,9 @@
 'use strict'
 
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-
-//------------------------------------------------------------------------------
-// Requirements
-//------------------------------------------------------------------------------
-
-const rule = require('../../../src/rules/i18n-only-identifiers.ts'),
-  RuleTester = require('eslint').RuleTester
-
+import rule from '../../../src/rules/i18n-only-identifiers'
+import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
+//import { RuleTester } from 'eslint'
 //------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
@@ -23,8 +18,6 @@ const tsTester = new RuleTester({
     },
   },
 })
-
-const errorMessage = 'Should be ${variable}, not ${object.property} or ${my_function()}'
 
 const tests = {
   valid: [
@@ -62,4 +55,4 @@ const tests = {
   ],
 }
 
-tsTester.run('i18n-template (ts)', rule, tests)
+tsTester.run<string, readonly unknown[]>('i18n-template (ts)', rule, tests)

@@ -1,5 +1,5 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { RuleContext } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
+import { RuleContext, RuleRecommendation } from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import type * as ts from 'typescript'
 import {
   isUpperCase,
@@ -10,17 +10,17 @@ import {
   getIdentifierName,
 } from '../helpers'
 
-type Option = {
-  ignore: string[]
-  ignoreFunction: string[]
-  ignoreAttribute: string[]
+export type Option = {
+  ignore?: string[]
+  ignoreFunction?: string[]
+  ignoreAttribute?: string[]
 }
-module.exports = {
+export default {
   meta: {
     docs: {
       description: 'disallow literal string',
       category: 'Best Practices',
-      recommended: true,
+      recommended: 'error' as RuleRecommendation,
     },
     messages: {
       default: '{{ message }}',
@@ -51,7 +51,10 @@ module.exports = {
         additionalProperties: false,
       },
     ],
+    type: 'problem' as const,
   },
+
+  defaultOptions: [],
 
   create: function (context: RuleContext<string, Option[]>) {
     // variables should be defined here
@@ -158,7 +161,9 @@ module.exports = {
       return node?.name
     }
 
-    const onJSXAttribute = (node: TSESTree.Literal | TSESTree.MemberExpression) => {
+    const onJSXAttribute = (
+      node: TSESTree.TemplateLiteral | TSESTree.Literal | TSESTree.MemberExpression,
+    ) => {
       const parent = getNearestAncestor<TSESTree.JSXAttribute>(node, 'JSXAttribute')
       const attrName = getAttrName(parent?.name?.name)
       // allow <MyComponent className="active" />
@@ -169,8 +174,9 @@ module.exports = {
 
       const jsxElement = getNearestAncestor<TSESTree.JSXOpeningElement>(node, 'JSXOpeningElement')
       const tagName = getIdentifierName(jsxElement?.name)
-      const attributeNames = jsxElement?.attributes.map((attr: TSESTree.JSXAttribute) =>
-        getAttrName(attr?.name?.name),
+      const attributeNames = jsxElement?.attributes.map(
+        (attr: TSESTree.JSXAttribute | TSESTree.JSXSpreadAttribute) =>
+          attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute && getAttrName(attr?.name?.name),
       )
       if (isAllowedDOMAttr(tagName, attrName, attributeNames)) {
         visited.add(node)
@@ -258,11 +264,34 @@ module.exports = {
       }
     }
 
-    const scriptVisitor = {
-      //
-      // ─── EXPORT AND IMPORT ───────────────────────────────────────────
-      //
+    const processTextNode = (
+      node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
+      text: string,
+    ) => {
+      visited.add(node)
 
+      const userJSXElement = [...ignoredJSXElements]
+
+      function isUserJSXElement(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
+      ) {
+        return userJSXElement.some((name) => hasAncestorWithName(node, name))
+      }
+
+      function isIgnoredSymbol(str: string) {
+        return ignoredJSXSymbols.some((name) => name === str)
+      }
+
+      if (!text || match(text) || isUserJSXElement(node) || isIgnoredSymbol(text)) {
+        return
+      }
+
+      context.report({ node, messageId: 'default', data: { message } })
+    }
+
+    const stringLiteralVisitor: {
+      [key: string]: (node: TSESTree.StringLiteral) => void
+    } = {
       'ImportDeclaration Literal'(node: TSESTree.StringLiteral) {
         // allow (import abc form 'abc')
         visited.add(node)
@@ -277,61 +306,18 @@ module.exports = {
         // allow export { named } from 'mod'
         visited.add(node)
       },
-      // ─────────────────────────────────────────────────────────────────
 
-      //
-      // ─── JSX ─────────────────────────────────────────────────────────
-      //
-
-      'JSXElement > Literal'(node: TSESTree.Literal) {
-        scriptVisitor.JSXText(node)
+      'JSXElement > Literal'(node: TSESTree.StringLiteral) {
+        processTextNode(node, `${node.value}`.trim())
       },
 
       'JSXElement > JSXExpressionContainer > Literal'(node: TSESTree.StringLiteral) {
-        scriptVisitor.JSXText(node)
-      },
-
-      'JSXElement > JSXExpressionContainer > TemplateLiteral'(node: TSESTree.StringLiteral) {
-        scriptVisitor.JSXText(node)
+        processTextNode(node, `${node.value}`.trim())
       },
 
       'JSXAttribute Literal'(node: TSESTree.StringLiteral) {
         onJSXAttribute(node)
       },
-
-      'JSXAttribute TemplateLiteral'(node: TSESTree.StringLiteral) {
-        onJSXAttribute(node)
-      },
-
-      // @typescript-eslint/parser would parse string literal as JSXText node
-      JSXText(node: TSESTree.Literal | TSESTree.TemplateLiteral) {
-        const trimed =
-          node.type === TSESTree.AST_NODE_TYPES.TemplateLiteral
-            ? getQuasisValue(node)
-            : `${node.value}`.trim()
-        visited.add(node)
-
-        const userJSXElement = [...ignoredJSXElements]
-
-        function isUserJSXElement(node: TSESTree.Literal | TSESTree.TemplateLiteral) {
-          return userJSXElement.some((name) => hasAncestorWithName(node, name))
-        }
-
-        function isIgnoredSymbol(str: string) {
-          return ignoredJSXSymbols.some((name) => name === str)
-        }
-
-        if (!trimed || match(trimed) || isUserJSXElement(node) || isIgnoredSymbol(trimed)) {
-          return
-        }
-
-        context.report({ node, messageId: 'default', data: { message } })
-      },
-      // ─────────────────────────────────────────────────────────────────
-
-      //
-      // ─── TYPESCRIPT ──────────────────────────────────────────────────
-      //
 
       'TSLiteralType Literal'(node: TSESTree.StringLiteral) {
         // allow var a: Type['member'];
@@ -343,15 +329,7 @@ module.exports = {
         onClassProperty(node)
       },
 
-      'ClassProperty > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        onClassProperty(node)
-      },
-
       'TSEnumDeclaration > Literal'(node: TSESTree.StringLiteral) {
-        visited.add(node)
-      },
-
-      'TSEnumDeclaration > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
         visited.add(node)
       },
 
@@ -365,31 +343,10 @@ module.exports = {
           visited.add(node)
         }
       },
-
-      'VariableDeclarator > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        // allow statements like const A_B = `test`
-        if (
-          node.parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator &&
-          node.parent.id.type === TSESTree.AST_NODE_TYPES.Identifier &&
-          isUpperCase(node.parent.id.name)
-        ) {
-          visited.add(node)
-        }
-      },
-
       'Property > Literal'(node: TSESTree.StringLiteral) {
         onProperty(node)
       },
-
-      'Property > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        onProperty(node)
-      },
-
       'BinaryExpression > Literal'(node: TSESTree.StringLiteral) {
-        onBinaryExpression(node)
-      },
-
-      'BinaryExpression > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
         onBinaryExpression(node)
       },
 
@@ -397,15 +354,7 @@ module.exports = {
         onCallExpression(node, TSESTree.AST_NODE_TYPES.CallExpression)
       },
 
-      'CallExpression TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        onCallExpression(node, TSESTree.AST_NODE_TYPES.CallExpression)
-      },
-
       'NewExpression Literal'(node: TSESTree.StringLiteral) {
-        onCallExpression(node, TSESTree.AST_NODE_TYPES.NewExpression)
-      },
-
-      'NewExpression TemplateLiteral'(node: TSESTree.TemplateLiteral) {
         onCallExpression(node, TSESTree.AST_NODE_TYPES.NewExpression)
       },
 
@@ -413,30 +362,8 @@ module.exports = {
         visited.add(node)
       },
 
-      'SwitchCase > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        visited.add(node)
-      },
-
-      'TaggedTemplateExpression > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        visited.add(node)
-      },
-
-      'TaggedTemplateExpression > TemplateLiteral TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        visited.add(node)
-      },
-
       'TaggedTemplateExpression > TemplateLiteral Literal'(node: TSESTree.StringLiteral) {
         visited.add(node)
-      },
-
-      'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
-        if (visited.has(node)) return
-        const quasisValue = getQuasisValue(node)
-        if (isUpperCase(quasisValue)) return
-
-        if (match(quasisValue) || !isStrMatched(quasisValue)) return
-
-        context.report({ node, messageId: 'default', data: { message } })
       },
 
       'Literal:exit'(node: TSESTree.StringLiteral) {
@@ -467,11 +394,84 @@ module.exports = {
       },
     }
 
-    function wrapVisitor() {
-      Object.keys(scriptVisitor).forEach((key) => {
-        const old: (node: TSESTree.TemplateLiteral | TSESTree.StringLiteral) => void =
-          scriptVisitor[key]
-        scriptVisitor[key] = (node: TSESTree.TemplateLiteral | TSESTree.StringLiteral) => {
+    const templateLiteralVisitor: {
+      [key: string]: (node: TSESTree.TemplateLiteral) => void
+    } = {
+      'JSXElement > JSXExpressionContainer > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        processTextNode(node, getQuasisValue(node))
+      },
+      'JSXAttribute TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        onJSXAttribute(node)
+      },
+      'ClassProperty > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        onClassProperty(node)
+      },
+      'TSEnumDeclaration > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        visited.add(node)
+      },
+      'VariableDeclarator > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        // allow statements like const A_B = `test`
+        if (
+          node.parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator &&
+          node.parent.id.type === TSESTree.AST_NODE_TYPES.Identifier &&
+          isUpperCase(node.parent.id.name)
+        ) {
+          visited.add(node)
+        }
+      },
+      'Property > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        onProperty(node)
+      },
+
+      'BinaryExpression > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        onBinaryExpression(node)
+      },
+
+      'CallExpression TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        onCallExpression(node, TSESTree.AST_NODE_TYPES.CallExpression)
+      },
+
+      'NewExpression TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        onCallExpression(node, TSESTree.AST_NODE_TYPES.NewExpression)
+      },
+
+      'SwitchCase > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        visited.add(node)
+      },
+
+      'TaggedTemplateExpression > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        visited.add(node)
+      },
+
+      'TaggedTemplateExpression > TemplateLiteral TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        visited.add(node)
+      },
+      'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
+        if (visited.has(node)) return
+        const quasisValue = getQuasisValue(node)
+        if (isUpperCase(quasisValue)) return
+
+        if (match(quasisValue) || !isStrMatched(quasisValue)) return
+
+        context.report({ node, messageId: 'default', data: { message } })
+      },
+    }
+
+    const jsxTextLiteralVisitor: {
+      [key: string]: (node: TSESTree.JSXText) => void
+    } = {
+      JSXText(node: TSESTree.JSXText) {
+        processTextNode(node, `${node.value}`.trim())
+      },
+    }
+
+    function wrapVisitor<
+      Type extends TSESTree.StringLiteral | TSESTree.TemplateLiteral | TSESTree.JSXText
+    >(visitor: { [key: string]: (node: Type) => void }) {
+      Object.keys(visitor).forEach((key) => {
+        const old: (node: Type) => void = visitor[key]
+
+        visitor[key] = (node: Type) => {
           // make sure node is string literal
           if (!isString(node)) return
 
@@ -480,9 +480,15 @@ module.exports = {
       })
     }
 
-    wrapVisitor()
+    wrapVisitor<TSESTree.StringLiteral>(stringLiteralVisitor)
+    wrapVisitor<TSESTree.TemplateLiteral>(templateLiteralVisitor)
+    wrapVisitor<TSESTree.JSXText>(jsxTextLiteralVisitor)
 
-    return scriptVisitor
+    return {
+      ...stringLiteralVisitor,
+      ...templateLiteralVisitor,
+      ...jsxTextLiteralVisitor,
+    }
   },
 }
 

@@ -1,11 +1,6 @@
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-
-//------------------------------------------------------------------------------
-// Requirements
-//------------------------------------------------------------------------------
-
-var rule = require('../../../src/rules/missing-lingui-transformation.ts'),
-  RuleTester = require('eslint').RuleTester
+import rule, { Option } from '../../../src/rules/missing-lingui-transformation'
+import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 
 //------------------------------------------------------------------------------
 // Tests
@@ -22,7 +17,7 @@ var ruleTester = new RuleTester({
     },
   },
 })
-ruleTester.run('missing-lingui-transformation', rule, {
+ruleTester.run<string, Option[]>('missing-lingui-transformation', rule, {
   valid: [
     {
       code: 'i18n._(t`Hello ${nice}`)',
@@ -224,7 +219,10 @@ ruleTester.run('missing-lingui-transformation', rule, {
             ? 'Search'
             : 'Search for accounts, merchants, and more...'
     }`,
-      errors: [message, message],
+      errors: [
+        { messageId: 'default', data: { message } },
+        { messageId: 'default', data: { message } },
+      ],
     },
   ],
 })
@@ -349,7 +347,10 @@ tsTester.run('missing-lingui-transformation', rule, {
             ? 'Search'
             : 'Search for accounts, merchants, and more...'
     }`,
-      errors: [message, message],
+      errors: [
+        { messageId: 'default', data: { message } },
+        { messageId: 'default', data: { message } },
+      ],
     },
   ],
 })
