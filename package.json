@@ -9,6 +9,10 @@
   ],
   "author": "Igor Dolzhenkov",
   "main": "lib/index.js",
+  "files": [
+    "/lib",
+    "README.md"
+  ],
   "scripts": {
     "test": "jest",
     "build": "rm -rf lib && tsc --project tsconfig.build.json"
