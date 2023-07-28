@@ -468,26 +468,26 @@ export default {
     function wrapVisitor<
       Type extends TSESTree.StringLiteral | TSESTree.TemplateLiteral | TSESTree.JSXText
     >(visitor: { [key: string]: (node: Type) => void }) {
+      const newVisitor: {
+        [key: string]: (node: Type) => void
+      } = {}
       Object.keys(visitor).forEach((key) => {
         const old: (node: Type) => void = visitor[key]
 
-        visitor[key] = (node: Type) => {
+        newVisitor[key] = (node: Type) => {
           // make sure node is string literal
           if (!isString(node)) return
 
           old(node)
         }
       })
+      return newVisitor
     }
 
-    wrapVisitor<TSESTree.StringLiteral>(stringLiteralVisitor)
-    wrapVisitor<TSESTree.TemplateLiteral>(templateLiteralVisitor)
-    wrapVisitor<TSESTree.JSXText>(jsxTextLiteralVisitor)
-
     return {
-      ...stringLiteralVisitor,
-      ...templateLiteralVisitor,
-      ...jsxTextLiteralVisitor,
+      ...wrapVisitor<TSESTree.StringLiteral>(stringLiteralVisitor),
+      ...wrapVisitor<TSESTree.TemplateLiteral>(templateLiteralVisitor),
+      ...wrapVisitor<TSESTree.JSXText>(jsxTextLiteralVisitor),
     }
   },
 }
