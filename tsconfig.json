@@ -3,7 +3,7 @@
     "module": "commonjs",
     "target": "ES2019",
     "sourceMap": true,
-    "strict": false,
+    "strict": true,
     "strictNullChecks": false,
     "outDir": "lib"
   },
