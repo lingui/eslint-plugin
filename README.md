@@ -86,7 +86,7 @@ const a = <div color="rgba(100, 100, 100, 0.4)"></div>
 
 #### ignoreFunction
 
-THe `ignoreFunction` option specifies exceptions not check for
+The `ignoreFunction` option specifies exceptions not check for
 function calls whose names match one of regexp patterns.
 
 Examples of correct code for the `{ "ignoreFunction": ["showIntercomMessage"] }` option:
@@ -113,7 +113,7 @@ Check that `t` calls are inside `function`. It is necessary for language switchi
 
 ## i18n-only-identifiers
 
-Check that `` t` `  `` doesn't contain member or function expressions like `` t`${obj.prop}` `` or `` t`${func}` ``
+Check that `` t` ` `` doesn't contain member or function expressions like `` t`${obj.prop}` `` or `` t`${func}` ``
 
 ## no-trans-inside-trans
 
@@ -143,7 +143,7 @@ Check that strings/templates/jsxText doesn't contain patterns from the rules
 each `rule` has a structure:
 
 - `patterns` is an array of regex or strings
-- `message` is a error message that will be displayed if restricting pattern matches text
+- `message` is an error message that will be displayed if restricting pattern matches text
 - `flags` is a string with regex flags for patterns
 - `isOnlyForTranslation` is a boolean indicating that patterns should be found only inside `Trans` tags or `t` tagged template
 
