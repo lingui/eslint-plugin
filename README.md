@@ -1,19 +1,29 @@
-# eslint-plugin-lingui
+# <div align="center">A ESLint Plugin For LinguiJS</div> 
 
-Set of eslint rules for `js-lingui` projects
+<div align="center">
+
+Set of eslint rules for [LinguiJS](https://lingui.dev) projects  <img src="https://img.shields.io/badge/beta-yellow"/>
+
+[//]: # (add badges here)
+</div>
+
 
 ## Installation
 
 You'll first need to install [ESLint](http://eslint.org):
 
-```
-$ yarn add eslint --dev
+```bash
+npm install --save-dev eslint
+# or
+yarn add eslint --dev
 ```
 
 Next, install `eslint-plugin-lingui`:
 
-```
-$ yarn add eslint-plugin-lingui --dev
+```bash
+npm install --save-dev eslint-plugin-lingui
+# or
+yarn add eslint-plugin-lingui --dev
 ```
 
 **Note:** If you installed ESLint globally (using the `-g` flag) then you must also install `eslint-plugin-lingui` globally.
@@ -35,7 +45,7 @@ Then configure the rules you want to use under the rules section.
   "rules": {
     "lingui/missing-lingui-transformation": 2,
     "lingui/t-call-in-function": 2,
-    "lingui/no-single-varibles-to-translate": 2,
+    "lingui/no-single-variables-to-translate": 2,
     "lingui/i18n-only-identifiers": 2,
     "lingui/no-single-tag-to-translate": 2,
     "lingui/no-trans-inside-trans": 2,
@@ -65,7 +75,7 @@ Check that code doesn't contain strings/templates/jsxText what should be wraped 
 #### ignore
 
 The `ignore` option specifies exceptions not to check for
-literal strings that match one of regexp paterns.
+literal strings that match one of regexp patterns.
 
 Examples of correct code for the `{ "ignore": ["rgba"] }` option:
 
@@ -76,7 +86,7 @@ const a = <div color="rgba(100, 100, 100, 0.4)"></div>
 
 #### ignoreFunction
 
-THe `ignoreFunction` option speficies exceptions not check for
+THe `ignoreFunction` option specifies exceptions not check for
 function calls whose names match one of regexp patterns.
 
 Examples of correct code for the `{ "ignoreFunction": ["showIntercomMessage"] }` option:
@@ -99,19 +109,19 @@ const element = <div style={{ margin: '1rem 2rem' }} />
 
 ## t-call-in-function
 
-Check that `t` calls are inside `function`. It is necessary for language switching.
+Check that `t` calls are inside `function`. It is necessary for language switching.
 
 ## i18n-only-identifiers
 
-Check that t`` doesn't contain member or function expressions like t`\${obj.prop} or t`func()`
+Check that ``t` ` `` doesn't contain member or function expressions like ``t`${obj.prop}` `` or ``t`${func}` ``
 
 ## no-trans-inside-trans
 
 Check that no `Trans` inside `Trans` components
 
-## no-single-varibles-to-translate
+## no-single-variables-to-translate
 
-Doesn't allow single variables without text to translate like <Trans>{variable}</Trans> or t`${variable}`
+Doesn't allow single variables without text to translate like `<Trans>{variable}</Trans>` or ``t`${variable}` ``
 
 ## text-restrictions
 
@@ -121,7 +131,14 @@ Check that strings/templates/jsxText doesn't contain patterns from the rules
 
 ### rules
 
-`rules` is array of rules when one rule has structure `{ "patterns": ["first", "second"], "message": "error message" }`.
+`rules` is array of rules when one rule has structure 
+
+```json
+{
+  "patterns": ["first", "second"], 
+  "message": "error message"
+}
+```
 
 each `rule` has a structure:
 

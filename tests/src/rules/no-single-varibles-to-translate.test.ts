@@ -1,5 +1,5 @@
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-import rule from '../../../src/rules/no-single-varibles-to-translate'
+import rule from '../../../src/rules/no-single-variables-to-translate'
 import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 
 const errorsForTrans = [{ messageId: 'asJsx' }]
