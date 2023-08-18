@@ -1,0 +1,40 @@
+name: main-suite
+
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    needs: test
+    name: validate (16, ubuntu-latest)
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          cache: yarn
+          node-version: 16
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Check Prettier Formatting
+        run: yarn prettier:check
+
+      - name: Unit Testing
+        run: yarn test:ci
+# Need to register an account in Codecov
+#      - name: Check coverage
+#        uses: codecov/codecov-action@v3
+#        with:
+#          verbose: true

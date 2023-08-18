@@ -18,7 +18,9 @@
   ],
   "scripts": {
     "test": "jest",
+    "test:ci": "jest --ci --runInBand --coverage",
     "build": "rm -rf lib && tsc --project tsconfig.build.json",
+    "prettier:check": "prettier --check --ignore-unknown '**/*'",
     "prepare": "husky install"
   },
   "lint-staged": {
