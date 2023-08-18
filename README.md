@@ -1,12 +1,12 @@
-# <div align="center">A ESLint Plugin For LinguiJS</div> 
+# <div align="center">A ESLint Plugin For LinguiJS</div>
 
 <div align="center">
 
-Set of eslint rules for [LinguiJS](https://lingui.dev) projects  <img src="https://img.shields.io/badge/beta-yellow"/>
+Set of eslint rules for [LinguiJS](https://lingui.dev) projects <img src="https://img.shields.io/badge/beta-yellow"/>
 
-[//]: # (add badges here)
+[//]: # 'add badges here'
+
 </div>
-
 
 ## Installation
 
@@ -113,7 +113,7 @@ Check that `t` calls are inside `function`. It is necessary for language switchi
 
 ## i18n-only-identifiers
 
-Check that ``t` ` `` doesn't contain member or function expressions like ``t`${obj.prop}` `` or ``t`${func}` ``
+Check that `` t` `  `` doesn't contain member or function expressions like `` t`${obj.prop}` `` or `` t`${func}` ``
 
 ## no-trans-inside-trans
 
@@ -121,7 +121,7 @@ Check that no `Trans` inside `Trans` components
 
 ## no-single-variables-to-translate
 
-Doesn't allow single variables without text to translate like `<Trans>{variable}</Trans>` or ``t`${variable}` ``
+Doesn't allow single variables without text to translate like `<Trans>{variable}</Trans>` or `` t`${variable}` ``
 
 ## text-restrictions
 
@@ -131,11 +131,11 @@ Check that strings/templates/jsxText doesn't contain patterns from the rules
 
 ### rules
 
-`rules` is array of rules when one rule has structure 
+`rules` is array of rules when one rule has structure
 
 ```json
 {
-  "patterns": ["first", "second"], 
+  "patterns": ["first", "second"],
   "message": "error message"
 }
 ```
