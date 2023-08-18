@@ -68,7 +68,7 @@ Then configure the rules you want to use under the rules section.
 
 ## missing-lingui-transformation
 
-Check that code doesn't contain strings/templates/jsxText what should be wraped into `<Trans>` or `i18n`
+Check that code doesn't contain strings/templates/jsxText what should be wrapped into `<Trans>` or `i18n`
 
 ### Options
 
@@ -109,23 +109,62 @@ const element = <div style={{ margin: '1rem 2rem' }} />
 
 ## t-call-in-function
 
-Check that `t` calls are inside `function`. It is necessary for language switching.
+Check that `t` calls are inside `function`. They should not be at the module level otherwise they will not react to language switching.
+
+```jsx
+import { t } from '@lingui/macro'
+
+// nope ⛔️
+const msg = t`Hello world!`
+
+// ok ✅
+function getGreeting() {
+  return t`Hello world!`
+}
+```
+
+Check the [Lingui Docs](https://lingui.dev/tutorials/react-patterns#translations-outside-react-components) for more info.
 
 ## i18n-only-identifiers
 
-Check that `` t` ` `` doesn't contain member or function expressions like `` t`${obj.prop}` `` or `` t`${func}` ``
+Check that `` t` ` `` doesn't contain member or function expressions like `` t`Hello ${user.name}` `` or `` t`Hello ${getName()}` ``
+
+Such expressions would be transformed to its index position such as `Hello {0}` which gives zero to little context for translator.
+
+Use a variable identifier instead.
+
+```jsx
+// nope ⛔️
+t`Hello ${user.name}` // => 'Hello {0}'
+
+// ok ✅
+const userName = user.name
+t`Hello ${userName}` // => 'Hello {userName}'
+```
 
 ## no-trans-inside-trans
 
-Check that no `Trans` inside `Trans` components
+Check that no `Trans` inside `Trans` components.
+
+```jsx
+// nope ⛔️
+<Trans>Hello <Trans>World!</Trans></Trans>
+
+// ok ✅
+<Trans>Hello World!</Trans>
+```
 
 ## no-single-variables-to-translate
 
 Doesn't allow single variables without text to translate like `<Trans>{variable}</Trans>` or `` t`${variable}` ``
 
+Such expression would pollute message catalog with useless string which has nothing to translate.
+
 ## text-restrictions
 
-Check that strings/templates/jsxText doesn't contain patterns from the rules
+Check that strings/templates/jsxText doesn't contain patterns from the rules.
+
+This rules enforces a consistency rules inside your messages.
 
 ### Options
 
