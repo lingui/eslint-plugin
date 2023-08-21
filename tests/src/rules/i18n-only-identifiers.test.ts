@@ -1,5 +1,3 @@
-'use strict'
-
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
 import rule from '../../../src/rules/i18n-only-identifiers'
 import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
