@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-lingui",
   "version": "0.1.0",
-  "description": "ESlint plugin for lingui",
+  "description": "ESLint plugin for Lingui",
   "keywords": [
     "eslint",
     "eslintplugin",
@@ -10,6 +10,8 @@
     "linguijs",
     "lingui-js"
   ],
+  "repository": "lingui/eslint-plugin",
+  "bugs": "https://github.com/lingui/eslint-plugin/issues",
   "author": "Igor Dolzhenkov",
   "main": "lib/index.js",
   "files": [
@@ -45,5 +47,6 @@
   },
   "engines": {
     "node": "16.x"
-  }
+  },
+  "license": "MIT"
 }

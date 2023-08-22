@@ -1,10 +1,14 @@
-# <div align="center">A ESLint Plugin For LinguiJS</div>
+# <div align="center">An ESLint Plugin For Lingui<sub>js</sub></div>
 
 <div align="center">
 
-Set of eslint rules for [LinguiJS](https://lingui.dev) projects <img src="https://img.shields.io/badge/beta-yellow"/>
+Set of eslint rules for [Lingui](https://lingui.dev) projects <img src="https://img.shields.io/badge/beta-yellow"/>
 
-[//]: # 'add badges here'
+[![npm](https://img.shields.io/npm/v/eslint-plugin-lingui?logo=npm&cacheSeconds=1800)](https://www.npmjs.com/package/eslint-plugin-lingui)
+[![npm](https://img.shields.io/npm/dt/eslint-plugin-lingui?cacheSeconds=500)](https://www.npmjs.com/package/eslint-plugin-lingui)
+[![main-suite](https://github.com/lingui/eslint-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/lingui/eslint-plugin/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/lingui/eslint-plugin/graph/badge.svg?token=ULkNOaWVaw)](https://codecov.io/gh/lingui/eslint-plugin)
+[![GitHub](https://img.shields.io/github/license/lingui/eslint-plugin)](https://github.com/lingui/eslint-plugin/blob/main/LICENSE)
 
 </div>
 
