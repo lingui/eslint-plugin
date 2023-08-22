@@ -1,0 +1,22 @@
+{
+  "git": {
+    "push": true,
+    "commit": true,
+    "commitMessage": "chore: version ${version} [skip ci]",
+    "requireBranch": "main",
+    "tag": true
+  },
+  "github": {
+    "release": true,
+    "autoGenerate": true,
+    "releaseName": "${version}"
+  },
+  "npm": {
+    "publish": true
+  },
+  "plugins": {
+    "@release-it/keep-a-changelog": {
+      "filename": "CHANGELOG.md"
+    }
+  }
+}
