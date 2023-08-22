@@ -1,5 +1,5 @@
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-import rule from '../../../src/rules/i18n-only-identifiers'
+import rule from '../../../src/rules/no-expression-in-message'
 import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 //import { RuleTester } from 'eslint'
 //------------------------------------------------------------------------------

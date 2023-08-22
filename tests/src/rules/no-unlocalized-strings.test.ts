@@ -1,5 +1,5 @@
 import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-import rule, { Option } from '../../../src/rules/missing-lingui-transformation'
+import rule, { Option } from '../../../src/rules/no-unlocalized-strings'
 import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 
 //------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ var ruleTester = new RuleTester({
     },
   },
 })
-ruleTester.run<string, Option[]>('missing-lingui-transformation', rule, {
+ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
   valid: [
     {
       code: 'i18n._(t`Hello ${nice}`)',
@@ -238,7 +238,7 @@ const jsxTester = new RuleTester({
   },
 })
 
-jsxTester.run('missing-lingui-transformation', rule, {
+jsxTester.run('no-unlocalized-strings', rule, {
   valid: [
     { code: '<Component>{ i18n._("abc") }</Component>' },
     { code: '<Component>{ i18n._(`abc`) }</Component>' },
@@ -303,7 +303,7 @@ const tsTester = new RuleTester({
   },
 })
 
-tsTester.run('missing-lingui-transformation', rule, {
+tsTester.run('no-unlocalized-strings', rule, {
   valid: [
     { code: '<div className="hello"></div>', filename: 'a.tsx' },
     { code: '<div className={`hello`}></div>', filename: 'a.tsx' },
