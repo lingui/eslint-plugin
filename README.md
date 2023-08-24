@@ -43,10 +43,10 @@ Then configure the rules you want to use under the rules section.
 ```json
 {
   "rules": {
-    "lingui/missing-lingui-transformation": 2,
+    "lingui/no-unlocalized-strings": 2,
     "lingui/t-call-in-function": 2,
     "lingui/no-single-variables-to-translate": 2,
-    "lingui/i18n-only-identifiers": 2,
+    "lingui/no-expression-in-message": 2,
     "lingui/no-single-tag-to-translate": 2,
     "lingui/no-trans-inside-trans": 2,
     "lingui/text-restrictions": [
@@ -66,7 +66,7 @@ Then configure the rules you want to use under the rules section.
 
 ## Supported Rules
 
-## missing-lingui-transformation
+## no-unlocalized-strings
 
 Check that code doesn't contain strings/templates/jsxText what should be wrapped into `<Trans>` or `i18n`
 
@@ -80,7 +80,7 @@ literal strings that match one of regexp patterns.
 Examples of correct code for the `{ "ignore": ["rgba"] }` option:
 
 ```jsx
-/*eslint lingui/missing-lingui-transformation ["error", {"ignore": ["rgba"]}]*/
+/*eslint lingui/no-unlocalized-strings ["error", {"ignore": ["rgba"]}]*/
 const a = <div color="rgba(100, 100, 100, 0.4)"></div>
 ```
 
@@ -92,7 +92,7 @@ function calls whose names match one of regexp patterns.
 Examples of correct code for the `{ "ignoreFunction": ["showIntercomMessage"] }` option:
 
 ```js
-/*eslint lingui/missing-lingui-transformation: ["error", { "ignoreFunction": ["showIntercomMessage"] }]*/
+/*eslint lingui/no-unlocalized-strings: ["error", { "ignoreFunction": ["showIntercomMessage"] }]*/
 const bar = showIntercomMessage('Please, write me')
 ```
 
@@ -103,7 +103,7 @@ The `ignoreAttribute` option specifies exceptions not to check for JSX attribute
 Examples of correct code for the `{ "ignoreAttribute": ["style"] }` option:
 
 ```jsx
-/*eslint lingui/missing-lingui-transformation: ["error", { "ignoreAttribute": ["style"] }]*/
+/*eslint lingui/no-unlocalized-strings: ["error", { "ignoreAttribute": ["style"] }]*/
 const element = <div style={{ margin: '1rem 2rem' }} />
 ```
 
@@ -125,7 +125,7 @@ function getGreeting() {
 
 Check the [Lingui Docs](https://lingui.dev/tutorials/react-patterns#translations-outside-react-components) for more info.
 
-## i18n-only-identifiers
+## no-expression-in-message
 
 Check that `` t` ` `` doesn't contain member or function expressions like `` t`Hello ${user.name}` `` or `` t`Hello ${getName()}` ``
 
