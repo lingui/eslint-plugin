@@ -46,6 +46,6 @@ jobs:
         run: npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
 
       - name: Bump version
-        run: npx release-it --increment ${{ github.event.inputs.version }} --ci -V --no-npm
+        run: npx release-it --increment ${{ github.event.inputs.version }} --ci -V
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
