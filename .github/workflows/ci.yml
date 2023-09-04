@@ -32,8 +32,9 @@ jobs:
 
       - name: Unit Testing
         run: yarn test:ci
-# Need to register an account in Codecov
-#      - name: Check coverage
-#        uses: codecov/codecov-action@v3
-#        with:
-#          verbose: true
+
+      - name: Check coverage
+        uses: codecov/codecov-action@v3
+        with:
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}

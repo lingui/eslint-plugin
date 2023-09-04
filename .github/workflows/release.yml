@@ -1,0 +1,52 @@
+name: Release
+run-name: Release ${{ github.event.inputs.version }} version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: choice
+        description: Version
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: yarn
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install the latest version of the npm CLI
+        run: npm install -g npm@latest
+
+      - name: Install dependencies and build
+        run: |
+          yarn install
+          yarn build
+
+      - name: Install release-it globally
+        run: |
+          npm i -g release-it
+          npm i -g @release-it/keep-a-changelog
+
+      - name: git config
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - name: npm config
+        run: npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+
+      - name: Bump version
+        run: npx release-it --increment ${{ github.event.inputs.version }} --ci -V
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
