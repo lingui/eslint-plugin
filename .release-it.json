@@ -15,10 +15,9 @@
     "publish": true
   },
   "plugins": {
-    "@release-it/keep-a-changelog": {
-      "filename": "CHANGELOG.md",
-      "addUnreleased": false,
-      "keepUnreleased": false
+    "@release-it/conventional-changelog": {
+      "infile": "CHANGELOG.md",
+      "header": "# Change Log"
     }
   }
 }
