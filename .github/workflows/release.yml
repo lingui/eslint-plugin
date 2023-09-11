@@ -1,16 +1,7 @@
-name: Release
-run-name: Release ${{ github.event.inputs.version }} version
+name: release
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        type: choice
-        description: Version
-        options:
-          - patch
-          - minor
-          - major
 
 jobs:
   publish-npm:
@@ -20,6 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v3
         with:
@@ -35,7 +28,7 @@ jobs:
       - name: Install release-it globally
         run: |
           npm i -g release-it
-          npm i -g @release-it/keep-a-changelog
+          npm i -g @release-it/conventional-changelog
 
       - name: git config
         run: |
@@ -46,6 +39,6 @@ jobs:
         run: npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
 
       - name: Bump version
-        run: npx release-it --increment ${{ github.event.inputs.version }} --ci -V
+        run: npx release-it --increment
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
