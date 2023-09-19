@@ -145,6 +145,10 @@ ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
       code: 'new Error("hello")',
       options: [{ ignoreFunction: ['Error'] }],
     },
+    {
+      code: 'hello("Hello")',
+      options: [{ ignoreFunction: ['hello'] }],
+    },
     { code: '<div>&nbsp; </div>' },
     { code: "plural('hello')" },
     { code: "select('hello')" },

@@ -107,7 +107,7 @@ const rule: RuleModule<string, Option[]> = {
           if (callee.name === 'require') {
             return true
           }
-          return calleeWhitelists.complex.indexOf(callee.name) !== -1
+          return calleeWhitelists.simple.indexOf(callee.name) !== -1
         }
         default:
           return false
