@@ -149,6 +149,10 @@ ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
       code: 'hello("Hello")',
       options: [{ ignoreFunction: ['hello'] }],
     },
+    {
+      code: 'formatDate(date, "d LLL")',
+      options: [{ ignoreFunction: ['formatDate'] }],
+    },
     { code: '<div>&nbsp; </div>' },
     { code: "plural('hello')" },
     { code: "select('hello')" },
