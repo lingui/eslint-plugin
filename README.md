@@ -111,6 +111,21 @@ Examples of correct code for the `{ "ignoreAttribute": ["style"] }` option:
 const element = <div style={{ margin: '1rem 2rem' }} />
 ```
 
+By default, the following attributes are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`
+
+#### ignoreProperty
+
+The `ignoreProperty` option specifies property names not to check.
+
+Examples of correct code for the `{ "ignoreProperty": ["text"] }` option:
+
+```jsx
+/*eslint lingui/no-unlocalized-strings: ["error", { "ignoreProperty": ["text"] }]*/
+const test = { text: 'This is ignored' }
+```
+
+By default, the following properties are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`
+
 ## t-call-in-function
 
 Check that `t` calls are inside `function`. They should not be at the module level otherwise they will not react to language switching.

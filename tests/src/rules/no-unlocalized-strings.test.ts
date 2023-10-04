@@ -8,7 +8,7 @@ import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
 const message = 'disallow literal string'
 const errors = [{ messageId: 'default', data: { message } }] // default errors
 
-var ruleTester = new RuleTester({
+const ruleTester = new RuleTester({
   parser: TYPESCRIPT_ESLINT,
   parserOptions: {
     sourceType: 'module',
@@ -172,6 +172,11 @@ ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
       code:
         "const Wrapper = styled.a` cursor: pointer; ${(props) => props.isVisible && 'visibility: visible;'}`",
     },
+    { code: `const test = { id: 'This is not localized' }` },
+    {
+      code: `const test = { text: 'This is not localized' }`,
+      options: [{ ignoreProperty: ['text'] }],
+    },
   ],
 
   invalid: [
@@ -221,6 +226,7 @@ ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
     { code: '<DIV foo="Bar" />', errors },
     { code: '<img src="./image.png" alt="some image" />', errors },
     { code: '<button aria-label="Close" type="button" />', errors },
+    { code: `const test = { text: 'This is not localized' }`, errors },
     {
       code: `function getQueryPlaceholder(compact: boolean | undefined) {
         return compact || mobileMediaQuery.matches
@@ -348,7 +354,7 @@ tsTester.run('no-unlocalized-strings', rule, {
       code: "function Button({ t= 'Name'  }: {t: 1 |  'Abs'}){} ",
       errors,
     },
-    { code: "var a: {type: string} = {type: 'Bold'}", errors },
+    { code: "var a: {text: string} = {text: 'Bold'}", errors },
     {
       code: `function getQueryPlaceholder(compact: boolean | undefined) {
         return compact || mobileMediaQuery.matches
