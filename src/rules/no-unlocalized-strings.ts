@@ -18,6 +18,7 @@ export type Option = {
   ignore?: string[]
   ignoreFunction?: string[]
   ignoreAttribute?: string[]
+  ignoreProperty?: string[]
 }
 const rule: RuleModule<string, Option[]> = {
   meta: {
@@ -45,6 +46,12 @@ const rule: RuleModule<string, Option[]> = {
             },
           },
           ignoreAttribute: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          ignoreProperty: {
             type: 'array',
             items: {
               type: 'string',
@@ -129,9 +136,18 @@ const rule: RuleModule<string, Option[]> = {
 
       ...ignoredAttributes,
     ]
-    function isValidAttrName(name: string) {
-      return userJSXAttrs.includes(name)
-    }
+
+    const ignoredProperties = (option && option.ignoreProperty) || []
+    const userProperties = [
+      'className',
+      'styleName',
+      'type',
+      'id',
+      'width',
+      'height',
+
+      ...ignoredProperties,
+    ]
 
     //----------------------------------------------------------------------
     // Public
@@ -170,7 +186,7 @@ const rule: RuleModule<string, Option[]> = {
       const parent = getNearestAncestor<TSESTree.JSXAttribute>(node, 'JSXAttribute')
       const attrName = getAttrName(parent?.name?.name)
       // allow <MyComponent className="active" />
-      if (isValidAttrName(getAttrName(parent?.name?.name))) {
+      if (userJSXAttrs.includes(getAttrName(parent?.name?.name))) {
         visited.add(node)
         return
       }
@@ -199,7 +215,7 @@ const rule: RuleModule<string, Option[]> = {
         // dont care whether if this is computed or not
         if (
           parent?.key?.type === TSESTree.AST_NODE_TYPES.Identifier &&
-          isUpperCase(parent?.key?.name)
+          (isUpperCase(parent?.key?.name) || userProperties.includes(parent?.key?.name))
         ) {
           visited.add(node)
         }
