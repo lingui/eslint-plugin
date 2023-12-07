@@ -333,6 +333,11 @@ tsTester.run('no-unlocalized-strings', rule, {
         Address = 'Address'
       }`,
     },
+    {
+      code: `enum StepType {
+        Address = \`Address\`
+      }`,
+    },
   ],
   invalid: [
     { code: `var a = 'Hello guys'`, errors },
