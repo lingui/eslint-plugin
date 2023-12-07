@@ -22,6 +22,11 @@ ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
     {
       code: 'i18n._(t`Hello ${nice}`)',
     },
+    { code: 't(i18n)({ message: `Hello ${name}` })' },
+    {
+      code: 'custom.wrapper()({message: "Hello!"})',
+      options: [{ ignoreFunction: ['custom.wrapper'] }],
+    },
     { code: 'name === `Hello brat` || name === `Nice have`' },
     { code: 'switch(a){ case `a`: break; default: break;}' },
     { code: 'a.indexOf(`ios`)' },
