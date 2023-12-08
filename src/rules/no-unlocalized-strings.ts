@@ -94,7 +94,9 @@ const rule: RuleModule<string, Option[]> = {
       return whitelists.some((item) => item.test(str))
     }
 
-    function isValidFunctionCall({ callee }: TSESTree.CallExpression | TSESTree.NewExpression) {
+    function isValidFunctionCall({
+      callee,
+    }: TSESTree.CallExpression | TSESTree.NewExpression): boolean {
       switch (callee.type) {
         case TSESTree.AST_NODE_TYPES.MemberExpression: {
           if (
@@ -115,6 +117,13 @@ const rule: RuleModule<string, Option[]> = {
             return true
           }
           return calleeWhitelists.simple.indexOf(callee.name) !== -1
+        }
+        case TSESTree.AST_NODE_TYPES.CallExpression: {
+          return (
+            (callee.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression ||
+              callee.callee.type === TSESTree.AST_NODE_TYPES.Identifier) &&
+            isValidFunctionCall(callee)
+          )
         }
         default:
           return false
