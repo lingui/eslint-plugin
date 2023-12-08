@@ -348,7 +348,7 @@ const rule: RuleModule<string, Option[]> = {
         onClassProperty(node)
       },
 
-      'TSEnumDeclaration > Literal'(node: TSESTree.Literal) {
+      'TSEnumMember > Literal'(node: TSESTree.Literal) {
         visited.add(node)
       },
 
@@ -425,7 +425,7 @@ const rule: RuleModule<string, Option[]> = {
       'ClassProperty > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
         onClassProperty(node)
       },
-      'TSEnumDeclaration > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+      'TSEnumMember > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
         visited.add(node)
       },
       'VariableDeclarator > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
