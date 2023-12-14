@@ -13,7 +13,7 @@ const rule: RuleModule<string, readonly unknown[]> = {
       recommended: 'error' as RuleRecommendation,
     },
     messages: {
-      default: 't`` call should be inside function',
+      default: 't`` and t() call should be inside function',
     },
     schema: [
       {
@@ -56,7 +56,19 @@ const rule: RuleModule<string, readonly unknown[]> = {
       ['ClassDeclaration TaggedTemplateExpression'](node: TSESTree.TaggedTemplateExpression) {
         handler(node)
       },
-
+      ['CallExpression:exit'](node: TSESTree.CallExpression) {
+        const scope = context.getScope()
+        if (
+          scope.type === 'module' &&
+          node.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
+          node.callee.name === 't'
+        ) {
+          context.report({
+            node,
+            messageId: 'default',
+          })
+        }
+      },
       ['TaggedTemplateExpression:exit'](node: TSESTree.TaggedTemplateExpression) {
         if (visited.has(node)) return
         if (!isTTaggedTemplateExpression(node)) {
