@@ -42,5 +42,6 @@ ruleTester.run<string, readonly unknown[]>('t-call-in-function', rule, {
   invalid: [
     { code: 't`Hello`', errors },
     { code: 't("Hello")', errors },
+    { code: 'const hello = [t({id:"hello", message:"hello"})]', errors },
   ],
 })
