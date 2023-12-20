@@ -27,8 +27,8 @@ jobs:
 
       - name: Install release-it globally
         run: |
-          npm i -g release-it
-          npm i -g @release-it/conventional-changelog
+          npm i -g release-it@16.2.1
+          npm i -g @release-it/conventional-changelog@7.0.2
 
       - name: git config
         run: |
