@@ -52,8 +52,12 @@ const rule: RuleModule<string, readonly unknown[]> = {
         const identifierName = getIdentifierName(node?.openingElement?.name)
         if (identifierName === 'Trans') {
           const isSomeJSXTextWithContent = node && hasSomeJSXTextWithContent(node.children)
+          const hasIdProperty =
+            node.openingElement.attributes.find(
+              (attr) => attr.type === 'JSXAttribute' && attr.name.name === 'id',
+            ) !== undefined
 
-          if (!isSomeJSXTextWithContent) {
+          if (!isSomeJSXTextWithContent && !hasIdProperty) {
             context.report({
               node,
               messageId: 'asJsx',

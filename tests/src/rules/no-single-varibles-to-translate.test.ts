@@ -60,6 +60,11 @@ ruleTester.run<string, readonly unknown[]>('no-single-varibles-to-translate', ru
       code: '`${hello}`',
       options: [],
     },
+
+    {
+      code: '<Trans id={lazyTranslation.id} />',
+      options: [],
+    },
   ],
 
   invalid: [
