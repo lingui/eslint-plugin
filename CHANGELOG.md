@@ -1,5 +1,8 @@
 # Change Log
 
+- feat: respect lazy translation tags in no-single-variables-to-translate (#34) (3cb7b6a)
+- ci: minor fixes for the release process (#27) (cb0e1d5)
+
 ## 0.2.2 (2023-12-20)
 
 - fix: ban top level t() calls aside from t`` calls (#26) (5ca48ad)
