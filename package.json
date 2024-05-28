@@ -29,7 +29,7 @@
     "**/*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
-    "@typescript-eslint/utils": "^5.61.0"
+    "@typescript-eslint/utils": "^5.61.0 || 6 || 7"
   },
   "devDependencies": {
     "@types/eslint": "^8.40.2",
