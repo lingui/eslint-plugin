@@ -40,6 +40,9 @@ const tests = {
     {
       code: 't`Hello ${hello}`',
     },
+    {
+      code: 't`Hello ${plural()}`',
+    },
   ],
   invalid: [
     {
