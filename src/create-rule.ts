@@ -5,5 +5,5 @@ export type ExtraRuleDocs = {
 }
 
 export const createRule = ESLintUtils.RuleCreator<ExtraRuleDocs>(
-  (name) => `https://github.com/lingui/eslint-plugin?tab=readme-ov-file#${name}`,
+  (name) => `https://github.com/lingui/eslint-plugin/blob/main/docs/rules/${name}.md`,
 )
