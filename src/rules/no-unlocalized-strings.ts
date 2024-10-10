@@ -154,7 +154,7 @@ const rule: RuleModule<string, Option[]> = {
       'id',
       'width',
       'height',
-
+      'displayName',
       ...ignoredProperties,
     ]
 
@@ -373,6 +373,17 @@ const rule: RuleModule<string, Option[]> = {
       },
       'Property > Literal'(node: TSESTree.Literal) {
         onProperty(node)
+      },
+      "AssignmentExpression[left.type='MemberExpression'] > Literal"(node: TSESTree.Literal) {
+        const assignmentExp = node.parent as TSESTree.AssignmentExpression
+        const memberExp = assignmentExp.left as TSESTree.MemberExpression
+        if (
+          !memberExp.computed &&
+          memberExp.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
+          userProperties.includes(memberExp.property.name)
+        ) {
+          visited.add(node)
+        }
       },
       'BinaryExpression > Literal'(node: TSESTree.Literal) {
         onBinaryExpression(node)

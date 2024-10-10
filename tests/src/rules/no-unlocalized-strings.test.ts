@@ -185,7 +185,6 @@ ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
   ],
 
   invalid: [
-    { code: "ItemRenderer.displayName = 'ItemRenderer'", errors },
     { code: "<Plural value='Hello' one='2' notOther='3' /> ", errors },
     { code: "<Select value='Hello' one='2' notOther='3' /> ", errors },
     { code: "<Plural notValue='Hello' one='2' other='3' /> ", errors },
@@ -342,6 +341,14 @@ tsTester.run('no-unlocalized-strings', rule, {
       code: `enum StepType {
         Address = \`Address\`
       }`,
+    },
+    {
+      code: `MyComponent.myIgnoredProperty = 'MyComponent';`,
+      options: [{ ignoreProperty: ['myIgnoredProperty'] }],
+    },
+    {
+      // displayName is ignored by default
+      code: `MyComponent.displayName = 'MyComponent';`,
     },
   ],
   invalid: [
