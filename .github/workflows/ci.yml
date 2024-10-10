@@ -12,17 +12,16 @@ jobs:
   validate:
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    name: validate (16, ubuntu-latest)
+    name: validate (20, ubuntu-latest)
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
+      - uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           cache: yarn
-          node-version: 16
+          node-version: 20
 
       - name: Install dependencies
         run: yarn install
