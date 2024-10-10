@@ -29,18 +29,22 @@
     "**/*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
-    "@typescript-eslint/utils": "^5.61.0"
+    "@typescript-eslint/utils": "^8.8.1"
+  },
+  "peerDependencies": {
+    "eslint": "^8.37.0 || ^9.0.0"
   },
   "devDependencies": {
     "@types/eslint": "^8.40.2",
+    "@types/jest": "^29.5.13",
     "@types/node": "^20.3.3",
-    "@typescript-eslint/parser": "^4.2.0",
-    "babel-eslint": "^10.0.3",
-    "eslint": "^8.44.0",
+    "@typescript-eslint/parser": "^8.8.1",
+    "@typescript-eslint/rule-tester": "^8.8.1",
+    "eslint": "^9.12.0",
     "husky": "^8.0.3",
     "jest": "^29.5.0",
     "lint-staged": "^14.0.0",
-    "prettier": "2.1.2",
+    "prettier": "3.3.3",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"

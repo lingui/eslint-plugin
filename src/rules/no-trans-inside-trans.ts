@@ -1,16 +1,14 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import {
-  RuleContext,
-  RuleRecommendation,
-  RuleModule,
-} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { hasAncestorWithName, getIdentifierName } from '../helpers'
+import { createRule } from '../create-rule'
 
-const rule: RuleModule<string, readonly unknown[]> = {
+export const name = 'no-trans-inside-trans'
+export const rule = createRule({
+  name,
   meta: {
     docs: {
       description: "doesn't allow Trans component be inside Trans component",
-      recommended: 'error' as RuleRecommendation,
+      recommended: 'error',
     },
     messages: {
       default: "Trans couldn't be wrapped into Trans",
@@ -27,7 +25,7 @@ const rule: RuleModule<string, readonly unknown[]> = {
 
   defaultOptions: [],
 
-  create: function (context: RuleContext<string, readonly unknown[]>) {
+  create: function (context) {
     return {
       JSXElement(node: TSESTree.JSXElement) {
         const identifierName = getIdentifierName(node?.openingElement?.name)
@@ -42,6 +40,4 @@ const rule: RuleModule<string, readonly unknown[]> = {
       },
     }
   },
-}
-
-export default rule
+})

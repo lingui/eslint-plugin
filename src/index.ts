@@ -1,17 +1,63 @@
-import noExpressionInMessageRule from './rules/no-expression-in-message'
-import noUnlocalizedStringsRule from './rules/no-unlocalized-strings'
-import noSingleTagToTranslateRule from './rules/no-single-tag-to-translate'
-import noSingleVariablesToTranslateRule from './rules/no-single-variables-to-translate'
-import tCallInFunctionRule from './rules/t-call-in-function'
-import textRestrictionsRule from './rules/text-restrictions'
-import noTransInsideTransRule from './rules/no-trans-inside-trans'
+import * as noExpressionInMessageRule from './rules/no-expression-in-message'
+import * as noUnlocalizedStringsRule from './rules/no-unlocalized-strings'
+import * as noSingleTagToTranslateRule from './rules/no-single-tag-to-translate'
+import * as noSingleVariablesToTranslateRule from './rules/no-single-variables-to-translate'
+import * as tCallInFunctionRule from './rules/t-call-in-function'
+import * as textRestrictionsRule from './rules/text-restrictions'
+import * as noTransInsideTransRule from './rules/no-trans-inside-trans'
+
+import { ESLint, Linter } from 'eslint'
+import { FlatConfig, RuleModule } from '@typescript-eslint/utils/ts-eslint'
 
 export const rules = {
-  'no-expression-in-message': noExpressionInMessageRule,
-  'no-unlocalized-strings': noUnlocalizedStringsRule,
-  'no-single-tag-to-translate': noSingleTagToTranslateRule,
-  'no-single-variables-to-translate': noSingleVariablesToTranslateRule,
-  't-call-in-function': tCallInFunctionRule,
-  'text-restrictions': textRestrictionsRule,
-  'no-trans-inside-trans': noTransInsideTransRule,
+  [noExpressionInMessageRule.name]: noExpressionInMessageRule.rule,
+  [noUnlocalizedStringsRule.name]: noUnlocalizedStringsRule.rule,
+  [noSingleTagToTranslateRule.name]: noSingleTagToTranslateRule.rule,
+  [noSingleVariablesToTranslateRule.name]: noSingleVariablesToTranslateRule.rule,
+  [tCallInFunctionRule.name]: tCallInFunctionRule.rule,
+  [textRestrictionsRule.name]: textRestrictionsRule.rule,
+  [noTransInsideTransRule.name]: noTransInsideTransRule.rule,
 }
+
+type RuleKey = keyof typeof rules
+
+interface Plugin extends Omit<ESLint.Plugin, 'rules'> {
+  rules: Record<RuleKey, RuleModule<any, any, any>>
+  configs: {
+    recommended: ESLint.ConfigData
+    'flat/recommended': Array<Linter.FlatConfig>
+  }
+}
+
+const plugin: Plugin = {
+  meta: {
+    name: 'eslint-plugin-lingui',
+  },
+  configs: {} as Plugin['configs'],
+  rules,
+}
+
+const recommendedRules: { [K in RuleKey as `lingui/${K}`]?: FlatConfig.RuleLevel } = {
+  'lingui/t-call-in-function': 'error',
+  'lingui/no-single-tag-to-translate': 'warn',
+  'lingui/no-single-variable-to-translate': 'warn',
+  'lingui/no-trans-inside-trans': 'warn',
+}
+
+// Assign configs here so we can reference `plugin`
+Object.assign(plugin.configs, {
+  recommended: {
+    plugins: ['lingui'],
+    rules: recommendedRules,
+  },
+  'flat/recommended': [
+    {
+      plugins: {
+        lingui: plugin,
+      },
+      rules: recommendedRules,
+    },
+  ],
+})
+
+export default plugin

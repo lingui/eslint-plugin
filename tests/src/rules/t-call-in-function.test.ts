@@ -1,22 +1,13 @@
-import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-import rule from '../../../src/rules/t-call-in-function'
-import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
+import { rule, name } from '../../../src/rules/t-call-in-function'
+import { RuleTester } from '@typescript-eslint/rule-tester'
 
-//------------------------------------------------------------------------------
-// Tests
-//------------------------------------------------------------------------------
-const errors = [{ messageId: 'default' }] // default errors
+describe('', () => {})
 
-var ruleTester = new RuleTester({
-  parser: TYPESCRIPT_ESLINT,
-  parserOptions: {
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
-    },
-  },
-})
-ruleTester.run<string, readonly unknown[]>('t-call-in-function', rule, {
+const ruleTester = new RuleTester()
+
+const errors = [{ messageId: 'default' }] as const
+
+ruleTester.run(name, rule, {
   valid: [
     {
       code: 'function hello() { return t`Hello`}',
@@ -28,8 +19,7 @@ ruleTester.run<string, readonly unknown[]>('t-call-in-function', rule, {
       code: 'const a = () => {t`Hello`}',
     },
     {
-      code:
-        'const StyledAMLQuestionsContainer = styled(AMLQuestionsContainer)` \
+      code: 'const StyledAMLQuestionsContainer = styled(AMLQuestionsContainer)` \
                 text-align: center; \
                 padding: ${tokens.spacing20};\
               `',

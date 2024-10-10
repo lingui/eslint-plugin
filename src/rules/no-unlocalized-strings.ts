@@ -1,10 +1,4 @@
-import { TSESTree } from '@typescript-eslint/utils'
-import {
-  RuleContext,
-  RuleRecommendation,
-  RuleModule,
-} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
-import type * as ts from 'typescript'
+import { ESLintUtils, TSESTree } from '@typescript-eslint/utils'
 import {
   isUpperCase,
   isAllowedDOMAttr,
@@ -13,18 +7,22 @@ import {
   hasAncestorWithName,
   getIdentifierName,
 } from '../helpers'
+import { createRule } from '../create-rule'
 
 export type Option = {
   ignore?: string[]
   ignoreFunction?: string[]
   ignoreAttribute?: string[]
   ignoreProperty?: string[]
+  useTsTypes?: boolean
 }
-const rule: RuleModule<string, Option[]> = {
+export const name = 'no-unlocalized-strings'
+export const rule = createRule<Option[], string>({
+  name,
   meta: {
     docs: {
       description: 'disallow literal string',
-      recommended: 'error' as RuleRecommendation,
+      recommended: 'error',
     },
     messages: {
       default: '{{ message }}',
@@ -57,6 +55,9 @@ const rule: RuleModule<string, Option[]> = {
               type: 'string',
             },
           },
+          useTsTypes: {
+            type: 'boolean',
+          },
         },
         additionalProperties: false,
       },
@@ -66,12 +67,12 @@ const rule: RuleModule<string, Option[]> = {
 
   defaultOptions: [],
 
-  create: function (context: RuleContext<string, Option[]>) {
+  create: function (context) {
     // variables should be defined here
     const {
-      parserServices,
       options: [option],
     } = context
+
     const whitelists = [
       /^[^A-Za-z]+$/, // ignore not-word string
       ...((option && option.ignore) || []),
@@ -174,12 +175,6 @@ const rule: RuleModule<string, Option[]> = {
         default:
           return false
       }
-    }
-
-    const { esTreeNodeToTSNodeMap, program } = parserServices
-    let typeChecker: ts.TypeChecker
-    if (program && esTreeNodeToTSNodeMap) {
-      typeChecker = program.getTypeChecker()
     }
 
     const getAttrName = (node: TSESTree.JSXIdentifier | string) => {
@@ -352,8 +347,7 @@ const rule: RuleModule<string, Option[]> = {
         visited.add(node)
       },
       // ─────────────────────────────────────────────────────────────────
-
-      'ClassProperty > Literal'(node: TSESTree.Literal) {
+      'ClassProperty > Literal, PropertyDefinition > Literal'(node: TSESTree.Literal) {
         onClassProperty(node)
       },
 
@@ -408,16 +402,17 @@ const rule: RuleModule<string, Option[]> = {
         //
         // TYPESCRIPT
         //
+        if (option?.useTsTypes) {
+          const services = ESLintUtils.getParserServices(context)
 
-        if (typeChecker) {
-          const tsNode = esTreeNodeToTSNodeMap.get(node)
-          const typeObj = typeChecker.getTypeAtLocation(tsNode.parent)
+          const typeObj = services.getTypeAtLocation(node.parent)
 
           // var a: 'abc' = 'abc'
           if (typeObj.isStringLiteral() && typeObj.symbol) {
             return
           }
         }
+
         context.report({ node, messageId: 'default', data: { message } })
       },
     }
@@ -494,7 +489,7 @@ const rule: RuleModule<string, Option[]> = {
     }
 
     function wrapVisitor<
-      Type extends TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText
+      Type extends TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
     >(visitor: { [key: string]: (node: Type) => void }) {
       const newVisitor: {
         [key: string]: (node: Type) => void
@@ -518,7 +513,7 @@ const rule: RuleModule<string, Option[]> = {
       ...wrapVisitor<TSESTree.JSXText>(jsxTextLiteralVisitor),
     }
   },
-}
+})
 
 const popularCallee = [
   'addEventListener',
@@ -547,5 +542,3 @@ function generateCalleeWhitelists(option: Option) {
   })
   return result
 }
-
-export default rule

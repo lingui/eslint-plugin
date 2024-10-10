@@ -1,20 +1,22 @@
-import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-import rule from '../../../src/rules/no-single-variables-to-translate'
-import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
+import { rule, name } from '../../../src/rules/no-single-variables-to-translate'
+import { RuleTester } from '@typescript-eslint/rule-tester'
 
-const errorsForTrans = [{ messageId: 'asJsx' }]
-const errorsForT = [{ messageId: 'asFunction' }]
+describe('', () => {})
 
-var ruleTester = new RuleTester({
-  parser: TYPESCRIPT_ESLINT,
-  parserOptions: {
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
+const errorsForTrans = [{ messageId: 'asJsx' }] as const
+const errorsForT = [{ messageId: 'asFunction' }] as const
+
+const ruleTester = new RuleTester({
+  languageOptions: {
+    parserOptions: {
+      ecmaFeatures: {
+        jsx: true,
+      },
     },
   },
 })
-ruleTester.run<string, readonly unknown[]>('no-single-varibles-to-translate', rule, {
+
+ruleTester.run(name, rule, {
   valid: [
     {
       code: 't`Hello`',

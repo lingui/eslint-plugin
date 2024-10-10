@@ -1,23 +1,11 @@
-import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-import rule from '../../../src/rules/no-expression-in-message'
-import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
-//import { RuleTester } from 'eslint'
-//------------------------------------------------------------------------------
-// Tests
-//------------------------------------------------------------------------------
+import { rule, name } from '../../../src/rules/no-expression-in-message'
+import { RuleTester } from '@typescript-eslint/rule-tester'
 
-const tsTester = new RuleTester({
-  parser: TYPESCRIPT_ESLINT,
-  parserOptions: {
-    ecmaVersion: 2018,
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
-    },
-  },
-})
+describe('', () => {})
 
-const tests = {
+const ruleTester = new RuleTester()
+
+ruleTester.run(name, rule, {
   valid: [
     {
       code: '`Hello ${hello}`',
@@ -51,6 +39,4 @@ const tests = {
       errors: [{ messageId: 'default' }],
     },
   ],
-}
-
-tsTester.run<string, readonly unknown[]>('i18n-template (ts)', rule, tests)
+})

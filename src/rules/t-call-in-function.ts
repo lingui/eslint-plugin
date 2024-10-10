@@ -1,16 +1,14 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import {
-  RuleContext,
-  RuleRecommendation,
-  RuleModule,
-} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { isTTaggedTemplateExpression } from '../helpers'
+import { createRule } from '../create-rule'
 
-const rule: RuleModule<string, readonly unknown[]> = {
+export const name = 't-call-in-function'
+export const rule = createRule({
+  name,
   meta: {
     docs: {
       description: 'allow t call only inside functions',
-      recommended: 'error' as RuleRecommendation,
+      recommended: 'error',
     },
     messages: {
       default: 't`` and t() call should be inside function',
@@ -27,7 +25,9 @@ const rule: RuleModule<string, readonly unknown[]> = {
 
   defaultOptions: [],
 
-  create: (context: RuleContext<string, readonly unknown[]>) => {
+  create: (context) => {
+    const sourceCode = context.sourceCode ?? context.getSourceCode()
+
     const visited = new WeakSet()
 
     const handler = (node: TSESTree.TaggedTemplateExpression) => {
@@ -57,7 +57,12 @@ const rule: RuleModule<string, readonly unknown[]> = {
         handler(node)
       },
       ['CallExpression:exit'](node: TSESTree.CallExpression) {
-        const scope = context.getScope()
+        const scope = sourceCode.getScope
+          ? // available from ESLint v8.37.0
+            sourceCode.getScope(node)
+          : // deprecated and remove in V9
+            context.getScope()
+
         if (
           scope.type === 'module' &&
           node.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
@@ -82,6 +87,4 @@ const rule: RuleModule<string, readonly unknown[]> = {
       },
     }
   },
-}
-
-export default rule
+})
