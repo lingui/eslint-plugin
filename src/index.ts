@@ -9,7 +9,7 @@ import * as noTransInsideTransRule from './rules/no-trans-inside-trans'
 import { ESLint, Linter } from 'eslint'
 import { FlatConfig, RuleModule } from '@typescript-eslint/utils/ts-eslint'
 
-export const rules = {
+const rules = {
   [noExpressionInMessageRule.name]: noExpressionInMessageRule.rule,
   [noUnlocalizedStringsRule.name]: noUnlocalizedStringsRule.rule,
   [noSingleTagToTranslateRule.name]: noSingleTagToTranslateRule.rule,
@@ -29,13 +29,13 @@ interface Plugin extends Omit<ESLint.Plugin, 'rules'> {
   }
 }
 
-const plugin: Plugin = {
+const plugin = {
   meta: {
     name: 'eslint-plugin-lingui',
   },
   configs: {} as Plugin['configs'],
   rules,
-}
+} satisfies Plugin
 
 const recommendedRules: { [K in RuleKey as `lingui/${K}`]?: FlatConfig.RuleLevel } = {
   'lingui/t-call-in-function': 'error',
@@ -60,4 +60,4 @@ Object.assign(plugin.configs, {
   ],
 })
 
-export default plugin
+export = plugin

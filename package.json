@@ -18,6 +18,7 @@
     "/lib",
     "README.md"
   ],
+  "type": "commonjs",
   "scripts": {
     "test": "jest",
     "test:ci": "jest --ci --runInBand --coverage",
