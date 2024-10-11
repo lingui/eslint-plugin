@@ -29,8 +29,13 @@ export const rule = createRule({
     return {
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         const noneIdentifierExpressions = node.expressions
-          ? node.expressions.filter((expression: { type: string }) => {
-              return expression.type !== TSESTree.AST_NODE_TYPES.Identifier
+          ? node.expressions.filter((expression) => {
+              const isIdentifier = expression.type === TSESTree.AST_NODE_TYPES.Identifier
+              const isCallToPluralFunction =
+                expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
+                expression.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
+                expression.callee.name === 'plural'
+              return !isIdentifier && !isCallToPluralFunction
             })
           : []
 

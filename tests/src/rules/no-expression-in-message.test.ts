@@ -28,6 +28,9 @@ ruleTester.run(name, rule, {
     {
       code: 't`Hello ${hello}`',
     },
+    {
+      code: 't`Hello ${plural()}`',
+    },
   ],
   invalid: [
     {
