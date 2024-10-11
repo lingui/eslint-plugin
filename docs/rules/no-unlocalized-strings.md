@@ -9,7 +9,7 @@ Check that code doesn't contain strings/templates/jsxText what should be wrapped
 
 ### useTsTypes
 
-Use additional Typescript type information. Requires [typed linting](https://typescript-eslint.io/getting-started/typed-linting/) to be setup.
+Use additional TypeScript type information. Requires [typed linting](https://typescript-eslint.io/getting-started/typed-linting/) to be setup.
 
 Will automatically exclude some built-in methods such as `Map` and `Set`, and also cases where a string literal is used as a TypeScript constant:
 
@@ -95,3 +95,6 @@ interface Foo {
 const foo: Foo
 
 foo.get('string with a spaces')
+```
+
+The following methods are ignored by default: `Map.get`, `Map.has`, `Set.has`.
