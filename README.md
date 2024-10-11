@@ -42,7 +42,7 @@ To enable all of the recommended rules for our plugin, add the following config:
 import pluginLingui from 'eslint-plugin-lingui'
 
 export default [
-  ...pluginLingui.configs['flat/recommended'],
+  pluginLingui.configs['flat/recommended'],
   // Any other config...
 ]
 ```
