@@ -1,4 +1,4 @@
-import { ESLintUtils, TSESTree } from '@typescript-eslint/utils'
+import { ESLintUtils, TSESTree, ParserServicesWithTypeInformation } from '@typescript-eslint/utils'
 import {
   isUpperCase,
   isAllowedDOMAttr,
@@ -14,6 +14,7 @@ export type Option = {
   ignoreFunction?: string[]
   ignoreAttribute?: string[]
   ignoreProperty?: string[]
+  ignoreMethodsOnTypes?: string[]
   useTsTypes?: boolean
 }
 export const name = 'no-unlocalized-strings'
@@ -38,6 +39,12 @@ export const rule = createRule<Option[], string>({
             },
           },
           ignoreFunction: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          ignoreMethodsOnTypes: {
             type: 'array',
             items: {
               type: 'string',
@@ -73,6 +80,10 @@ export const rule = createRule<Option[], string>({
       options: [option],
     } = context
 
+    let tsService: ParserServicesWithTypeInformation
+    if (option?.useTsTypes) {
+      tsService = ESLintUtils.getParserServices(context, false)
+    }
     const whitelists = [
       /^[^A-Za-z]+$/, // ignore not-word string
       ...((option && option.ignore) || []),
@@ -104,20 +115,39 @@ export const rule = createRule<Option[], string>({
             callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
             callee.object.type === TSESTree.AST_NODE_TYPES.Identifier
           ) {
-            if (calleeWhitelists.simple.indexOf(callee.property.name) !== -1) {
+            if (calleeWhitelists.simple.includes(callee.property.name)) {
               return true
             }
 
             const calleeName = `${callee.object.name}.${callee.property.name}`
-            return calleeWhitelists.complex.indexOf(calleeName) !== -1
+
+            if (calleeWhitelists.complex.includes(calleeName)) {
+              return true
+            }
           }
+
+          // use power of TS compiler to exclude call on specific types, such Map.get, Set.get and so on
+          if (tsService && callee.property.type === TSESTree.AST_NODE_TYPES.Identifier) {
+            for (const ignore of ignoredMethodsOnTypes) {
+              const [type, method] = ignore.split('.')
+
+              if (method === callee.property.name) {
+                const typeObj = tsService.getTypeAtLocation(callee.object)
+
+                if (type === typeObj?.getSymbol()?.name) {
+                  return true
+                }
+              }
+            }
+          }
+
           return false
         }
         case TSESTree.AST_NODE_TYPES.Identifier: {
           if (callee.name === 'require') {
             return true
           }
-          return calleeWhitelists.simple.indexOf(callee.name) !== -1
+          return calleeWhitelists.simple.includes(callee.name)
         }
         case TSESTree.AST_NODE_TYPES.CallExpression: {
           return (
@@ -135,8 +165,7 @@ export const rule = createRule<Option[], string>({
     const ignoredJSXElements = ['Trans']
     const ignoredJSXSymbols = ['&larr;', '&nbsp;', '&middot;']
 
-    const ignoredAttributes = (option && option.ignoreAttribute) || []
-    const userJSXAttrs = [
+    const ignoredAttributes = [
       'className',
       'styleName',
       'type',
@@ -144,11 +173,17 @@ export const rule = createRule<Option[], string>({
       'width',
       'height',
 
-      ...ignoredAttributes,
+      ...(option?.ignoreAttribute || []),
     ]
 
-    const ignoredProperties = (option && option.ignoreProperty) || []
-    const userProperties = [
+    const ignoredMethodsOnTypes = [
+      'Map.get',
+      'Map.has',
+      'Set.has',
+      ...(option?.ignoreMethodsOnTypes || []),
+    ]
+
+    const ignoredProperties = [
       'className',
       'styleName',
       'type',
@@ -156,7 +191,7 @@ export const rule = createRule<Option[], string>({
       'width',
       'height',
       'displayName',
-      ...ignoredProperties,
+      ...(option?.ignoreProperty || []),
     ]
 
     //----------------------------------------------------------------------
@@ -190,7 +225,7 @@ export const rule = createRule<Option[], string>({
       const parent = getNearestAncestor<TSESTree.JSXAttribute>(node, 'JSXAttribute')
       const attrName = getAttrName(parent?.name?.name)
       // allow <MyComponent className="active" />
-      if (userJSXAttrs.includes(getAttrName(parent?.name?.name))) {
+      if (ignoredAttributes.includes(getAttrName(parent?.name?.name))) {
         visited.add(node)
         return
       }
@@ -219,7 +254,7 @@ export const rule = createRule<Option[], string>({
         // dont care whether if this is computed or not
         if (
           parent?.key?.type === TSESTree.AST_NODE_TYPES.Identifier &&
-          (isUpperCase(parent?.key?.name) || userProperties.includes(parent?.key?.name))
+          (isUpperCase(parent?.key?.name) || ignoredProperties.includes(parent?.key?.name))
         ) {
           visited.add(node)
         }
@@ -269,7 +304,10 @@ export const rule = createRule<Option[], string>({
           ? getNearestAncestor<TSESTree.CallExpression>(node, parentName)
           : getNearestAncestor<TSESTree.NewExpression>(node, parentName)
 
-      if (isValidFunctionCall(parent)) visited.add(node)
+      if (isValidFunctionCall(parent)) {
+        visited.add(node)
+        return
+      }
     }
 
     const onClassProperty = (node: TSESTree.Literal | TSESTree.TemplateLiteral) => {
@@ -378,7 +416,7 @@ export const rule = createRule<Option[], string>({
         if (
           !memberExp.computed &&
           memberExp.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
-          userProperties.includes(memberExp.property.name)
+          ignoredProperties.includes(memberExp.property.name)
         ) {
           visited.add(node)
         }
@@ -417,10 +455,8 @@ export const rule = createRule<Option[], string>({
         //
         // TYPESCRIPT
         //
-        if (option?.useTsTypes) {
-          const services = ESLintUtils.getParserServices(context)
-
-          const typeObj = services.getTypeAtLocation(node.parent)
+        if (tsService) {
+          const typeObj = tsService.getTypeAtLocation(node.parent)
 
           // var a: 'abc' = 'abc'
           if (typeObj.isStringLiteral() && typeObj.symbol) {
@@ -553,7 +589,7 @@ function generateCalleeWhitelists(option: Option) {
     complex: ['i18n._'],
   }
   ignoreFunction.forEach((item: string) => {
-    if (item.indexOf('.') !== -1) {
+    if (item.includes('.')) {
       result.complex.push(item)
     } else {
       result.simple.push(item)
