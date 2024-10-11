@@ -33,6 +33,16 @@ Examples of correct code for the `{ "ignoreFunction": ["showIntercomMessage"] }`
 ```js
 /*eslint lingui/no-unlocalized-strings: ["error", { "ignoreFunction": ["showIntercomMessage"] }]*/
 const bar = showIntercomMessage('Please, write me')
+
+/*eslint lingui/no-unlocalized-strings: ["error", { "ignoreFunction": ["cva"] }]*/
+const labelVariants = cva('text-form-input-content-helper', {
+  variants: {
+    size: {
+      sm: 'text-sm leading-5',
+      md: 'text-base leading-6',
+    },
+  },
+})
 ```
 
 ### ignoreAttribute
@@ -52,11 +62,11 @@ By default, the following attributes are ignored: `className`, `styleName`, `typ
 
 The `ignoreProperty` option specifies property names not to check.
 
-Examples of correct code for the `{ "ignoreProperty": ["text"] }` option:
+Examples of correct code for the `{ "ignoreProperty": ["myProperty"] }` option:
 
 ```jsx
-/*eslint lingui/no-unlocalized-strings: ["error", { "ignoreProperty": ["text"] }]*/
-const test = { text: 'This is ignored' }
+const test = { myProperty: 'This is ignored' }
+object.MyProperty = 'This is ignored'
 ```
 
-By default, the following properties are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`
+By default, the following properties are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`, `displayName`
