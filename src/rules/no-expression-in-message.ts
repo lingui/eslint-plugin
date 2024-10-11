@@ -34,7 +34,7 @@ export const rule = createRule({
               const isCallToPluralFunction =
                 expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
                 expression.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
-                expression.callee.name === 'plural'
+                ['plural', 'select', 'selectOrdinal'].includes(expression.callee.name)
               return !isIdentifier && !isCallToPluralFunction
             })
           : []
