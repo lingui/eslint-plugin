@@ -11,6 +11,13 @@ Check that code doesn't contain strings/templates/jsxText what should be wrapped
 
 Use additional Typescript type information. Requires [typed linting](https://typescript-eslint.io/getting-started/typed-linting/) to be setup.
 
+Will automatically exclude some built-in methods such as `Map` and `Set`
+and also cases where string literal is used as typescript constant.
+
+```ts
+const a: 'abc' = 'abc'
+```
+
 ### ignore
 
 The `ignore` option specifies exceptions not to check for
@@ -70,3 +77,25 @@ object.MyProperty = 'This is ignored'
 ```
 
 By default, the following properties are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`, `displayName`
+
+### ignoreMethodsOnTypes
+
+Leverage power of Typescript to exclude methods defined on specific types.
+
+Note: You need to set `useTsTypes: true` to use this
+
+The method to exclude defined as a `Type.method`. Where type and method matched by name.
+
+Examples of correct code for the `{ "ignoreMethodsOnTypes": ["Foo.bar"], "useTsTypes": true }` option:
+
+```ts
+interface Foo {
+  get: (key: string) => string
+}
+
+const foo: Foo
+
+foo.get('string with a spaces')
+```
+
+By default, the following methods ate ignored: `Map.get`, `Map.has`, `Set.has`

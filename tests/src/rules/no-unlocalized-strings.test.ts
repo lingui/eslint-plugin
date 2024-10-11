@@ -351,8 +351,35 @@ tsTester.run('no-unlocalized-strings', rule, {
       // displayName is ignored by default
       code: `MyComponent.displayName = 'MyComponent';`,
     },
+    {
+      code: `const myMap = new Map(); 
+      myMap.get("string with a spaces")
+      myMap.has("string with a spaces")`,
+      options: [{ useTsTypes: true }],
+    },
+    {
+      code: `
+      const mySet = new Set(); mySet.has("string with a spaces")`,
+      options: [{ useTsTypes: true }],
+    },
+    {
+      code: `interface Foo {get: (key: string) => string}; 
+      (foo as Foo).get("string with a spaces")`,
+      options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
+    },
+    {
+      code: `interface Foo {get: (key: string) => string};
+      const foo: Foo;
+      foo.get("string with a spaces")`,
+      options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
+    },
   ],
   invalid: [
+    {
+      code: `const notAMap: {get: (key: string) => string}; notAMap.get("string with a spaces")`,
+      options: [{ useTsTypes: true }],
+      errors,
+    },
     { code: `var a = 'Hello guys'`, errors },
     {
       code: `<button className={styles.btn}>loading</button>`,
