@@ -15,8 +15,10 @@ jobs:
     name: validate (20, ubuntu-latest)
     steps:
       - uses: actions/checkout@v4
+
       - name: Enable Corepack
         run: corepack enable
+
       - name: Setup node
         uses: actions/setup-node@v4
         with:
@@ -33,7 +35,7 @@ jobs:
         run: yarn test:ci
 
       - name: Check coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}

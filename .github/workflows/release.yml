@@ -19,7 +19,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           cache: yarn
           registry-url: https://registry.npmjs.org/
 
@@ -30,8 +30,8 @@ jobs:
 
       - name: Install release-it globally
         run: |
-          npm i -g release-it@16.2.1
-          npm i -g @release-it/conventional-changelog@7.0.2
+          npm i -g release-it@17.8.2
+          npm i -g @release-it/conventional-changelog@8.0.2
 
       - name: git config
         run: |
