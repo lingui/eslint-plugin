@@ -31,6 +31,12 @@ ruleTester.run(name, rule, {
     {
       code: 't`Hello ${plural()}`',
     },
+    {
+      code: 't`Hello ${select()}`',
+    },
+    {
+      code: 't`Hello ${selectOrdinal()}`',
+    },
   ],
   invalid: [
     {
