@@ -1,7 +1,17 @@
 # Change Log
 
-- feat: respect lazy translation tags in no-single-variables-to-translate (#34) (3cb7b6a)
-- ci: minor fixes for the release process (#27) (cb0e1d5)
+- ci: fix release workflow (#57) (27cd472)
+- fix(no-unlocalized-strings): ignore Literals in computed MemberExpression (#56) (edb2bc1)
+- fix(config): get rid of array in config export (#55) (3c6d349)
+- fix(no-expression-in-message): add select and selectOrdinal to exclusion (#54) (89f5953)
+- feat: allow calls to plural function in no-expression-in-message (#48) (7a8d062)
+- docs(no-unlocalized-strings): more examples for valid cases (#52) (f99a709)
+- fix(no-unlocalized-strings): `ignoreProperty` support MemberExpression assignments (#51) (1ecc912)
+- feat: Eslint 9 + flat config support (#49) (b57329b)
+- chore(deps): bump braces from 3.0.2 to 3.0.3 (#44) (0c80feb)
+
+* feat: respect lazy translation tags in no-single-variables-to-translate (#34) (3cb7b6a)
+* ci: minor fixes for the release process (#27) (cb0e1d5)
 
 ## 0.2.2 (2023-12-20)
 
