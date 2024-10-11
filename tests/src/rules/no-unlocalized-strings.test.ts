@@ -180,6 +180,8 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: `const test = { text: 'This is not localized' }`,
       options: [{ ignoreProperty: ['text'] }],
     },
+    { code: `obj["key with space"] = 5` },
+    { code: `obj[\`key with space\`] = 5` },
   ],
 
   invalid: [
