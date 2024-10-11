@@ -199,7 +199,17 @@ export const rule = createRule<Option[], string>({
     //----------------------------------------------------------------------
     const visited = new WeakSet()
 
-    function isString(node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText) {
+    function isIgnoredSymbol(str: string) {
+      return ignoredJSXSymbols.some((name) => name === str)
+    }
+
+    function isIgnoredJSXElement(
+      node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
+    ) {
+      return ignoredJSXElements.some((name) => hasAncestorWithName(node, name))
+    }
+
+    function isStringLiteral(node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText) {
       switch (node.type) {
         case TSESTree.AST_NODE_TYPES.Literal:
           return typeof node.value === 'string'
@@ -219,139 +229,21 @@ export const rule = createRule<Option[], string>({
       return node?.name
     }
 
-    const onJSXAttribute = (
-      node: TSESTree.TemplateLiteral | TSESTree.Literal | TSESTree.MemberExpression,
-    ) => {
-      const parent = getNearestAncestor<TSESTree.JSXAttribute>(node, 'JSXAttribute')
-      const attrName = getAttrName(parent?.name?.name)
-      // allow <MyComponent className="active" />
-      if (ignoredAttributes.includes(getAttrName(parent?.name?.name))) {
-        visited.add(node)
-        return
-      }
-
-      const jsxElement = getNearestAncestor<TSESTree.JSXOpeningElement>(node, 'JSXOpeningElement')
-      const tagName = getIdentifierName(jsxElement?.name)
-      const attributeNames = jsxElement?.attributes.map(
-        (attr: TSESTree.JSXAttribute | TSESTree.JSXSpreadAttribute) =>
-          attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute && getAttrName(attr?.name?.name),
-      )
-      if (isAllowedDOMAttr(tagName, attrName, attributeNames)) {
-        visited.add(node)
-      }
-    }
-
-    const onProperty = (node: TSESTree.Literal | TSESTree.TemplateLiteral) => {
-      const { parent } = node
-
-      if (parent.type === TSESTree.AST_NODE_TYPES.Property) {
-        // if node is key of property, skip
-        if (parent?.key === node) {
-          visited.add(node)
-        }
-
-        // name if key is Identifier; value if key is Literal
-        // dont care whether if this is computed or not
-        if (
-          parent?.key?.type === TSESTree.AST_NODE_TYPES.Identifier &&
-          (isUpperCase(parent?.key?.name) || ignoredProperties.includes(parent?.key?.name))
-        ) {
-          visited.add(node)
-        }
-
-        if (
-          parent?.key?.type === TSESTree.AST_NODE_TYPES.Literal &&
-          isUpperCase(`${parent?.key?.value}`)
-        ) {
-          visited.add(node)
-        }
-
-        if (
-          parent?.value?.type === TSESTree.AST_NODE_TYPES.Literal &&
-          isUpperCase(`${parent?.value?.value}`)
-        ) {
-          visited.add(node)
-        }
-
-        if (
-          parent?.key?.type === TSESTree.AST_NODE_TYPES.TemplateLiteral &&
-          isUpperCase(getQuasisValue(parent?.key))
-        ) {
-          visited.add(node)
-        }
-      }
-    }
-
-    const onBinaryExpression = (node: TSESTree.Literal | TSESTree.TemplateLiteral) => {
-      if (node.parent.type === TSESTree.AST_NODE_TYPES.BinaryExpression) {
-        const {
-          parent: { operator },
-        } = node
-
-        // allow name === 'String'
-        if (operator !== '+') {
-          visited.add(node)
-        }
-      }
-    }
-
-    const onCallExpression = (
-      node: TSESTree.Literal | TSESTree.TemplateLiteral,
-      parentName: TSESTree.AST_NODE_TYPES.CallExpression | TSESTree.AST_NODE_TYPES.NewExpression,
-    ) => {
-      const parent =
-        TSESTree.AST_NODE_TYPES.CallExpression === parentName
-          ? getNearestAncestor<TSESTree.CallExpression>(node, parentName)
-          : getNearestAncestor<TSESTree.NewExpression>(node, parentName)
-
-      if (isValidFunctionCall(parent)) {
-        visited.add(node)
-        return
-      }
-    }
-
-    const onClassProperty = (node: TSESTree.Literal | TSESTree.TemplateLiteral) => {
-      const { parent } = node
-      if (
-        (parent.type === TSESTree.AST_NODE_TYPES.Property ||
-          parent.type === TSESTree.AST_NODE_TYPES.PropertyDefinition ||
-          //@ts-ignore
-          parent.type === 'ClassProperty') &&
-        parent.key.type === TSESTree.AST_NODE_TYPES.Identifier
-      ) {
-        if (parent?.key && ignoredClassProperties.includes(parent.key.name)) {
-          visited.add(node)
-        }
-      }
-    }
-
     const processTextNode = (
       node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
       text: string,
     ) => {
       visited.add(node)
 
-      const userJSXElement = [...ignoredJSXElements]
-
-      function isUserJSXElement(
-        node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
-      ) {
-        return userJSXElement.some((name) => hasAncestorWithName(node, name))
-      }
-
-      function isIgnoredSymbol(str: string) {
-        return ignoredJSXSymbols.some((name) => name === str)
-      }
-
-      if (!text || match(text) || isUserJSXElement(node) || isIgnoredSymbol(text)) {
+      if (!text || match(text) || isIgnoredJSXElement(node) || isIgnoredSymbol(text)) {
         return
       }
 
       context.report({ node, messageId: 'default', data: { message } })
     }
 
-    const literalVisitor: {
-      [key: string]: (node: TSESTree.Literal) => void
+    const visitor: {
+      [key: string]: (node: any) => void
     } = {
       'ImportDeclaration Literal'(node: TSESTree.Literal) {
         // allow (import abc form 'abc')
@@ -368,6 +260,10 @@ export const rule = createRule<Option[], string>({
         visited.add(node)
       },
 
+      JSXText(node: TSESTree.JSXText) {
+        processTextNode(node, `${node.value}`.trim())
+      },
+
       'JSXElement > Literal'(node: TSESTree.Literal) {
         processTextNode(node, `${node.value}`.trim())
       },
@@ -376,8 +272,30 @@ export const rule = createRule<Option[], string>({
         processTextNode(node, `${node.value}`.trim())
       },
 
-      'JSXAttribute Literal'(node: TSESTree.Literal) {
-        onJSXAttribute(node)
+      'JSXElement > JSXExpressionContainer > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        processTextNode(node, getQuasisValue(node))
+      },
+
+      'JSXAttribute :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
+        const parent = getNearestAncestor<TSESTree.JSXAttribute>(node, 'JSXAttribute')
+        const attrName = getAttrName(parent?.name?.name)
+        // allow <MyComponent className="active" />
+        if (ignoredAttributes.includes(getAttrName(parent?.name?.name))) {
+          visited.add(node)
+          return
+        }
+
+        const jsxElement = getNearestAncestor<TSESTree.JSXOpeningElement>(node, 'JSXOpeningElement')
+        const tagName = getIdentifierName(jsxElement?.name)
+        const attributeNames = jsxElement?.attributes.map(
+          (attr: TSESTree.JSXAttribute | TSESTree.JSXSpreadAttribute) =>
+            attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute && getAttrName(attr?.name?.name),
+        )
+        if (isAllowedDOMAttr(tagName, attrName, attributeNames)) {
+          visited.add(node)
+        }
       },
 
       'TSLiteralType Literal'(node: TSESTree.Literal) {
@@ -385,15 +303,30 @@ export const rule = createRule<Option[], string>({
         visited.add(node)
       },
       // ─────────────────────────────────────────────────────────────────
-      'ClassProperty > Literal, PropertyDefinition > Literal'(node: TSESTree.Literal) {
-        onClassProperty(node)
+      'ClassProperty > :matches(Literal,TemplateLiteral), PropertyDefinition > :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal,
+      ) {
+        const { parent } = node
+        if (
+          (parent.type === TSESTree.AST_NODE_TYPES.Property ||
+            parent.type === TSESTree.AST_NODE_TYPES.PropertyDefinition ||
+            //@ts-ignore
+            parent.type === 'ClassProperty') &&
+          parent.key.type === TSESTree.AST_NODE_TYPES.Identifier
+        ) {
+          if (parent?.key && ignoredClassProperties.includes(parent.key.name)) {
+            visited.add(node)
+          }
+        }
       },
 
-      'TSEnumMember > Literal'(node: TSESTree.Literal) {
+      'TSEnumMember > :matches(Literal,TemplateLiteral)'(node: TSESTree.Literal) {
         visited.add(node)
       },
 
-      'VariableDeclarator > Literal'(node: TSESTree.Literal) {
+      'VariableDeclarator > :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
         // allow statements like const A_B = "test"
         if (
           node.parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator &&
@@ -403,14 +336,57 @@ export const rule = createRule<Option[], string>({
           visited.add(node)
         }
       },
-      'Property > Literal'(node: TSESTree.Literal) {
-        onProperty(node)
+      'Property > :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
+        const { parent } = node
+
+        if (parent.type === TSESTree.AST_NODE_TYPES.Property) {
+          // if node is key of property, skip
+          if (parent?.key === node) {
+            visited.add(node)
+          }
+
+          // name if key is Identifier; value if key is Literal
+          // dont care whether if this is computed or not
+          if (
+            parent?.key?.type === TSESTree.AST_NODE_TYPES.Identifier &&
+            (isUpperCase(parent?.key?.name) || ignoredProperties.includes(parent?.key?.name))
+          ) {
+            visited.add(node)
+          }
+
+          if (
+            parent?.key?.type === TSESTree.AST_NODE_TYPES.Literal &&
+            isUpperCase(`${parent?.key?.value}`)
+          ) {
+            visited.add(node)
+          }
+
+          if (
+            parent?.value?.type === TSESTree.AST_NODE_TYPES.Literal &&
+            isUpperCase(`${parent?.value?.value}`)
+          ) {
+            visited.add(node)
+          }
+
+          if (
+            parent?.key?.type === TSESTree.AST_NODE_TYPES.TemplateLiteral &&
+            isUpperCase(getQuasisValue(parent?.key))
+          ) {
+            visited.add(node)
+          }
+        }
       },
-      'MemberExpression[computed=true] > Literal'(node: TSESTree.Literal) {
+      'MemberExpression[computed=true] > :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
         // obj["key with space"]
         visited.add(node)
       },
       "AssignmentExpression[left.type='MemberExpression'] > Literal"(node: TSESTree.Literal) {
+        // options: { ignoreProperties: ['myProperty'] }
+        // MyComponent.myProperty = "Hello"
         const assignmentExp = node.parent as TSESTree.AssignmentExpression
         const memberExp = assignmentExp.left as TSESTree.MemberExpression
         if (
@@ -421,23 +397,62 @@ export const rule = createRule<Option[], string>({
           visited.add(node)
         }
       },
-      'BinaryExpression > Literal'(node: TSESTree.Literal) {
-        onBinaryExpression(node)
+      'BinaryExpression > :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
+        if (node.parent.type === TSESTree.AST_NODE_TYPES.BinaryExpression) {
+          const {
+            parent: { operator },
+          } = node
+
+          // allow name === 'String'
+          if (operator !== '+') {
+            visited.add(node)
+          }
+        }
       },
 
-      'CallExpression Literal'(node: TSESTree.Literal) {
-        onCallExpression(node, TSESTree.AST_NODE_TYPES.CallExpression)
+      'CallExpression :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
+        const parent = getNearestAncestor<TSESTree.CallExpression>(
+          node,
+          TSESTree.AST_NODE_TYPES.CallExpression,
+        )
+
+        if (isValidFunctionCall(parent)) {
+          visited.add(node)
+          return
+        }
       },
 
-      'NewExpression Literal'(node: TSESTree.Literal) {
-        onCallExpression(node, TSESTree.AST_NODE_TYPES.NewExpression)
+      'NewExpression :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
+        const parent = getNearestAncestor<TSESTree.NewExpression>(
+          node,
+          TSESTree.AST_NODE_TYPES.NewExpression,
+        )
+
+        if (isValidFunctionCall(parent)) {
+          visited.add(node)
+          return
+        }
       },
 
-      'SwitchCase > Literal'(node: TSESTree.Literal) {
+      'SwitchCase > :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
         visited.add(node)
       },
 
-      'TaggedTemplateExpression > TemplateLiteral Literal'(node: TSESTree.Literal) {
+      'TaggedTemplateExpression > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        visited.add(node)
+      },
+
+      'TaggedTemplateExpression > TemplateLiteral :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal,
+      ) {
         visited.add(node)
       },
 
@@ -466,64 +481,6 @@ export const rule = createRule<Option[], string>({
 
         context.report({ node, messageId: 'default', data: { message } })
       },
-    }
-
-    const templateLiteralVisitor: {
-      [key: string]: (node: TSESTree.TemplateLiteral) => void
-    } = {
-      'JSXElement > JSXExpressionContainer > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        processTextNode(node, getQuasisValue(node))
-      },
-      'JSXAttribute TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        onJSXAttribute(node)
-      },
-      'ClassProperty > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        onClassProperty(node)
-      },
-      'TSEnumMember > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        visited.add(node)
-      },
-      'VariableDeclarator > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        // allow statements like const A_B = `test`
-        if (
-          node.parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator &&
-          node.parent.id.type === TSESTree.AST_NODE_TYPES.Identifier &&
-          isUpperCase(node.parent.id.name)
-        ) {
-          visited.add(node)
-        }
-      },
-      'MemberExpression[computed=true] > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        // obj[`key with space`]
-        visited.add(node)
-      },
-      'Property > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        onProperty(node)
-      },
-
-      'BinaryExpression > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        onBinaryExpression(node)
-      },
-
-      'CallExpression TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        onCallExpression(node, TSESTree.AST_NODE_TYPES.CallExpression)
-      },
-
-      'NewExpression TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        onCallExpression(node, TSESTree.AST_NODE_TYPES.NewExpression)
-      },
-
-      'SwitchCase > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        visited.add(node)
-      },
-
-      'TaggedTemplateExpression > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        visited.add(node)
-      },
-
-      'TaggedTemplateExpression > TemplateLiteral TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        visited.add(node)
-      },
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         if (visited.has(node)) return
         const quasisValue = getQuasisValue(node)
@@ -532,14 +489,6 @@ export const rule = createRule<Option[], string>({
         if (match(quasisValue) || !isStrMatched(quasisValue)) return
 
         context.report({ node, messageId: 'default', data: { message } })
-      },
-    }
-
-    const jsxTextLiteralVisitor: {
-      [key: string]: (node: TSESTree.JSXText) => void
-    } = {
-      JSXText(node: TSESTree.JSXText) {
-        processTextNode(node, `${node.value}`.trim())
       },
     }
 
@@ -554,7 +503,7 @@ export const rule = createRule<Option[], string>({
 
         newVisitor[key] = (node: Type) => {
           // make sure node is string literal
-          if (!isString(node)) return
+          if (!isStringLiteral(node)) return
 
           old(node)
         }
@@ -562,11 +511,7 @@ export const rule = createRule<Option[], string>({
       return newVisitor
     }
 
-    return {
-      ...wrapVisitor<TSESTree.Literal>(literalVisitor),
-      ...wrapVisitor<TSESTree.TemplateLiteral>(templateLiteralVisitor),
-      ...wrapVisitor<TSESTree.JSXText>(jsxTextLiteralVisitor),
-    }
+    return wrapVisitor<TSESTree.Literal>(visitor)
   },
 })
 
