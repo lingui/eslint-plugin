@@ -26,16 +26,18 @@ export const rule = createRule({
   defaultOptions: [],
 
   create: function (context) {
+    const linguiMacroFunctionNames = ['plural', 'select', 'selectOrdinal']
+
     return {
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         const noneIdentifierExpressions = node.expressions
           ? node.expressions.filter((expression) => {
               const isIdentifier = expression.type === TSESTree.AST_NODE_TYPES.Identifier
-              const isCallToPluralFunction =
+              const isCallToLinguiMacro =
                 expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
                 expression.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
-                expression.callee.name === 'plural'
-              return !isIdentifier && !isCallToPluralFunction
+                linguiMacroFunctionNames.includes(expression.callee.name)
+              return !isIdentifier && !isCallToLinguiMacro
             })
           : []
 
