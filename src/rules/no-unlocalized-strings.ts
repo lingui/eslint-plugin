@@ -368,6 +368,10 @@ export const rule = createRule<Option[], string>({
       'Property > Literal'(node: TSESTree.Literal) {
         onProperty(node)
       },
+      'MemberExpression[computed=true] > Literal'(node: TSESTree.Literal) {
+        // obj["key with space"]
+        visited.add(node)
+      },
       "AssignmentExpression[left.type='MemberExpression'] > Literal"(node: TSESTree.Literal) {
         const assignmentExp = node.parent as TSESTree.AssignmentExpression
         const memberExp = assignmentExp.left as TSESTree.MemberExpression
@@ -452,6 +456,10 @@ export const rule = createRule<Option[], string>({
         ) {
           visited.add(node)
         }
+      },
+      'MemberExpression[computed=true] > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        // obj[`key with space`]
+        visited.add(node)
       },
       'Property > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
         onProperty(node)
