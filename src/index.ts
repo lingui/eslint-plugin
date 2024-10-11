@@ -25,7 +25,7 @@ interface Plugin extends Omit<ESLint.Plugin, 'rules'> {
   rules: Record<RuleKey, RuleModule<any, any, any>>
   configs: {
     recommended: ESLint.ConfigData
-    'flat/recommended': Array<Linter.FlatConfig>
+    'flat/recommended': Linter.FlatConfig
   }
 }
 
@@ -50,14 +50,12 @@ Object.assign(plugin.configs, {
     plugins: ['lingui'],
     rules: recommendedRules,
   },
-  'flat/recommended': [
-    {
-      plugins: {
-        lingui: plugin,
-      },
-      rules: recommendedRules,
+  'flat/recommended': {
+    plugins: {
+      lingui: plugin,
     },
-  ],
+    rules: recommendedRules,
+  },
 })
 
 export = plugin
