@@ -1,15 +1,13 @@
-import {
-  RuleContext,
-  RuleRecommendation,
-  RuleModule,
-} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { TSESTree } from '@typescript-eslint/utils'
+import { createRule } from '../create-rule'
 
-const rule: RuleModule<string, readonly unknown[]> = {
+export const name = 'no-single-tag-to-translate'
+export const rule = createRule({
+  name,
   meta: {
     docs: {
       description: "doesn't allow <Trans></Trans> to wrap a single element unnecessarily.",
-      recommended: 'error' as RuleRecommendation,
+      recommended: 'error',
     },
     messages: {
       default: '<Trans></Trans> should not wrap a single element unnecessarily',
@@ -26,7 +24,7 @@ const rule: RuleModule<string, readonly unknown[]> = {
 
   defaultOptions: [],
 
-  create: function (context: RuleContext<string, readonly unknown[]>) {
+  create: function (context) {
     return {
       'JSXClosingElement > JSXIdentifier[name=Trans]'(node: TSESTree.JSXIdentifier) {
         const parentJSXElement: TSESTree.JSXElement = node.parent?.parent as TSESTree.JSXElement
@@ -53,6 +51,4 @@ const rule: RuleModule<string, readonly unknown[]> = {
       },
     }
   },
-}
-
-export default rule
+})

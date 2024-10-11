@@ -1,13 +1,9 @@
-import {
-  RuleContext,
-  RuleRecommendation,
-  RuleModule,
-} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { TSESTree } from '@typescript-eslint/utils'
 
 import { getQuasisValue, isNodeTranslated } from '../helpers'
+import { createRule } from '../create-rule'
 
-export type Rule = {
+export type RestrictionRule = {
   patterns: string[]
   message: string
   flags?: string
@@ -22,14 +18,16 @@ type RegexRule = {
 }
 
 export type Option = {
-  rules: Rule[]
+  rules: RestrictionRule[]
 }
 
-const rule: RuleModule<string, Option[]> = {
+export const name = 'text-restrictions'
+export const rule = createRule<Option[], string>({
+  name,
   meta: {
     docs: {
       description: 'Text restrictions',
-      recommended: 'error' as RuleRecommendation,
+      recommended: 'error',
     },
     messages: {
       default: '{{ message }}',
@@ -70,7 +68,7 @@ const rule: RuleModule<string, Option[]> = {
 
   defaultOptions: [],
 
-  create: function (context: RuleContext<string, Option[]>) {
+  create: function (context) {
     const {
       options: [option],
     } = context
@@ -78,7 +76,7 @@ const rule: RuleModule<string, Option[]> = {
       const { rules } = option
 
       const rulePatterns: RegexRule[] = rules.map(
-        ({ patterns, message, flags, isOnlyForTranslation }: Rule) => ({
+        ({ patterns, message, flags, isOnlyForTranslation }: RestrictionRule) => ({
           patterns: patterns.map((item: string) => new RegExp(item, flags)),
           message,
           isOnlyForTranslation,
@@ -119,6 +117,4 @@ const rule: RuleModule<string, Option[]> = {
       }
     }
   },
-}
-
-export default rule
+})

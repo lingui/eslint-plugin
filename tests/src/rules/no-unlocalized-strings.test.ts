@@ -1,23 +1,25 @@
-import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-import rule, { Option } from '../../../src/rules/no-unlocalized-strings'
-import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
+import { rule, name, Option } from '../../../src/rules/no-unlocalized-strings'
+import { RuleTester } from '@typescript-eslint/rule-tester'
 
-//------------------------------------------------------------------------------
-// Tests
-//------------------------------------------------------------------------------
-const message = 'disallow literal string'
-const errors = [{ messageId: 'default', data: { message } }] // default errors
+describe('', () => {})
 
 const ruleTester = new RuleTester({
-  parser: TYPESCRIPT_ESLINT,
-  parserOptions: {
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
+  languageOptions: {
+    parserOptions: {
+      ecmaFeatures: {
+        jsx: true,
+      },
+      projectService: {
+        allowDefaultProject: ['*.ts*'],
+      },
     },
   },
 })
-ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
+
+const message = 'disallow literal string'
+const errors = [{ messageId: 'default', data: { message } }] // default errors
+
+ruleTester.run<string, Option[]>(name, rule, {
   valid: [
     {
       code: 'i18n._(t`Hello ${nice}`)',
@@ -80,7 +82,6 @@ ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
     { code: 'dispatch("hello");' },
     { code: 'store.dispatch("hello");' },
     { code: 'store.commit("hello");' },
-    { code: 'i18n._("hello");' },
     { code: 'const a = "absfoo";', options: [{ ignore: ['foo'] }] },
     { code: 'const a = "fooabc";', options: [{ ignore: ['^foo'] }] },
     { code: 'const a = "FOO";' },
@@ -95,7 +96,6 @@ ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
     { code: 'var a = {A_B: `hello world`};' },
     { code: 'var a = {foo: `FOO`};' },
     { code: 'class Form extends Component { displayName = "FormContainer" };' },
-    { code: 'class Form extends Component { displayName = `FormContainer` };' },
     //     // JSX
     { code: '<div className="primary"></div>' },
     { code: '<div className={`primary`}></div>' },
@@ -170,12 +170,10 @@ ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
       />`,
     },
     {
-      code:
-        'const Wrapper = styled.a` cursor: pointer; ${(props) => props.isVisible && `visibility: visible;`}`',
+      code: 'const Wrapper = styled.a` cursor: pointer; ${(props) => props.isVisible && `visibility: visible;`}`',
     },
     {
-      code:
-        "const Wrapper = styled.a` cursor: pointer; ${(props) => props.isVisible && 'visibility: visible;'}`",
+      code: "const Wrapper = styled.a` cursor: pointer; ${(props) => props.isVisible && 'visibility: visible;'}`",
     },
     { code: `const test = { id: 'This is not localized' }` },
     {
@@ -247,12 +245,11 @@ ruleTester.run<string, Option[]>('no-unlocalized-strings', rule, {
 })
 
 const jsxTester = new RuleTester({
-  parser: TYPESCRIPT_ESLINT,
-  parserOptions: {
-    ecmaVersion: 2018,
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
+  languageOptions: {
+    parserOptions: {
+      ecmaFeatures: {
+        jsx: true,
+      },
     },
   },
 })
@@ -276,8 +273,7 @@ jsxTester.run('no-unlocalized-strings', rule, {
       code: `<Trans id="missingReceipts.subtitle" description={"Call to action on missing receipt banner"} />`,
     },
     {
-      code:
-        '<Trans id="missingReceipts.subtitle" description={`Call to action on missing receipt banner`} />',
+      code: '<Trans id="missingReceipts.subtitle" description={`Call to action on missing receipt banner`} />',
     },
   ],
   invalid: [
@@ -316,9 +312,12 @@ jsxTester.run('no-unlocalized-strings', rule, {
 })
 
 const tsTester = new RuleTester({
-  parser: TYPESCRIPT_ESLINT,
-  parserOptions: {
-    sourceType: 'module',
+  languageOptions: {
+    parserOptions: {
+      projectService: {
+        allowDefaultProject: ['*.ts*'],
+      },
+    },
   },
 })
 

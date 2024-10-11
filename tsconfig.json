@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "target": "ES2019",
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": false,
+    "declaration": true,
     "outDir": "lib"
   },
   "exclude": ["node_modules"]

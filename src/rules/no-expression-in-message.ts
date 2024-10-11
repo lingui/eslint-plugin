@@ -1,16 +1,14 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import {
-  RuleContext,
-  RuleRecommendation,
-  RuleModule,
-} from '@typescript-eslint/utils/dist/ts-eslint/Rule'
 import { getNearestAncestor, isTTaggedTemplateExpression } from '../helpers'
+import { createRule } from '../create-rule'
 
-const rule: RuleModule<string, readonly unknown[]> = {
+export const name = 'no-expression-in-message'
+export const rule = createRule({
+  name: 'no-expression-in-message',
   meta: {
     docs: {
       description: "doesn't allow functions or member expressions in templates",
-      recommended: 'error' as RuleRecommendation,
+      recommended: 'error',
     },
     messages: {
       default: 'Should be ${variable}, not ${object.property} or ${my_function()}',
@@ -27,7 +25,7 @@ const rule: RuleModule<string, readonly unknown[]> = {
 
   defaultOptions: [],
 
-  create: function (context: RuleContext<string, readonly unknown[]>) {
+  create: function (context) {
     return {
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         const noneIdentifierExpressions = node.expressions
@@ -56,6 +54,4 @@ const rule: RuleModule<string, readonly unknown[]> = {
       },
     }
   },
-}
-
-export default rule
+})

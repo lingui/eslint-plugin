@@ -1,39 +1,37 @@
-import { TYPESCRIPT_ESLINT } from '../../helpers/parsers'
-import rule, { Option, Rule } from '../../../src/rules/text-restrictions'
-import { RuleTester } from '@typescript-eslint/utils/dist/ts-eslint/RuleTester'
-//------------------------------------------------------------------------------
-// Tests
-//------------------------------------------------------------------------------
+import { rule, Option, RestrictionRule } from '../../../src/rules/text-restrictions'
 
-const quotesRule: Rule = {
+import { RuleTester } from '@typescript-eslint/rule-tester'
+
+describe('', () => {})
+
+const quotesRule: RestrictionRule = {
   patterns: ["''", '’', '“'],
   message: `Quotes should be ' or "`,
 }
 
-const bracketRule: Rule = {
+const bracketRule: RestrictionRule = {
   patterns: ['<', '>', '&lt;', '&gt;'],
   message: 'Exclude <,> symbols from translations',
   isOnlyForTranslation: true,
 }
 
-const wordRule: Rule = {
+const wordRule: RestrictionRule = {
   patterns: ['e-mail'],
   message: `Use email instead of e-mail`,
   flags: 'i',
 }
 
-const tsTester = new RuleTester({
-  parser: TYPESCRIPT_ESLINT,
-  parserOptions: {
-    ecmaVersion: 2018,
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
+const ruleTester = new RuleTester({
+  languageOptions: {
+    parserOptions: {
+      ecmaFeatures: {
+        jsx: true,
+      },
     },
   },
 })
 
-const tests = {
+ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
   valid: [
     {
       code: "i18n._('Hello')",
@@ -184,6 +182,4 @@ const tests = {
       errors: [{ messageId: 'default', data: { message: bracketRule.message } }],
     },
   ],
-}
-
-tsTester.run<string, Option[]>('text-restrictions (ts)', rule, tests)
+})
