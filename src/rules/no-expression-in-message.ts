@@ -43,7 +43,7 @@ export const rule = createRule({
 
         const taggedTemplate = getNearestAncestor<TSESTree.TaggedTemplateExpression>(
           node,
-          'TaggedTemplateExpression',
+          TSESTree.AST_NODE_TYPES.TaggedTemplateExpression,
         )
 
         if (
@@ -52,12 +52,24 @@ export const rule = createRule({
           isTTaggedTemplateExpression(taggedTemplate)
         ) {
           context.report({
-            node: node,
+            node,
             messageId: 'default',
           })
         }
 
         return
+      },
+      'JSXElement[openingElement.name.name=Trans] JSXExpressionContainer:not([parent.type=JSXAttribute]) > :expression'(
+        node: TSESTree.Expression,
+      ) {
+        const isIdentifier = node.type === TSESTree.AST_NODE_TYPES.Identifier
+
+        if (!isIdentifier) {
+          context.report({
+            node,
+            messageId: 'default',
+          })
+        }
       },
     }
   },
