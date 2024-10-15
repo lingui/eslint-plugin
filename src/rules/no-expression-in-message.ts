@@ -1,5 +1,5 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { getNearestAncestor, isTTaggedTemplateExpression } from '../helpers'
+import { getNearestAncestor, isLinguiTaggedTemplateExpression } from '../helpers'
 import { createRule } from '../create-rule'
 
 export const name = 'no-expression-in-message'
@@ -30,6 +30,14 @@ export const rule = createRule({
 
     return {
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
+        const taggedTemplate = getNearestAncestor<TSESTree.TaggedTemplateExpression>(
+          node,
+          TSESTree.AST_NODE_TYPES.TaggedTemplateExpression,
+        )
+        if (!taggedTemplate) {
+          return
+        }
+
         const noneIdentifierExpressions = node.expressions
           ? node.expressions.filter((expression) => {
               const isIdentifier = expression.type === TSESTree.AST_NODE_TYPES.Identifier
@@ -41,15 +49,9 @@ export const rule = createRule({
             })
           : []
 
-        const taggedTemplate = getNearestAncestor<TSESTree.TaggedTemplateExpression>(
-          node,
-          TSESTree.AST_NODE_TYPES.TaggedTemplateExpression,
-        )
-
         if (
           noneIdentifierExpressions.length > 0 &&
-          taggedTemplate &&
-          isTTaggedTemplateExpression(taggedTemplate)
+          isLinguiTaggedTemplateExpression(taggedTemplate)
         ) {
           context.report({
             node,

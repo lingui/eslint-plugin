@@ -37,6 +37,12 @@ ruleTester.run(name, rule, {
       code: 't`Hello ${hello}`',
     },
     {
+      code: 'msg`Hello ${hello}`',
+    },
+    {
+      code: 'defineMessage`Hello ${hello}`',
+    },
+    {
       code: 't`Hello ${plural()}`',
     },
     {
@@ -58,6 +64,14 @@ ruleTester.run(name, rule, {
   invalid: [
     {
       code: 't`hello ${obj.prop}?`',
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      code: 'msg`hello ${obj.prop}?`',
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      code: 'defineMessage`hello ${obj.prop}?`',
       errors: [{ messageId: 'default' }],
     },
     {

@@ -50,17 +50,21 @@ export function getNearestAncestor<Type>(node: any, type: string): Type | null {
 }
 
 export const isTTaggedTemplateExpression = (node: TSESTree.TaggedTemplateExpression | null) => {
-  switch (node?.type) {
-    case TSESTree.AST_NODE_TYPES.TaggedTemplateExpression:
-      if (node.tag.type === TSESTree.AST_NODE_TYPES.Identifier) {
-        const tagName = node.tag.name
-        if (tagName === 't') {
-          return true
-        }
-      }
-    default:
-      return false
-  }
+  return (
+    node?.type === TSESTree.AST_NODE_TYPES.TaggedTemplateExpression &&
+    node.tag.type === TSESTree.AST_NODE_TYPES.Identifier &&
+    node.tag.name === 't'
+  )
+}
+
+export const isLinguiTaggedTemplateExpression = (
+  node: TSESTree.TaggedTemplateExpression | null,
+) => {
+  return (
+    node?.type === TSESTree.AST_NODE_TYPES.TaggedTemplateExpression &&
+    node.tag.type === TSESTree.AST_NODE_TYPES.Identifier &&
+    [`t`, `msg`, `defineMessage`].includes(node.tag.name)
+  )
 }
 
 export const getQuasisValue = (node: TSESTree.TemplateLiteral, trim: boolean = true) => {
@@ -109,7 +113,7 @@ export function isNodeTranslated(
     TSESTree.AST_NODE_TYPES.TaggedTemplateExpression,
   )
 
-  return taggedTemplate ? isTTaggedTemplateExpression(taggedTemplate) : false
+  return taggedTemplate ? isLinguiTaggedTemplateExpression(taggedTemplate) : false
 }
 
 export function getIdentifierName(jsxTagNameExpression: TSESTree.JSXTagNameExpression) {

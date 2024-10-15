@@ -6,11 +6,21 @@ Such expressions would be transformed to its index position such as `Hello {0}` 
 
 Use a variable identifier instead.
 
-```jsx
-// nope ⛔️
-t`Hello ${user.name}` // => 'Hello {0}'
+Examples of invalid code with this rule:
 
-// ok ✅
+```jsx
+// invalid ⛔
+t`Hello ${user.name}` // => 'Hello {0}'
+msg`Hello ${user.name}` // => 'Hello {0}'
+defineMessage`Hello ${user.name}` // => 'Hello {0}'
+```
+
+Examples of valid code with this rule:
+
+```jsx
+// valid ✅
 const userName = user.name
 t`Hello ${userName}` // => 'Hello {userName}'
+msg`Hello ${userName}` // => 'Hello {userName}'
+defineMessage`Hello ${userName}` // => 'Hello {userName}'
 ```

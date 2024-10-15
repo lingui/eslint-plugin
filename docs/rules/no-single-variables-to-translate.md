@@ -7,10 +7,20 @@ Doesn't allow single variables without text to translate like `<Trans>{variable}
 
 Such expression would pollute message catalog with useless string which has nothing to translate.
 
-```jsx
-// nope ⛔️
-<Trans>{user}</Trans>
+Examples of invalid code with this rule:
 
-// ok ✅
-<Trans>Hello {user}</Trans>
+```jsx
+// invalid ⛔️
+;<Trans>{user}</Trans>
+t`${user}`
+msg`${user}`
+```
+
+Examples of valid code with this rule:
+
+```jsx
+// valid ✅
+;<Trans>Hello {user}</Trans>
+t`Hello ${user}`
+msg`Hello ${user}`
 ```

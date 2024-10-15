@@ -27,6 +27,12 @@ ruleTester.run(name, rule, {
     {
       code: 'const a = () => {t("Hello")}',
     },
+    {
+      code: 'msg`Hello`',
+    },
+    {
+      code: 'defineMessage`Hello`',
+    },
   ],
 
   invalid: [
