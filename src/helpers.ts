@@ -49,14 +49,6 @@ export function getNearestAncestor<Type>(node: any, type: string): Type | null {
   return null
 }
 
-export const isTTaggedTemplateExpression = (node: TSESTree.TaggedTemplateExpression | null) => {
-  return (
-    node?.type === TSESTree.AST_NODE_TYPES.TaggedTemplateExpression &&
-    node.tag.type === TSESTree.AST_NODE_TYPES.Identifier &&
-    node.tag.name === 't'
-  )
-}
-
 export const isLinguiTaggedTemplateExpression = (
   node: TSESTree.TaggedTemplateExpression | null,
 ) => {
