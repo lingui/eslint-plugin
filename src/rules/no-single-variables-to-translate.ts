@@ -1,11 +1,6 @@
 import { TSESTree } from '@typescript-eslint/utils'
 
-import {
-  getQuasisValue,
-  getNearestAncestor,
-  getIdentifierName,
-  isTTaggedTemplateExpression,
-} from '../helpers'
+import { getQuasisValue, getNearestAncestor, isLinguiTaggedTemplateExpression } from '../helpers'
 import { createRule } from '../create-rule'
 
 export const name = 'no-single-variable-to-translate'
@@ -47,33 +42,28 @@ export const rule = createRule({
       })
     }
     return {
-      JSXElement(node: TSESTree.JSXElement) {
-        const identifierName = getIdentifierName(node?.openingElement?.name)
-        if (identifierName === 'Trans') {
-          const isSomeJSXTextWithContent = node && hasSomeJSXTextWithContent(node.children)
-          const hasIdProperty =
-            node.openingElement.attributes.find(
-              (attr) => attr.type === 'JSXAttribute' && attr.name.name === 'id',
-            ) !== undefined
+      'JSXElement[openingElement.name.name=Trans]'(node: TSESTree.JSXElement) {
+        const hasIdProperty =
+          node.openingElement.attributes.find(
+            (attr) => attr.type === 'JSXAttribute' && attr.name.name === 'id',
+          ) !== undefined
 
-          if (!isSomeJSXTextWithContent && !hasIdProperty) {
-            context.report({
-              node,
-              messageId: 'asJsx',
-            })
-          }
+        if (!hasSomeJSXTextWithContent(node.children) && !hasIdProperty) {
+          context.report({
+            node,
+            messageId: 'asJsx',
+          })
         }
-        return
       },
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         const taggedTemplate = getNearestAncestor<TSESTree.TaggedTemplateExpression>(
           node,
-          'TaggedTemplateExpression',
+          TSESTree.AST_NODE_TYPES.TaggedTemplateExpression,
         )
         const quasisValue = getQuasisValue(node)
         if (
           taggedTemplate &&
-          isTTaggedTemplateExpression(taggedTemplate) &&
+          isLinguiTaggedTemplateExpression(taggedTemplate) &&
           (!quasisValue || !quasisValue.length)
         ) {
           context.report({

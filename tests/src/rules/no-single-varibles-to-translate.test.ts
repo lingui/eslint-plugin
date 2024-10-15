@@ -22,12 +22,18 @@ ruleTester.run(name, rule, {
       code: 't`Hello`',
       options: [],
     },
-
     {
       code: 't`Hello ${hello}`',
       options: [],
     },
-
+    {
+      code: 'msg`Hello ${hello}`',
+      options: [],
+    },
+    {
+      code: 'defineMessage`Hello ${hello}`',
+      options: [],
+    },
     {
       code: 't`${hello} Hello ${hello}`',
       options: [],
@@ -116,6 +122,16 @@ ruleTester.run(name, rule, {
     },
     {
       code: 't`${hello}`',
+      options: [],
+      errors: errorsForT,
+    },
+    {
+      code: 'msg`${hello}`',
+      options: [],
+      errors: errorsForT,
+    },
+    {
+      code: 'defineMessage`${hello}`',
       options: [],
       errors: errorsForT,
     },
