@@ -26,11 +26,9 @@ export const rule = createRule({
 
   create: function (context) {
     return {
-      'JSXClosingElement > JSXIdentifier[name=Trans]'(node: TSESTree.JSXIdentifier) {
-        const parentJSXElement: TSESTree.JSXElement = node.parent?.parent as TSESTree.JSXElement
-
+      'JSXElement[openingElement.name.name=Trans]'(node: TSESTree.JSXElement) {
         // delete all spaces or breaks
-        const filteredChildren = parentJSXElement.children.filter((child: TSESTree.JSXChild) => {
+        const filteredChildren = node.children.filter((child: TSESTree.JSXChild) => {
           switch (child.type) {
             case TSESTree.AST_NODE_TYPES.JSXText:
               return child.value?.trim() !== ''

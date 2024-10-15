@@ -13,8 +13,9 @@ ruleTester.run(name, rule, {
       code: 'function hello() { return t`Hello`}',
     },
 
-    { code: 'class React{ render(){return t`Hello`}}' },
-    { code: 'class React{ static state = t`Hello`}' },
+    { code: 'class React { render() { return t`Hello` } }' },
+    { code: 'class React { render = () => { return t`Hello` } }' },
+    { code: 'class React { static state = t`Hello` }' },
     {
       code: 'const a = () => {t`Hello`}',
     },
@@ -36,6 +37,10 @@ ruleTester.run(name, rule, {
   ],
 
   invalid: [
+    { code: 'for (const item of items) { t`Hello` }', errors },
+    { code: '{ t`Hello` }', errors },
+    { code: 'for (const item of items) { t("Hello") }', errors },
+    { code: '{ t("Hello") }', errors },
     { code: 't`Hello`', errors },
     { code: 't("Hello")', errors },
     { code: 'const hello = [t({id:"hello", message:"hello"})]', errors },

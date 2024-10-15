@@ -1,5 +1,4 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { hasAncestorWithName, getIdentifierName } from '../helpers'
 import { createRule } from '../create-rule'
 
 export const name = 'no-trans-inside-trans'
@@ -27,14 +26,13 @@ export const rule = createRule({
 
   create: function (context) {
     return {
-      JSXElement(node: TSESTree.JSXElement) {
-        const identifierName = getIdentifierName(node?.openingElement?.name)
-        if (identifierName === 'Trans' && hasAncestorWithName(node, 'Trans')) {
-          context.report({
-            node,
-            messageId: 'default',
-          })
-        }
+      'JSXElement[openingElement.name.name=Trans] JSXElement[openingElement.name.name=Trans]'(
+        node: TSESTree.JSXElement,
+      ) {
+        context.report({
+          node,
+          messageId: 'default',
+        })
 
         return
       },

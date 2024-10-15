@@ -34,7 +34,7 @@ export const rule = createRule({
           node,
           TSESTree.AST_NODE_TYPES.TaggedTemplateExpression,
         )
-        if (!taggedTemplate) {
+        if (!isLinguiTaggedTemplateExpression(taggedTemplate)) {
           return
         }
 
@@ -49,10 +49,7 @@ export const rule = createRule({
             })
           : []
 
-        if (
-          noneIdentifierExpressions.length > 0 &&
-          isLinguiTaggedTemplateExpression(taggedTemplate)
-        ) {
+        if (noneIdentifierExpressions.length > 0) {
           context.report({
             node,
             messageId: 'default',
