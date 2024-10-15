@@ -1,6 +1,10 @@
 import { TSESTree } from '@typescript-eslint/utils'
 
-import { getQuasisValue, getNearestAncestor, isLinguiTaggedTemplateExpression } from '../helpers'
+import {
+  getQuasisValue,
+  LinguiCallExpressionMessageQuery,
+  LinguiTaggedTemplateExpressionMessageQuery,
+} from '../helpers'
 import { createRule } from '../create-rule'
 
 export const name = 'no-single-variable-to-translate'
@@ -55,17 +59,10 @@ export const rule = createRule({
           })
         }
       },
-      'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
-        const taggedTemplate = getNearestAncestor<TSESTree.TaggedTemplateExpression>(
-          node,
-          TSESTree.AST_NODE_TYPES.TaggedTemplateExpression,
-        )
-        const quasisValue = getQuasisValue(node)
-        if (
-          taggedTemplate &&
-          isLinguiTaggedTemplateExpression(taggedTemplate) &&
-          (!quasisValue || !quasisValue.length)
-        ) {
+      [`${LinguiTaggedTemplateExpressionMessageQuery}, ${LinguiCallExpressionMessageQuery}`](
+        node: TSESTree.TemplateLiteral,
+      ) {
+        if (getQuasisValue(node).length === 0) {
           context.report({
             node,
             messageId: 'asFunction',

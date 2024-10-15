@@ -43,6 +43,18 @@ ruleTester.run(name, rule, {
       code: 'defineMessage`Hello ${hello}`',
     },
     {
+      code: 'b({message: `hello ${user.name}?`})',
+    },
+    {
+      code: 't({message: `hello ${user}?`})',
+    },
+    {
+      code: 'msg({message: `hello ${user}?`})',
+    },
+    {
+      code: 'defineMessage({message: `hello ${user}?`})',
+    },
+    {
       code: 't`Hello ${plural()}`',
     },
     {
@@ -72,6 +84,18 @@ ruleTester.run(name, rule, {
     },
     {
       code: 'defineMessage`hello ${obj.prop}?`',
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      code: 't({message: `hello ${obj.prop}?`})',
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      code: 'msg({message: `hello ${obj.prop}?`})',
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      code: 'defineMessage({message: `hello ${obj.prop}?`})',
       errors: [{ messageId: 'default' }],
     },
     {

@@ -1,5 +1,6 @@
 import { TSESTree } from '@typescript-eslint/utils'
 import { createRule } from '../create-rule'
+import { LinguiTransQuery } from '../helpers'
 
 export const name = 'no-single-tag-to-translate'
 export const rule = createRule({
@@ -26,7 +27,7 @@ export const rule = createRule({
 
   create: function (context) {
     return {
-      'JSXElement[openingElement.name.name=Trans]'(node: TSESTree.JSXElement) {
+      [LinguiTransQuery](node: TSESTree.JSXElement) {
         // delete all spaces or breaks
         const filteredChildren = node.children.filter((child: TSESTree.JSXChild) => {
           switch (child.type) {
