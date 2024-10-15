@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.5.0 (2024-10-15)
+
+- feat(no-expression-in-message): check Trans component (#60) (3fcb131)
+- feat: support msg and defineMessage in various rules (#61) (15a4d04)
+- refactor: use more eslint features instead of custom implementations (#62) (c30ccc6)
+- feat: support messages defined as MessageDescriptor (#63) (7952a56)
+- feat(text-restrictions): apply rules only for translation messages support different Lingui signatures (#64) (de9637f)
+- feat(no-unlocalized-strings): add strictAttribute option (#66) (a284b26)
+
+## 0.4.0 (2024-10-11)
+
 - ci: fix release workflow (#57) (27cd472)
 - fix(no-unlocalized-strings): ignore Literals in computed MemberExpression (#56) (edb2bc1)
 - fix(config): get rid of array in config export (#55) (3c6d349)
@@ -10,8 +21,10 @@
 - feat: Eslint 9 + flat config support (#49) (b57329b)
 - chore(deps): bump braces from 3.0.2 to 3.0.3 (#44) (0c80feb)
 
-* feat: respect lazy translation tags in no-single-variables-to-translate (#34) (3cb7b6a)
-* ci: minor fixes for the release process (#27) (cb0e1d5)
+## 0.3.0 (2024-02-09)
+
+- feat: respect lazy translation tags in no-single-variables-to-translate (#34) (3cb7b6a)
+- ci: minor fixes for the release process (#27) (cb0e1d5)
 
 ## 0.2.2 (2023-12-20)
 
