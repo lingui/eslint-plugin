@@ -20,70 +20,69 @@ ruleTester.run(name, rule, {
   valid: [
     {
       code: 't`Hello`',
-      options: [],
     },
     {
       code: 't`Hello ${hello}`',
-      options: [],
     },
     {
       code: 'msg`Hello ${hello}`',
-      options: [],
     },
     {
       code: 'defineMessage`Hello ${hello}`',
-      options: [],
     },
     {
       code: 't`${hello} Hello ${hello}`',
-      options: [],
     },
 
     {
       code: '<Trans>Hello</Trans>',
-      options: [],
     },
 
     {
       code: '<Trans>Hello {hello}</Trans>',
-      options: [],
     },
 
     {
       code: '<Trans>{hello} Hello {hello}</Trans>',
-      options: [],
     },
 
     {
       code: '<Trans><b>Hello</b></Trans>',
-      options: [],
     },
 
     {
       code: '{hello}',
-      options: [],
     },
 
     {
       code: '`${hello}`',
-      options: [],
     },
-
+    {
+      code: 'b({message: `${hello}`})',
+    },
+    {
+      code: 't({message: `Hello ${user}`})',
+    },
+    {
+      code: 'msg({message: `Hello ${user}`})',
+    },
+    {
+      code: 'defineMessage({message: `Hello ${user}`})',
+    },
     {
       code: '<Trans id={lazyTranslation.id} />',
-      options: [],
     },
   ],
 
   invalid: [
     {
       code: '<Trans>{hello}</Trans>',
-      options: [],
+
       errors: errorsForTrans,
     },
     {
       code: '<Trans>{hello} {hello}</Trans>',
-      options: [],
+
       errors: errorsForTrans,
     },
     {
@@ -93,7 +92,7 @@ ruleTester.run(name, rule, {
                     invoice.total.currency
                 )}
             </Trans>`,
-      options: [],
+
       errors: errorsForTrans,
     },
     {
@@ -117,22 +116,34 @@ ruleTester.run(name, rule, {
                     invoice.total.currency
                 )}
             </Trans>`,
-      options: [],
+
       errors: errorsForTrans,
     },
     {
       code: 't`${hello}`',
-      options: [],
+
       errors: errorsForT,
     },
     {
       code: 'msg`${hello}`',
-      options: [],
+
       errors: errorsForT,
     },
     {
       code: 'defineMessage`${hello}`',
-      options: [],
+
+      errors: errorsForT,
+    },
+    {
+      code: 't({message: `${hello}`})',
+      errors: errorsForT,
+    },
+    {
+      code: 'msg({message: `${user}`})',
+      errors: errorsForT,
+    },
+    {
+      code: 'defineMessage({message: `${user}`})',
       errors: errorsForT,
     },
   ],
