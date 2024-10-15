@@ -1,8 +1,8 @@
 # text-restrictions
 
-Check that strings/templates/jsxText doesn't contain patterns from the rules.
+Check that translated messages doesn't contain patterns from the rules.
 
-This rules enforces a consistency rules inside your messages.
+This rule enforces a consistency rules inside your messages.
 
 ## rules
 
@@ -20,4 +20,37 @@ each `rule` has a structure:
 - `patterns` is an array of regex or strings
 - `message` is an error message that will be displayed if restricting pattern matches text
 - `flags` is a string with regex flags for patterns
-- `isOnlyForTranslation` is a boolean indicating that patterns should be found only inside `Trans` tags or `t` tagged template
+
+## Example
+
+Restrict specific quotes to be used in the messages:
+
+```json
+{
+  "lingui/text-restrictions": [
+    "error",
+    {
+      "rules": [
+        {
+          "patterns": ["''", "’", "“"],
+          "message": "Quotes should be ' or \""
+        }
+      ]
+    }
+  ]
+}
+```
+
+Example of invalid code with this rule:
+
+```js
+t`Hello “mate“`
+msg`Hello “mate“`
+t({ message: `Hello “mate“` })
+```
+
+Example of valid code with this rule:
+
+```js
+t`Hello "mate"`
+```

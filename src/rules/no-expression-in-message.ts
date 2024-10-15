@@ -2,6 +2,7 @@ import { TSESTree } from '@typescript-eslint/utils'
 import {
   LinguiCallExpressionMessageQuery,
   LinguiTaggedTemplateExpressionMessageQuery,
+  LinguiTransQuery,
 } from '../helpers'
 import { createRule } from '../create-rule'
 
@@ -33,8 +34,12 @@ export const rule = createRule({
 
     return {
       [`${LinguiTaggedTemplateExpressionMessageQuery}, ${LinguiCallExpressionMessageQuery}`](
-        node: TSESTree.TemplateLiteral,
+        node: TSESTree.TemplateLiteral | TSESTree.Literal,
       ) {
+        if (node.type === TSESTree.AST_NODE_TYPES.Literal) {
+          return
+        }
+
         const noneIdentifierExpressions = node.expressions
           ? node.expressions.filter((expression) => {
               const isIdentifier = expression.type === TSESTree.AST_NODE_TYPES.Identifier
@@ -55,7 +60,7 @@ export const rule = createRule({
 
         return
       },
-      'JSXElement[openingElement.name.name=Trans] JSXExpressionContainer:not([parent.type=JSXAttribute]) > :expression'(
+      [`${LinguiTransQuery} JSXExpressionContainer:not([parent.type=JSXAttribute]) > :expression`](
         node: TSESTree.Expression,
       ) {
         const isIdentifier = node.type === TSESTree.AST_NODE_TYPES.Identifier

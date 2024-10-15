@@ -12,7 +12,6 @@ const quotesRule: RestrictionRule = {
 const bracketRule: RestrictionRule = {
   patterns: ['<', '>', '&lt;', '&gt;'],
   message: 'Exclude <,> symbols from translations',
-  isOnlyForTranslation: true,
 }
 
 const wordRule: RestrictionRule = {
@@ -34,7 +33,7 @@ const ruleTester = new RuleTester({
 ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
   valid: [
     {
-      code: "i18n._('Hello')",
+      code: 't`Hello`',
       options: [
         {
           rules: [quotesRule],
@@ -42,7 +41,7 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       ],
     },
     {
-      code: 'i18n._(`Hello ${kek}`)',
+      code: 't`Hello ${kek}`',
       options: [
         {
           rules: [quotesRule],
@@ -50,7 +49,7 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       ],
     },
     {
-      code: '<div>Hello</div>',
+      code: 't({message: `Hello ${kek}`})',
       options: [
         {
           rules: [quotesRule],
@@ -58,7 +57,23 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       ],
     },
     {
-      code: '<div>Email</div>',
+      code: 'b({message: `Hell“o“`})',
+      options: [
+        {
+          rules: [quotesRule],
+        },
+      ],
+    },
+    {
+      code: '<Trans>Hello</Trans>',
+      options: [
+        {
+          rules: [quotesRule],
+        },
+      ],
+    },
+    {
+      code: '<Trans>Email</Trans>',
       options: [
         {
           rules: [wordRule],
@@ -66,7 +81,7 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       ],
     },
     {
-      code: '<div>email</div>',
+      code: '<Trans>email</Trans>',
       options: [
         {
           rules: [wordRule],
@@ -101,7 +116,7 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
 
   invalid: [
     {
-      code: "i18n._('Hell“o“')",
+      code: 't`Hell“o“`',
       options: [
         {
           rules: [quotesRule],
@@ -110,7 +125,7 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       errors: [{ messageId: 'default', data: { message: quotesRule.message } }],
     },
     {
-      code: 'i18n._(`Hell“o“`)',
+      code: 'msg`Hell“o“`',
       options: [
         {
           rules: [quotesRule],
@@ -119,7 +134,7 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       errors: [{ messageId: 'default', data: { message: quotesRule.message } }],
     },
     {
-      code: '<div>Hell“o“</div>',
+      code: 'defineMessage`Hell“o“`',
       options: [
         {
           rules: [quotesRule],
@@ -128,7 +143,34 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       errors: [{ messageId: 'default', data: { message: quotesRule.message } }],
     },
     {
-      code: "i18n._('Hell“o“')",
+      code: 't({message: `Hell“o“`})',
+      options: [
+        {
+          rules: [quotesRule],
+        },
+      ],
+      errors: [{ messageId: 'default', data: { message: quotesRule.message } }],
+    },
+    {
+      code: "t({message: 'Hell“o“'})",
+      options: [
+        {
+          rules: [quotesRule],
+        },
+      ],
+      errors: [{ messageId: 'default', data: { message: quotesRule.message } }],
+    },
+    {
+      code: '<Trans>Hell“o“</Trans>',
+      options: [
+        {
+          rules: [quotesRule],
+        },
+      ],
+      errors: [{ messageId: 'default', data: { message: quotesRule.message } }],
+    },
+    {
+      code: 't`Hell“o“`',
       options: [
         {
           rules: [
@@ -146,7 +188,7 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       ],
     },
     {
-      code: '<div>E-mail</div>',
+      code: '<Trans>E-mail</Trans>',
       options: [
         {
           rules: [wordRule],
@@ -155,7 +197,7 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       errors: [{ messageId: 'default', data: { message: wordRule.message } }],
     },
     {
-      code: '<div>e-mail</div>',
+      code: '<Trans>e-mail</Trans>',
       options: [
         {
           rules: [wordRule],
