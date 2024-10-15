@@ -106,7 +106,7 @@ export function isNodeTranslated(
   }
   const taggedTemplate = getNearestAncestor<TSESTree.TaggedTemplateExpression>(
     node,
-    'TaggedTemplateExpression',
+    TSESTree.AST_NODE_TYPES.TaggedTemplateExpression,
   )
 
   return taggedTemplate ? isTTaggedTemplateExpression(taggedTemplate) : false

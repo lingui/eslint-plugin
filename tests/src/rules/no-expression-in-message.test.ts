@@ -3,7 +3,15 @@ import { RuleTester } from '@typescript-eslint/rule-tester'
 
 describe('', () => {})
 
-const ruleTester = new RuleTester()
+const ruleTester = new RuleTester({
+  languageOptions: {
+    parserOptions: {
+      ecmaFeatures: {
+        jsx: true,
+      },
+    },
+  },
+})
 
 ruleTester.run(name, rule, {
   valid: [
@@ -37,10 +45,23 @@ ruleTester.run(name, rule, {
     {
       code: 't`Hello ${selectOrdinal()}`',
     },
+    {
+      code: '<Trans>Hello <MyComponent prop={obj.prop}/></Trans>',
+    },
+    {
+      code: '<Trans>Hello <MyComponent prop={func({foo: bar})}/></Trans>',
+    },
+    {
+      code: '<Trans>Hello {userName}</Trans>',
+    },
   ],
   invalid: [
     {
       code: 't`hello ${obj.prop}?`',
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      code: '<Trans>Hello {obj.prop}</Trans>',
       errors: [{ messageId: 'default' }],
     },
     {
