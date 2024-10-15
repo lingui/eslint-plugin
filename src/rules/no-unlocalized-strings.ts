@@ -3,9 +3,9 @@ import {
   isUpperCase,
   isAllowedDOMAttr,
   getNearestAncestor,
-  getQuasisValue,
   hasAncestorWithName,
   getIdentifierName,
+  getText,
 } from '../helpers'
 import { createRule } from '../create-rule'
 
@@ -273,7 +273,7 @@ export const rule = createRule<Option[], string>({
       },
 
       'JSXElement > JSXExpressionContainer > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        processTextNode(node, getQuasisValue(node))
+        processTextNode(node, getText(node))
       },
 
       'JSXAttribute :matches(Literal,TemplateLiteral)'(
@@ -372,7 +372,7 @@ export const rule = createRule<Option[], string>({
 
           if (
             parent?.key?.type === TSESTree.AST_NODE_TYPES.TemplateLiteral &&
-            isUpperCase(getQuasisValue(parent?.key))
+            isUpperCase(getText(parent?.key))
           ) {
             visited.add(node)
           }
@@ -483,7 +483,7 @@ export const rule = createRule<Option[], string>({
       },
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         if (visited.has(node)) return
-        const quasisValue = getQuasisValue(node)
+        const quasisValue = getText(node)
         if (isUpperCase(quasisValue)) return
 
         if (match(quasisValue) || !isStrMatched(quasisValue)) return

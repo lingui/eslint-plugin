@@ -1,7 +1,7 @@
 import { TSESTree } from '@typescript-eslint/utils'
 
 import {
-  getQuasisValue,
+  getText,
   LinguiCallExpressionMessageQuery,
   LinguiTaggedTemplateExpressionMessageQuery,
 } from '../helpers'
@@ -60,9 +60,9 @@ export const rule = createRule({
         }
       },
       [`${LinguiTaggedTemplateExpressionMessageQuery}, ${LinguiCallExpressionMessageQuery}`](
-        node: TSESTree.TemplateLiteral,
+        node: TSESTree.TemplateLiteral | TSESTree.Literal,
       ) {
-        if (getQuasisValue(node).length === 0) {
+        if (!getText(node)) {
           context.report({
             node,
             messageId: 'asFunction',

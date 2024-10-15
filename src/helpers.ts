@@ -13,14 +13,14 @@ export const LinguiTaggedTemplateExpressionMessageQuery =
   ':matches(TaggedTemplateExpression[tag.name=t], TaggedTemplateExpression[tag.name=msg], TaggedTemplateExpression[tag.name=defineMessage]) TemplateLiteral'
 
 /**
- * Queries for TemplateLiteral in CallExpression expressions:
+ * Queries for TemplateLiteral | StringLiteral in CallExpression expressions:
  *
- * t({message: ``})
- * msg({message: ``})
- * defineMessage({message: ``})
+ * t({message: ``}); t({message: ''})
+ * msg({message: ``}); msg({message: ''})
+ * defineMessage({message: ``}); defineMessage({message: ''})
  */
 export const LinguiCallExpressionMessageQuery =
-  ':matches(CallExpression[callee.name=t], CallExpression[callee.name=msg], CallExpression[callee.name=defineMessage]) TemplateLiteral'
+  ':matches(CallExpression[callee.name=t], CallExpression[callee.name=msg], CallExpression[callee.name=defineMessage]) :matches(TemplateLiteral, Literal)'
 
 /**
  * Queries for Trans
@@ -76,38 +76,17 @@ export function getNearestAncestor<Type>(node: any, type: string): Type | null {
   return null
 }
 
-const jsMacrosNames = [`t`, `msg`, `defineMessage`]
-
-export const isLinguiSymbol = (
-  node: TSESTree.TaggedTemplateExpression | TSESTree.CallExpression | null,
-) => {
-  if (!node) {
-    return false
+export const getText = (
+  node: TSESTree.TemplateLiteral | TSESTree.Literal | TSESTree.JSXText,
+): string => {
+  if (node.type === TSESTree.AST_NODE_TYPES.TemplateLiteral) {
+    return node.quasis
+      .map((quasis) => quasis.value.cooked)
+      .join('')
+      .trim()
   }
 
-  if (
-    node?.type === TSESTree.AST_NODE_TYPES.CallExpression &&
-    hasName(node.callee, jsMacrosNames)
-  ) {
-    return true
-  }
-
-  return (
-    node?.type === TSESTree.AST_NODE_TYPES.TaggedTemplateExpression &&
-    hasName(node.tag, jsMacrosNames)
-  )
-}
-
-const hasName = (node: TSESTree.Expression, names: string[]) => {
-  return node.type === TSESTree.AST_NODE_TYPES.Identifier && names.includes(node.name)
-}
-
-export const getQuasisValue = (node: TSESTree.TemplateLiteral): string => {
-  const quasisCookedString = node.quasis
-    .map((quasis: TSESTree.TemplateElement) => quasis.value.cooked)
-    .join('')
-
-  return quasisCookedString.trim()
+  return node.value.toString().trim()
 }
 
 export function hasAncestorWithName(
@@ -128,20 +107,6 @@ export function hasAncestorWithName(
     p = p.parent
   }
   return false
-}
-
-export function isNodeTranslated(
-  node: TSESTree.TemplateLiteral | TSESTree.Literal | TSESTree.JSXText,
-) {
-  if (hasAncestorWithName(node, 'Trans')) {
-    return true
-  }
-  const taggedTemplate = getNearestAncestor<TSESTree.TaggedTemplateExpression>(
-    node,
-    TSESTree.AST_NODE_TYPES.TaggedTemplateExpression,
-  )
-
-  return taggedTemplate ? isLinguiSymbol(taggedTemplate) : false
 }
 
 export function getIdentifierName(jsxTagNameExpression: TSESTree.JSXTagNameExpression) {

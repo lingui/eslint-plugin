@@ -49,6 +49,9 @@ ruleTester.run(name, rule, {
       code: 't({message: `hello ${user}?`})',
     },
     {
+      code: 't({message: "StringLiteral"})',
+    },
+    {
       code: 'msg({message: `hello ${user}?`})',
     },
     {

@@ -33,7 +33,9 @@ ruleTester.run(name, rule, {
     {
       code: 't`${hello} Hello ${hello}`',
     },
-
+    {
+      code: 't({message: "StringLiteral"})',
+    },
     {
       code: '<Trans>Hello</Trans>',
     },
