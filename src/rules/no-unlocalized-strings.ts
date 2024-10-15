@@ -13,6 +13,7 @@ export type Option = {
   ignore?: string[]
   ignoreFunction?: string[]
   ignoreAttribute?: string[]
+  strictAttribute?: string[]
   ignoreProperty?: string[]
   ignoreMethodsOnTypes?: string[]
   useTsTypes?: boolean
@@ -51,6 +52,12 @@ export const rule = createRule<Option[], string>({
             },
           },
           ignoreAttribute: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          strictAttribute: {
             type: 'array',
             items: {
               type: 'string',
@@ -164,6 +171,8 @@ export const rule = createRule<Option[], string>({
     const ignoredClassProperties = ['displayName']
     const ignoredJSXElements = ['Trans']
     const ignoredJSXSymbols = ['&larr;', '&nbsp;', '&middot;']
+
+    const strictAttributes = [...(option?.strictAttribute || [])]
 
     const ignoredAttributes = [
       'className',
@@ -279,18 +288,31 @@ export const rule = createRule<Option[], string>({
       'JSXAttribute :matches(Literal,TemplateLiteral)'(
         node: TSESTree.Literal | TSESTree.TemplateLiteral,
       ) {
-        const parent = getNearestAncestor<TSESTree.JSXAttribute>(node, 'JSXAttribute')
+        const parent = getNearestAncestor<TSESTree.JSXAttribute>(
+          node,
+          TSESTree.AST_NODE_TYPES.JSXAttribute,
+        )
         const attrName = getAttrName(parent?.name?.name)
+
+        if (strictAttributes.includes(attrName)) {
+          visited.add(node)
+          context.report({ node, messageId: 'default', data: { message } })
+          return
+        }
+
         // allow <MyComponent className="active" />
-        if (ignoredAttributes.includes(getAttrName(parent?.name?.name))) {
+        if (ignoredAttributes.includes(attrName)) {
           visited.add(node)
           return
         }
 
-        const jsxElement = getNearestAncestor<TSESTree.JSXOpeningElement>(node, 'JSXOpeningElement')
+        const jsxElement = getNearestAncestor<TSESTree.JSXOpeningElement>(
+          node,
+          TSESTree.AST_NODE_TYPES.JSXOpeningElement,
+        )
         const tagName = getIdentifierName(jsxElement?.name)
         const attributeNames = jsxElement?.attributes.map(
-          (attr: TSESTree.JSXAttribute | TSESTree.JSXSpreadAttribute) =>
+          (attr) =>
             attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute && getAttrName(attr?.name?.name),
         )
         if (isAllowedDOMAttr(tagName, attrName, attributeNames)) {

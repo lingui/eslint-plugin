@@ -64,6 +64,18 @@ const element = <div style={{ margin: '1rem 2rem' }} />
 
 By default, the following attributes are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`
 
+### strictAttribute
+
+The `strictAttribute` option specifies JSX attributes which will always be checked regardless of `ignore`
+option or any built-in exceptions.
+
+Examples of incorrect code for the `{ "strictAttribute": ["alt"] }` option:
+
+```jsx
+/*eslint lingui/no-unlocalized-strings: ["error", { "strictAttribute": ["alt"] }]*/
+const element = <div alt="IMAGE" />
+```
+
 ### ignoreProperty
 
 The `ignoreProperty` option specifies property names not to check.

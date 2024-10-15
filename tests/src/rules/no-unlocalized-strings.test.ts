@@ -201,7 +201,6 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: 'class Form extends Component { property = `Something` };',
       errors,
     },
-    // JSX
     { code: '<DIV foo={`Bar`} />', errors },
     { code: '<img src="./image.png" alt={`some image`} />', errors },
     { code: '<button aria-label={`Close`} type={`button`} />', errors },
@@ -223,7 +222,7 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: 'class Form extends Component { property = "Something" };',
       errors,
     },
-    // JSX
+    { code: '<img alt="BLA" />', only: true, options: [{ strictAttribute: ['alt'] }], errors },
     { code: '<div>foo</div>', errors },
     { code: '<div>Foo</div>', errors },
     { code: '<div>FOO</div>', errors },
