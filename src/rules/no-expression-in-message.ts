@@ -15,7 +15,7 @@ export const rule = createRule({
       recommended: 'error',
     },
     messages: {
-      default: 'Should be ${variable}, not ${object.property} or ${my_function()}',
+      default: 'Should be ${variable}, not ${object.property} or ${myFunction()}',
     },
     schema: [
       {
@@ -28,9 +28,30 @@ export const rule = createRule({
   },
 
   defaultOptions: [],
-
   create: function (context) {
     const linguiMacroFunctionNames = ['plural', 'select', 'selectOrdinal']
+
+    function checkExpressionsInTplLiteral(node: TSESTree.TemplateLiteral) {
+      node.expressions.forEach((expression) => {
+        if (expression.type === TSESTree.AST_NODE_TYPES.Identifier) {
+          return
+        }
+
+        const isCallToLinguiMacro =
+          expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
+          expression.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
+          linguiMacroFunctionNames.includes(expression.callee.name)
+
+        if (isCallToLinguiMacro) {
+          return
+        }
+
+        context.report({
+          node: expression,
+          messageId: 'default',
+        })
+      })
+    }
 
     return {
       [`${LinguiTaggedTemplateExpressionMessageQuery}, ${LinguiCallExpressionMessageQuery}`](
@@ -40,32 +61,22 @@ export const rule = createRule({
           return
         }
 
-        const noneIdentifierExpressions = node.expressions
-          ? node.expressions.filter((expression) => {
-              const isIdentifier = expression.type === TSESTree.AST_NODE_TYPES.Identifier
-              const isCallToLinguiMacro =
-                expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
-                expression.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
-                linguiMacroFunctionNames.includes(expression.callee.name)
-              return !isIdentifier && !isCallToLinguiMacro
-            })
-          : []
-
-        if (noneIdentifierExpressions.length > 0) {
-          context.report({
-            node,
-            messageId: 'default',
-          })
-        }
-
-        return
+        checkExpressionsInTplLiteral(node)
       },
       [`${LinguiTransQuery} JSXExpressionContainer:not([parent.type=JSXAttribute]) > :expression`](
         node: TSESTree.Expression,
       ) {
-        const isIdentifier = node.type === TSESTree.AST_NODE_TYPES.Identifier
+        if (node.type === TSESTree.AST_NODE_TYPES.Literal) {
+          // skip strings as expression in JSX, including spaces {' '}
+          return
+        }
 
-        if (!isIdentifier) {
+        if (node.type === TSESTree.AST_NODE_TYPES.TemplateLiteral) {
+          // <Trans>{`How much is ${obj.prop}?`}</Trans>
+          return checkExpressionsInTplLiteral(node)
+        }
+
+        if (node.type !== TSESTree.AST_NODE_TYPES.Identifier) {
           context.report({
             node,
             messageId: 'default',
