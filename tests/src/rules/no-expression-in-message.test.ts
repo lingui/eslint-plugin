@@ -75,6 +75,18 @@ ruleTester.run(name, rule, {
     {
       code: '<Trans>Hello {userName}</Trans>',
     },
+    {
+      name: 'Should not be triggered for JSX Whitespace expression',
+      code: "<Trans>Did you mean{' '}<span>something</span>{` `}</Trans>",
+    },
+    {
+      name: 'Template literals as children with identifiers',
+      code: ' <Trans>{`How much is ${expression}? ${count}`}</Trans>',
+    },
+    {
+      name: 'Strings as children are preserved',
+      code: '<Trans>{"hello {count, plural, one {world} other {worlds}}"}</Trans>',
+    },
   ],
   invalid: [
     {
@@ -102,7 +114,17 @@ ruleTester.run(name, rule, {
       errors: [{ messageId: 'default' }],
     },
     {
+      name: 'Should trigger for each expression in the message',
+      code: 't`hello ${obj.prop} ${obj.prop}?`',
+      errors: [{ messageId: 'default' }, { messageId: 'default' }],
+    },
+    {
       code: '<Trans>Hello {obj.prop}</Trans>',
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'Template literals as children with expressions',
+      code: '<Trans>{`How much is ${obj.prop}?`}</Trans>',
       errors: [{ messageId: 'default' }],
     },
     {
