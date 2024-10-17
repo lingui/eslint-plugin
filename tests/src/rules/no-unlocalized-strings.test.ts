@@ -16,8 +16,7 @@ const ruleTester = new RuleTester({
   },
 })
 
-const message = 'disallow literal string'
-const errors = [{ messageId: 'default', data: { message } }] // default errors
+const errors = [{ messageId: 'default' }] // default errors
 
 ruleTester.run<string, Option[]>(name, rule, {
   valid: [
@@ -134,6 +133,10 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: '<button type={`button`} for={`form-id`} />' },
     { code: '<DIV foo="bar" />', options: [{ ignoreAttribute: ['foo'] }] },
     { code: '<DIV foo={`Bar`} />', options: [{ ignoreAttribute: ['foo'] }] },
+    {
+      code: '<DIV wrapperClassName={`Bar`} />',
+      options: [{ ignoreAttribute: [{ regex: { pattern: 'className', flags: 'i' } }] }],
+    },
     { code: '<DIV foo={`bar`} />' },
     { code: '<DIV foo="bar" />' },
     { code: 'a + `b`' },
@@ -177,8 +180,16 @@ ruleTester.run<string, Option[]>(name, rule, {
     },
     { code: `const test = { id: 'This is not localized' }` },
     {
-      code: `const test = { text: 'This is not localized' }`,
-      options: [{ ignoreProperty: ['text'] }],
+      code: `const test = { myProp: 'This is not localized' }`,
+      options: [{ ignoreProperty: ['myProp'] }],
+    },
+    {
+      code: `const test = { ['myProp']: 'This is not localized' }`,
+      options: [{ ignoreProperty: ['myProp'] }],
+    },
+    {
+      code: `const test = { wrapperClassName: 'This is not localized' }`,
+      options: [{ ignoreProperty: [{ regex: { pattern: 'className', flags: 'i' } }] }],
     },
     { code: `obj["key with space"] = 5` },
     { code: `obj[\`key with space\`] = 5` },
@@ -189,7 +200,7 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: "<Select value='Hello' one='2' notOther='3' /> ", errors },
     { code: "<Plural notValue='Hello' one='2' other='3' /> ", errors },
     { code: "<Select notValue='Hello' one='2' other='3' /> ", errors },
-    { code: '<div>hello &nbsp; </div>', errors },
+    { code: '<div>hello &nbsp; </div>', errors: [{ messageId: 'forJsxText' }] },
     { code: 'const a = `Hello ${nice}`', errors },
     { code: 'export const a = `hello string`;', errors },
     { code: "const ge = 'Select tax code'", errors },
@@ -222,10 +233,15 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: 'class Form extends Component { property = "Something" };',
       errors,
     },
-    { code: '<img alt="BLA" />', only: true, options: [{ strictAttribute: ['alt'] }], errors },
-    { code: '<div>foo</div>', errors },
-    { code: '<div>Foo</div>', errors },
-    { code: '<div>FOO</div>', errors },
+    { code: '<img alt="BLA" />', options: [{ strictAttribute: ['alt'] }], errors },
+    {
+      code: '<img altAaa="BLA" />',
+      options: [{ strictAttribute: [{ regex: { pattern: '^alt' } }] }],
+      errors,
+    },
+    { code: '<div>foo</div>', errors: [{ messageId: 'forJsxText' }] },
+    { code: '<div>Foo</div>', errors: [{ messageId: 'forJsxText' }] },
+    { code: '<div>FOO</div>', errors: [{ messageId: 'forJsxText' }] },
     { code: '<DIV foo="Bar" />', errors },
     { code: '<img src="./image.png" alt="some image" />', errors },
     { code: '<button aria-label="Close" type="button" />', errors },
@@ -236,10 +252,7 @@ ruleTester.run<string, Option[]>(name, rule, {
             ? 'Search'
             : 'Search for accounts, merchants, and more...'
     }`,
-      errors: [
-        { messageId: 'default', data: { message } },
-        { messageId: 'default', data: { message } },
-      ],
+      errors: [{ messageId: 'default' }, { messageId: 'default' }],
     },
   ],
 })
@@ -279,7 +292,7 @@ jsxTester.run('no-unlocalized-strings', rule, {
   invalid: [
     {
       code: '<Component>Abc</Component>',
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: '<Component>{"Hello"}</Component>',
@@ -291,7 +304,7 @@ jsxTester.run('no-unlocalized-strings', rule, {
     },
     {
       code: '<Component>abc</Component>',
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: "<Component>{'abc'}</Component>",
@@ -303,10 +316,7 @@ jsxTester.run('no-unlocalized-strings', rule, {
     },
     {
       code: '<Component>{someVar === 1 ? `Abc` : `Def`}</Component>',
-      errors: [
-        { messageId: 'default', data: { message } },
-        { messageId: 'default', data: { message } },
-      ],
+      errors: [{ messageId: 'default' }, { messageId: 'default' }],
     },
   ],
 })
@@ -383,12 +393,12 @@ tsTester.run('no-unlocalized-strings', rule, {
     {
       code: `<button className={styles.btn}>loading</button>`,
       filename: 'a.tsx',
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: `<button className={styles.btn}>Loading</button>`,
       filename: 'a.tsx',
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: "function Button({ t= 'Name'  }: {t: 'name' &  'Abs'}){} ",
@@ -405,10 +415,7 @@ tsTester.run('no-unlocalized-strings', rule, {
             ? 'Search'
             : 'Search for accounts, merchants, and more...'
     }`,
-      errors: [
-        { messageId: 'default', data: { message } },
-        { messageId: 'default', data: { message } },
-      ],
+      errors: [{ messageId: 'default' }, { messageId: 'default' }],
     },
   ],
 })

@@ -1,33 +1,97 @@
-import { ESLintUtils, TSESTree, ParserServicesWithTypeInformation } from '@typescript-eslint/utils'
 import {
-  isUpperCase,
-  isAllowedDOMAttr,
-  getNearestAncestor,
-  hasAncestorWithName,
+  ESLintUtils,
+  JSONSchema,
+  ParserServicesWithTypeInformation,
+  TSESTree,
+} from '@typescript-eslint/utils'
+import {
   getIdentifierName,
+  getNearestAncestor,
   getText,
+  hasAncestorWithName,
+  isAllowedDOMAttr,
+  isIdentifier,
+  isJSXAttribute,
+  isLiteral,
+  isMemberExpression,
+  isTemplateLiteral,
+  isUpperCase,
+  UpperCaseRegexp,
 } from '../helpers'
 import { createRule } from '../create-rule'
+
+type MatcherDef = string | { regex: { pattern: string; flags?: string } }
 
 export type Option = {
   ignore?: string[]
   ignoreFunction?: string[]
-  ignoreAttribute?: string[]
-  strictAttribute?: string[]
-  ignoreProperty?: string[]
+  ignoreAttribute?: MatcherDef[]
+  strictAttribute?: MatcherDef[]
+  ignoreProperty?: MatcherDef[]
   ignoreMethodsOnTypes?: string[]
   useTsTypes?: boolean
 }
+
+const MatcherSchema: JSONSchema.JSONSchema4 = {
+  oneOf: [
+    {
+      type: 'string',
+    },
+    {
+      type: 'object',
+      properties: {
+        regex: {
+          type: 'object',
+          properties: {
+            pattern: {
+              type: 'string',
+            },
+            flags: {
+              type: 'string',
+            },
+          },
+          required: ['pattern'],
+          additionalProperties: false,
+        },
+      },
+      required: ['regex'],
+      additionalProperties: false,
+    },
+  ],
+}
+
+function preparePatterns(items: MatcherDef[]): (string | RegExp)[] {
+  return items.map((item) =>
+    typeof item === 'string' ? item : new RegExp(item.regex.pattern, item.regex.flags),
+  )
+}
+
+function createMatcher(patterns: (string | RegExp)[]) {
+  return (str: string) => {
+    return patterns.some((pattern) => {
+      if (typeof pattern === 'string') {
+        return pattern === str
+      }
+
+      return pattern.test(str)
+    })
+  }
+}
+
 export const name = 'no-unlocalized-strings'
 export const rule = createRule<Option[], string>({
   name,
   meta: {
     docs: {
-      description: 'disallow literal string',
+      description:
+        'Ensures all strings, templates, and JSX text are properly wrapped with `<Trans>`, `t`, or `msg` for translation.',
       recommended: 'error',
     },
     messages: {
-      default: '{{ message }}',
+      default: 'String not marked for translation. Wrap it with t``, <Trans>, or msg``.',
+      forJsxText: 'String not marked for translation. Wrap it with <Trans>.',
+      forAttribute:
+        'Attribute not marked for translation. \n Wrap it with t`` from useLingui() macro hook.',
     },
     schema: [
       {
@@ -53,21 +117,15 @@ export const rule = createRule<Option[], string>({
           },
           ignoreAttribute: {
             type: 'array',
-            items: {
-              type: 'string',
-            },
+            items: MatcherSchema,
           },
           strictAttribute: {
             type: 'array',
-            items: {
-              type: 'string',
-            },
+            items: MatcherSchema,
           },
           ignoreProperty: {
             type: 'array',
-            items: {
-              type: 'string',
-            },
+            items: MatcherSchema,
           },
           useTsTypes: {
             type: 'boolean',
@@ -97,7 +155,6 @@ export const rule = createRule<Option[], string>({
     ].map((item) => new RegExp(item))
 
     const calleeWhitelists = generateCalleeWhitelists(option)
-    const message = 'disallow literal string'
     //----------------------------------------------------------------------
     // Helpers
     //----------------------------------------------------------------------
@@ -118,10 +175,7 @@ export const rule = createRule<Option[], string>({
     }: TSESTree.CallExpression | TSESTree.NewExpression): boolean {
       switch (callee.type) {
         case TSESTree.AST_NODE_TYPES.MemberExpression: {
-          if (
-            callee.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
-            callee.object.type === TSESTree.AST_NODE_TYPES.Identifier
-          ) {
+          if (isIdentifier(callee.property) && isIdentifier(callee.object)) {
             if (calleeWhitelists.simple.includes(callee.property.name)) {
               return true
             }
@@ -134,7 +188,7 @@ export const rule = createRule<Option[], string>({
           }
 
           // use power of TS compiler to exclude call on specific types, such Map.get, Set.get and so on
-          if (tsService && callee.property.type === TSESTree.AST_NODE_TYPES.Identifier) {
+          if (tsService && isIdentifier(callee.property)) {
             for (const ignore of ignoredMethodsOnTypes) {
               const [type, method] = ignore.split('.')
 
@@ -151,15 +205,11 @@ export const rule = createRule<Option[], string>({
           return false
         }
         case TSESTree.AST_NODE_TYPES.Identifier: {
-          if (callee.name === 'require') {
-            return true
-          }
           return calleeWhitelists.simple.includes(callee.name)
         }
         case TSESTree.AST_NODE_TYPES.CallExpression: {
           return (
-            (callee.callee.type === TSESTree.AST_NODE_TYPES.MemberExpression ||
-              callee.callee.type === TSESTree.AST_NODE_TYPES.Identifier) &&
+            (isMemberExpression(callee.callee) || isIdentifier(callee.callee)) &&
             isValidFunctionCall(callee)
           )
         }
@@ -168,11 +218,10 @@ export const rule = createRule<Option[], string>({
       }
     }
 
-    const ignoredClassProperties = ['displayName']
     const ignoredJSXElements = ['Trans']
     const ignoredJSXSymbols = ['&larr;', '&nbsp;', '&middot;']
 
-    const strictAttributes = [...(option?.strictAttribute || [])]
+    const strictAttributes = [...preparePatterns(option?.strictAttribute || [])]
 
     const ignoredAttributes = [
       'className',
@@ -182,7 +231,7 @@ export const rule = createRule<Option[], string>({
       'width',
       'height',
 
-      ...(option?.ignoreAttribute || []),
+      ...preparePatterns(option?.ignoreAttribute || []),
     ]
 
     const ignoredMethodsOnTypes = [
@@ -200,7 +249,8 @@ export const rule = createRule<Option[], string>({
       'width',
       'height',
       'displayName',
-      ...(option?.ignoreProperty || []),
+      UpperCaseRegexp,
+      ...preparePatterns(option?.ignoreProperty || []),
     ]
 
     //----------------------------------------------------------------------
@@ -211,6 +261,10 @@ export const rule = createRule<Option[], string>({
     function isIgnoredSymbol(str: string) {
       return ignoredJSXSymbols.some((name) => name === str)
     }
+
+    const isIgnoredAttribute = createMatcher(ignoredAttributes)
+    const isIgnoredProperty = createMatcher(ignoredProperties)
+    const isStrictAttribute = createMatcher(strictAttributes)
 
     function isIgnoredJSXElement(
       node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
@@ -240,15 +294,20 @@ export const rule = createRule<Option[], string>({
 
     const processTextNode = (
       node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
-      text: string,
     ) => {
       visited.add(node)
 
+      const text = getText(node)
       if (!text || match(text) || isIgnoredJSXElement(node) || isIgnoredSymbol(text)) {
         return
       }
 
-      context.report({ node, messageId: 'default', data: { message } })
+      if (node.type === TSESTree.AST_NODE_TYPES.JSXText) {
+        context.report({ node, messageId: 'forJsxText' })
+        return
+      }
+
+      context.report({ node, messageId: 'default' })
     }
 
     const visitor: {
@@ -270,19 +329,19 @@ export const rule = createRule<Option[], string>({
       },
 
       JSXText(node: TSESTree.JSXText) {
-        processTextNode(node, `${node.value}`.trim())
+        processTextNode(node)
       },
 
       'JSXElement > Literal'(node: TSESTree.Literal) {
-        processTextNode(node, `${node.value}`.trim())
+        processTextNode(node)
       },
 
       'JSXElement > JSXExpressionContainer > Literal'(node: TSESTree.Literal) {
-        processTextNode(node, `${node.value}`.trim())
+        processTextNode(node)
       },
 
       'JSXElement > JSXExpressionContainer > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
-        processTextNode(node, getText(node))
+        processTextNode(node)
       },
 
       'JSXAttribute :matches(Literal,TemplateLiteral)'(
@@ -294,14 +353,14 @@ export const rule = createRule<Option[], string>({
         )
         const attrName = getAttrName(parent?.name?.name)
 
-        if (strictAttributes.includes(attrName)) {
+        if (isStrictAttribute(attrName)) {
           visited.add(node)
-          context.report({ node, messageId: 'default', data: { message } })
+          context.report({ node, messageId: 'default' })
           return
         }
 
         // allow <MyComponent className="active" />
-        if (ignoredAttributes.includes(attrName)) {
+        if (isIgnoredAttribute(attrName)) {
           visited.add(node)
           return
         }
@@ -312,11 +371,11 @@ export const rule = createRule<Option[], string>({
         )
         const tagName = getIdentifierName(jsxElement?.name)
         const attributeNames = jsxElement?.attributes.map(
-          (attr) =>
-            attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute && getAttrName(attr?.name?.name),
+          (attr) => isJSXAttribute(attr) && getAttrName(attr.name.name),
         )
         if (isAllowedDOMAttr(tagName, attrName, attributeNames)) {
           visited.add(node)
+          return
         }
       },
 
@@ -334,11 +393,10 @@ export const rule = createRule<Option[], string>({
             parent.type === TSESTree.AST_NODE_TYPES.PropertyDefinition ||
             //@ts-ignore
             parent.type === 'ClassProperty') &&
-          parent.key.type === TSESTree.AST_NODE_TYPES.Identifier
+          isIdentifier(parent.key) &&
+          isIgnoredProperty(parent.key.name)
         ) {
-          if (parent?.key && ignoredClassProperties.includes(parent.key.name)) {
-            visited.add(node)
-          }
+          visited.add(node)
         }
       },
 
@@ -349,55 +407,31 @@ export const rule = createRule<Option[], string>({
       'VariableDeclarator > :matches(Literal,TemplateLiteral)'(
         node: TSESTree.Literal | TSESTree.TemplateLiteral,
       ) {
+        const parent = node.parent as TSESTree.VariableDeclarator
+
         // allow statements like const A_B = "test"
-        if (
-          node.parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator &&
-          node.parent.id.type === TSESTree.AST_NODE_TYPES.Identifier &&
-          isUpperCase(node.parent.id.name)
-        ) {
+        if (isIdentifier(parent.id) && isUpperCase(parent.id.name)) {
           visited.add(node)
         }
       },
       'Property > :matches(Literal,TemplateLiteral)'(
         node: TSESTree.Literal | TSESTree.TemplateLiteral,
       ) {
-        const { parent } = node
+        const parent = node.parent as TSESTree.Property
 
-        if (parent.type === TSESTree.AST_NODE_TYPES.Property) {
-          // if node is key of property, skip
-          if (parent?.key === node) {
-            visited.add(node)
-          }
+        // {A_B: "hello world"};
+        //  ^^^^
+        if (isIdentifier(parent.key) && isIgnoredProperty(parent.key.name)) {
+          visited.add(node)
+        }
 
-          // name if key is Identifier; value if key is Literal
-          // dont care whether if this is computed or not
-          if (
-            parent?.key?.type === TSESTree.AST_NODE_TYPES.Identifier &&
-            (isUpperCase(parent?.key?.name) || ignoredProperties.includes(parent?.key?.name))
-          ) {
-            visited.add(node)
-          }
-
-          if (
-            parent?.key?.type === TSESTree.AST_NODE_TYPES.Literal &&
-            isUpperCase(`${parent?.key?.value}`)
-          ) {
-            visited.add(node)
-          }
-
-          if (
-            parent?.value?.type === TSESTree.AST_NODE_TYPES.Literal &&
-            isUpperCase(`${parent?.value?.value}`)
-          ) {
-            visited.add(node)
-          }
-
-          if (
-            parent?.key?.type === TSESTree.AST_NODE_TYPES.TemplateLiteral &&
-            isUpperCase(getText(parent?.key))
-          ) {
-            visited.add(node)
-          }
+        // {["A_B"]: "hello world"};
+        //   ^^^^
+        if (
+          (isLiteral(parent.key) || isTemplateLiteral(parent.key)) &&
+          isIgnoredProperty(getText(parent.key))
+        ) {
+          visited.add(node)
         }
       },
       'MemberExpression[computed=true] > :matches(Literal,TemplateLiteral)'(
@@ -413,8 +447,8 @@ export const rule = createRule<Option[], string>({
         const memberExp = assignmentExp.left as TSESTree.MemberExpression
         if (
           !memberExp.computed &&
-          memberExp.property.type === TSESTree.AST_NODE_TYPES.Identifier &&
-          ignoredProperties.includes(memberExp.property.name)
+          isIdentifier(memberExp.property) &&
+          isIgnoredProperty(memberExp.property.name)
         ) {
           visited.add(node)
         }
@@ -501,7 +535,7 @@ export const rule = createRule<Option[], string>({
           }
         }
 
-        context.report({ node, messageId: 'default', data: { message } })
+        context.report({ node, messageId: 'default' })
       },
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         if (visited.has(node)) return
@@ -510,7 +544,7 @@ export const rule = createRule<Option[], string>({
 
         if (match(quasisValue) || !isStrMatched(quasisValue)) return
 
-        context.report({ node, messageId: 'default', data: { message } })
+        context.report({ node, messageId: 'default' })
       },
     }
 
@@ -548,19 +582,21 @@ const popularCallee = [
   'indexOf',
   'endsWith',
   'startsWith',
+  'require',
 ]
 function generateCalleeWhitelists(option: Option) {
-  const ignoreFunction = (option && option.ignoreFunction) || []
   const result = {
     simple: ['t', 'plural', 'select', ...popularCallee],
     complex: ['i18n._'],
   }
-  ignoreFunction.forEach((item: string) => {
+
+  ;(option?.ignoreFunction || []).forEach((item) => {
     if (item.includes('.')) {
       result.complex.push(item)
     } else {
       result.simple.push(item)
     }
   })
+
   return result
 }
