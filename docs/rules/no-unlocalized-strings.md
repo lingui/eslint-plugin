@@ -1,43 +1,42 @@
 # no-unlocalized-strings
 
-Ensures all strings, templates, and JSX text are properly wrapped with `<Trans>`, `t`, or `msg` for translation.
+Ensures that all string literals, templates, and JSX text are wrapped using `<Trans>`, `t`, or `msg` for localization.
 
 > [!IMPORTANT]  
-> This rule might use type information. You can enable it with `{useTsTypes: true}`
+> This rule may require TypeScript type information. Enable this feature by setting `{ useTsTypes: true }`.
 
 ## Options
 
-### useTsTypes
+### `useTsTypes`
 
-Use additional TypeScript type information. Requires [typed linting](https://typescript-eslint.io/getting-started/typed-linting/) to be setup.
+Enables the rule to use TypeScript type information. Requires [typed linting](https://typescript-eslint.io/getting-started/typed-linting/) to be configured.
 
-Will automatically exclude some built-in methods such as `Map` and `Set`, and also cases where a string literal is used as a TypeScript constant:
+This option automatically excludes built-in methods such as `Map` and `Set`, and cases where string literals are used as TypeScript constants, e.g.:
 
 ```ts
 const a: 'abc' = 'abc'
 ```
 
-### ignore
+### `ignore`
 
-The `ignore` option specifies exceptions not to check for
-literal strings that match one of regexp patterns.
+Specifies patterns for string literals to ignore. Strings matching any of the provided regular expressions will not trigger the rule.
 
-Examples of correct code for the `{ "ignore": ["rgba"] }` option:
+Example for `{ "ignore": ["rgba"] }`:
 
 ```jsx
-/*eslint lingui/no-unlocalized-strings ["error", {"ignore": ["rgba"]}]*/
-const a = <div color="rgba(100, 100, 100, 0.4)"></div>
+/*eslint lingui/no-unlocalized-strings: ["error", {"ignore": ["rgba"]}]*/
+const color = <div style={{ color: 'rgba(100, 100, 100, 0.4)' }} />
 ```
 
-### ignoreFunction
+### `ignoreFunction`
 
-The `ignoreFunction` option specifies exceptions not check for function calls with specified names.
+Specifies functions whose string arguments should be ignored.
 
-Examples of correct code for the `{ "ignoreFunction": ["showIntercomMessage"] }` option:
+Example of `correct` code with this option:
 
 ```js
-/*eslint lingui/no-unlocalized-strings: ["error", { "ignoreFunction": ["showIntercomMessage"] }]*/
-const bar = showIntercomMessage('Please, write me')
+/*eslint lingui/no-unlocalized-strings: ["error", {"ignoreFunction": ["showIntercomMessage"]}]*/
+showIntercomMessage('Please write me')
 
 /*eslint lingui/no-unlocalized-strings: ["error", { "ignoreFunction": ["cva"] }]*/
 const labelVariants = cva('text-form-input-content-helper', {
@@ -50,33 +49,31 @@ const labelVariants = cva('text-form-input-content-helper', {
 })
 ```
 
-`ignoreFunction` also supports patterns for member expression calls:
-
-Example of valid code with `{ "ignoreFunction": ["console.log"] }`
+This option also supports member expressions. Example for `{ "ignoreFunction": ["console.log"] }`:
 
 ```js
-/*eslint lingui/no-unlocalized-strings: ["error", { "ignoreFunction": ["console.log"] }]*/
-const bar = console.log('Please, write me')
+/*eslint lingui/no-unlocalized-strings: ["error", {"ignoreFunction": ["console.log"]}]*/
+console.log('Log this message')
 ```
 
-**Note!** Patterns could be specified only for one level deep. Pattern specified as `foo.bar.baz` will not work.
+> **Note:** Only single-level patterns are supported. For instance, `foo.bar.baz` will not be matched.
 
-### ignoreAttribute
+### `ignoreAttribute`
 
-The `ignoreAttribute` option specifies exceptions not to check for JSX attributes that match one of ignored attributes.
+Specifies JSX attributes that should be ignored. By default, the attributes `className`, `styleName`, `type`, `id`, `width`, and `height` are ignored.
 
-Examples of correct code for the `{ "ignoreAttribute": ["style"] }` option:
+Example for `{ "ignoreAttribute": ["style"] }`:
 
 ```jsx
-/*eslint lingui/no-unlocalized-strings: ["error", { "ignoreAttribute": ["style"] }]*/
+/*eslint lingui/no-unlocalized-strings: ["error", {"ignoreAttribute": ["style"]}]*/
 const element = <div style={{ margin: '1rem 2rem' }} />
 ```
 
-By default, the following attributes are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`
+#### `regex`
 
-#### regex
+Defines regex patterns for ignored attributes.
 
-The regex property is used to specify the regex patterns for ignored attributes
+Example:
 
 ```json
 {
@@ -96,27 +93,28 @@ The regex property is used to specify the regex patterns for ignored attributes
 }
 ```
 
-Examples of **correct** code for regex option:
+Example of **correct** code:
 
 ```jsx
 const element = <div wrapperClassName="absolute top-1/2 left-1/2" />
 ```
 
-### strictAttribute
+### `strictAttribute`
 
-The `strictAttribute` option specifies JSX attributes which will always be checked regardless of `ignore`
-option or any built-in exceptions.
+Specifies JSX attributes that should always be checked, regardless of other `ignore` settings or defaults.
 
-Examples of incorrect code for the `{ "strictAttribute": ["alt"] }` option:
+Example for `{ "strictAttribute": ["alt"] }`:
 
 ```jsx
-/*eslint lingui/no-unlocalized-strings: ["error", { "strictAttribute": ["alt"] }]*/
-const element = <div alt="IMAGE" />
+/*eslint lingui/no-unlocalized-strings: ["error", {"strictAttribute": ["alt"]}]*/
+const element = <img alt="IMAGE" />
 ```
 
-#### regex
+#### `regex`
 
-The regex property is used to specify the regex patterns for attributes
+Defines regex patterns for attributes that must always be checked.
+
+Example:
 
 ```json
 {
@@ -135,32 +133,32 @@ The regex property is used to specify the regex patterns for attributes
 }
 ```
 
-Examples of **incorrect** code for regex option:
+Examples of **incorrect** code:
 
 ```jsx
 const element = <div description="IMAGE" />
 ```
 
-### ignoreProperty
+### `ignoreProperty`
 
-The `ignoreProperty` option specifies property names not to check.
+Specifies object property names whose values should be ignored. By default, UPPERCASED properties and `className`, `styleName`, `type`, `id`, `width`, `height`, and `displayName` are ignored.
 
-Examples of correct code for the `{ "ignoreProperty": ["myProperty"] }` option:
+Example for `{ "ignoreProperty": ["myProperty"] }`:
 
 ```jsx
-const test = { myProperty: 'This is ignored' }
-object.MyProperty = 'This is ignored'
+const obj = { myProperty: 'Ignored value' }
+obj.myProperty = 'Ignored value'
 
 class MyClass {
-  myProperty = 'This is ignored'
+  myProperty = 'Ignored value'
 }
 ```
 
-By default, UPPERCASED and the following properties written are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`, `displayName`
+#### `regex`
 
-#### regex
+Defines regex patterns for ignored properties.
 
-The regex property is used to specify the regex patterns for ignored properties
+Example:
 
 ```json
 {
@@ -180,26 +178,26 @@ The regex property is used to specify the regex patterns for ignored properties
 }
 ```
 
-Examples of **correct** code for regex option:
+Examples of **correct** code:
 
 ```jsx
-const test = { wrapperClassName: 'This is ignored' }
-object.wrapperClassName = 'This is ignored'
+const obj = { wrapperClassName: 'Ignored value' }
+obj.wrapperClassName = 'Ignored value'
 
 class MyClass {
-  wrapperClassName = 'This is ignored'
+  wrapperClassName = 'Ignored value'
 }
 ```
 
-### ignoreMethodsOnTypes
+### `ignoreMethodsOnTypes`
 
-Leverage the power of TypeScript to exclude methods defined on specific types.
+Uses TypeScript type information to ignore methods defined on specific types.
 
-Note: You must set `useTsTypes: true` to use this option.
+Requires `useTsTypes: true`.
 
-The method to be excluded is defined as a `Type.method`. The type and method match by name here.
+Specify methods as `Type.method`, where both the type and method are matched by name.
 
-Examples of correct code for the `{ "ignoreMethodsOnTypes": ["Foo.bar"], "useTsTypes": true }` option:
+Example for `{ "ignoreMethodsOnTypes": ["Foo.get"], "useTsTypes": true }`:
 
 ```ts
 interface Foo {
@@ -207,8 +205,7 @@ interface Foo {
 }
 
 const foo: Foo
-
-foo.get('string with a spaces')
+foo.get('Some string')
 ```
 
 The following methods are ignored by default: `Map.get`, `Map.has`, `Set.has`.
