@@ -2,6 +2,7 @@ import { TSESTree } from '@typescript-eslint/utils'
 
 import {
   getText,
+  isJSXAttribute,
   LinguiCallExpressionMessageQuery,
   LinguiTaggedTemplateExpressionMessageQuery,
 } from '../helpers'
@@ -49,7 +50,7 @@ export const rule = createRule({
       'JSXElement[openingElement.name.name=Trans]'(node: TSESTree.JSXElement) {
         const hasIdProperty =
           node.openingElement.attributes.find(
-            (attr) => attr.type === 'JSXAttribute' && attr.name.name === 'id',
+            (attr) => isJSXAttribute(attr) && attr.name.name === 'id',
           ) !== undefined
 
         if (!hasSomeJSXTextWithContent(node.children) && !hasIdProperty) {

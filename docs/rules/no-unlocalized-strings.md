@@ -1,6 +1,6 @@
 # no-unlocalized-strings
 
-Check that code doesn't contain strings/templates/jsxText what should be wrapped into `<Trans>` or `i18n`
+Ensures all strings, templates, and JSX text are properly wrapped with `<Trans>`, `t`, or `msg` for translation.
 
 > [!IMPORTANT]  
 > This rule might use type information. You can enable it with `{useTsTypes: true}`
@@ -31,8 +31,7 @@ const a = <div color="rgba(100, 100, 100, 0.4)"></div>
 
 ### ignoreFunction
 
-The `ignoreFunction` option specifies exceptions not check for
-function calls whose names match one of regexp patterns.
+The `ignoreFunction` option specifies exceptions not check for function calls with specified names.
 
 Examples of correct code for the `{ "ignoreFunction": ["showIntercomMessage"] }` option:
 
@@ -51,6 +50,17 @@ const labelVariants = cva('text-form-input-content-helper', {
 })
 ```
 
+`ignoreFunction` also supports patterns for member expression calls:
+
+Example of valid code with `{ "ignoreFunction": ["console.log"] }`
+
+```js
+/*eslint lingui/no-unlocalized-strings: ["error", { "ignoreFunction": ["console.log"] }]*/
+const bar = console.log('Please, write me')
+```
+
+**Note!** Patterns could be specified only for one level deep. Pattern specified as `foo.bar.baz` will not work.
+
 ### ignoreAttribute
 
 The `ignoreAttribute` option specifies exceptions not to check for JSX attributes that match one of ignored attributes.
@@ -64,6 +74,34 @@ const element = <div style={{ margin: '1rem 2rem' }} />
 
 By default, the following attributes are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`
 
+#### regex
+
+The regex property is used to specify the regex patterns for ignored attributes
+
+```json
+{
+  "no-unlocalized-strings": [
+    "error",
+    {
+      "ignoreAttribute": [
+        {
+          "regex": {
+            "pattern": "classname",
+            "flags": "i"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+Examples of **correct** code for regex option:
+
+```jsx
+const element = <div wrapperClassName="absolute top-1/2 left-1/2" />
+```
+
 ### strictAttribute
 
 The `strictAttribute` option specifies JSX attributes which will always be checked regardless of `ignore`
@@ -76,6 +114,33 @@ Examples of incorrect code for the `{ "strictAttribute": ["alt"] }` option:
 const element = <div alt="IMAGE" />
 ```
 
+#### regex
+
+The regex property is used to specify the regex patterns for attributes
+
+```json
+{
+  "no-unlocalized-strings": [
+    "error",
+    {
+      "strictAttribute": [
+        {
+          "regex": {
+            "pattern": "^desc.*"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+Examples of **incorrect** code for regex option:
+
+```jsx
+const element = <div description="IMAGE" />
+```
+
 ### ignoreProperty
 
 The `ignoreProperty` option specifies property names not to check.
@@ -85,9 +150,46 @@ Examples of correct code for the `{ "ignoreProperty": ["myProperty"] }` option:
 ```jsx
 const test = { myProperty: 'This is ignored' }
 object.MyProperty = 'This is ignored'
+
+class MyClass {
+  myProperty = 'This is ignored'
+}
 ```
 
-By default, the following properties are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`, `displayName`
+By default, UPPERCASED and the following properties written are ignored: `className`, `styleName`, `type`, `id`, `width`, `height`, `displayName`
+
+#### regex
+
+The regex property is used to specify the regex patterns for ignored properties
+
+```json
+{
+  "no-unlocalized-strings": [
+    "error",
+    {
+      "ignoreProperty": [
+        {
+          "regex": {
+            "pattern": "classname",
+            "flags": "i"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+Examples of **correct** code for regex option:
+
+```jsx
+const test = { wrapperClassName: 'This is ignored' }
+object.wrapperClassName = 'This is ignored'
+
+class MyClass {
+  wrapperClassName = 'This is ignored'
+}
+```
 
 ### ignoreMethodsOnTypes
 
