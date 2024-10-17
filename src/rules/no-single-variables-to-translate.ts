@@ -7,7 +7,7 @@ import {
 } from '../helpers'
 import { createRule } from '../create-rule'
 
-export const name = 'no-single-variable-to-translate'
+export const name = 'no-single-variables-to-translate'
 export const rule = createRule({
   name,
   meta: {
