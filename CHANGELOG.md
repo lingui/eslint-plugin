@@ -1,5 +1,9 @@
 # Change Log
 
+- feat(no-unlocalized-strings): add regex patterns support (#70) (1c248a2)
+- fix: no-single-variables-to-translate renamed to no-single-variable... (#69) (b048305)
+- feat(no-expression-in-message): correctly handle {' '} in JSX, report for each found expression (#68) (e935e01)
+
 ## 0.5.0 (2024-10-15)
 
 - feat(no-expression-in-message): check Trans component (#60) (3fcb131)
