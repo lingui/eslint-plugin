@@ -29,8 +29,10 @@ export const LinguiCallExpressionMessageQuery =
  */
 export const LinguiTransQuery = 'JSXElement[openingElement.name.name=Trans]'
 
+export const UpperCaseRegexp = /^[A-Z_-]+$/
+
 export function isUpperCase(str: string) {
-  return /^[A-Z_-]+$/.test(str)
+  return UpperCaseRegexp.test(str)
 }
 
 export function isNativeDOMTag(str: string) {
@@ -116,4 +118,28 @@ export function getIdentifierName(jsxTagNameExpression: TSESTree.JSXTagNameExpre
     default:
       return null
   }
+}
+
+export function isLiteral(node: TSESTree.Node | undefined): node is TSESTree.Literal {
+  return node?.type === TSESTree.AST_NODE_TYPES.Literal
+}
+
+export function isTemplateLiteral(
+  node: TSESTree.Node | undefined,
+): node is TSESTree.TemplateLiteral {
+  return node?.type === TSESTree.AST_NODE_TYPES.TemplateLiteral
+}
+
+export function isIdentifier(node: TSESTree.Node | undefined): node is TSESTree.Identifier {
+  return (node as TSESTree.Node)?.type === TSESTree.AST_NODE_TYPES.Identifier
+}
+
+export function isMemberExpression(
+  node: TSESTree.Node | undefined,
+): node is TSESTree.MemberExpression {
+  return (node as TSESTree.Node)?.type === TSESTree.AST_NODE_TYPES.MemberExpression
+}
+
+export function isJSXAttribute(node: TSESTree.Node | undefined): node is TSESTree.JSXAttribute {
+  return (node as TSESTree.Node)?.type === TSESTree.AST_NODE_TYPES.JSXAttribute
 }
