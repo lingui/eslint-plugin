@@ -1,8 +1,8 @@
 import { TSESTree } from '@typescript-eslint/utils'
-import { Scope, ScopeType } from '@typescript-eslint/scope-manager'
+import type { Scope, ScopeType } from '@typescript-eslint/scope-manager'
 import { createRule } from '../create-rule'
 
-export function hasAncestorScope(node: Scope, types: ScopeType[]): boolean {
+export function hasAncestorScope(node: Scope, types: `${ScopeType}`[]): boolean {
   let current = node
 
   while (current) {
@@ -50,7 +50,7 @@ export const rule = createRule({
           : // deprecated and remove in V9
             context.getScope()
 
-        if (!hasAncestorScope(scope, [ScopeType.function, ScopeType.classFieldInitializer])) {
+        if (!hasAncestorScope(scope, ['function', 'class-field-initializer'])) {
           context.report({
             node,
             messageId: 'default',
