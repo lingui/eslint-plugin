@@ -31,10 +31,6 @@ export const LinguiTransQuery = 'JSXElement[openingElement.name.name=Trans]'
 
 export const UpperCaseRegexp = /^[A-Z_-]+$/
 
-export function isUpperCase(str: string) {
-  return UpperCaseRegexp.test(str)
-}
-
 export function isNativeDOMTag(str: string) {
   return DOM_TAGS.includes(str)
 }

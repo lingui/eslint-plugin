@@ -15,7 +15,6 @@ import {
   isLiteral,
   isMemberExpression,
   isTemplateLiteral,
-  isUpperCase,
   UpperCaseRegexp,
 } from '../helpers'
 import { createRule } from '../create-rule'
@@ -28,6 +27,7 @@ export type Option = {
   ignoreAttribute?: MatcherDef[]
   strictAttribute?: MatcherDef[]
   ignoreProperty?: MatcherDef[]
+  ignoreVariable?: MatcherDef[]
   ignoreMethodsOnTypes?: string[]
   useTsTypes?: boolean
 }
@@ -127,6 +127,10 @@ export const rule = createRule<Option[], string>({
             type: 'array',
             items: MatcherSchema,
           },
+          ignoreVariable: {
+            type: 'array',
+            items: MatcherSchema,
+          },
           useTsTypes: {
             type: 'boolean',
           },
@@ -140,7 +144,6 @@ export const rule = createRule<Option[], string>({
   defaultOptions: [],
 
   create: function (context) {
-    // variables should be defined here
     const {
       options: [option],
     } = context
@@ -151,6 +154,8 @@ export const rule = createRule<Option[], string>({
     }
     const whitelists = [
       /^[^A-Za-z]+$/, // ignore not-word string
+      UpperCaseRegexp,
+      /^(?![A-Z].*|\w+\s\w+).+$/,
       ...((option && option.ignore) || []),
     ].map((item) => new RegExp(item))
 
@@ -158,15 +163,7 @@ export const rule = createRule<Option[], string>({
     //----------------------------------------------------------------------
     // Helpers
     //----------------------------------------------------------------------
-
-    function isStrMatched(str: string) {
-      const mainAcceptanceRegex = /((^[A-Z]{1}.*?)|(\w*?\s\w*?.*?))/
-      const lettersRegex = /[a-z]/
-
-      return str && mainAcceptanceRegex.test(str) && lettersRegex.test(str)
-    }
-
-    function match(str: string) {
+    function isTextWhiteListed(str: string) {
       return whitelists.some((item) => item.test(str))
     }
 
@@ -253,6 +250,12 @@ export const rule = createRule<Option[], string>({
       ...preparePatterns(option?.ignoreProperty || []),
     ]
 
+    const ignoreVariable = [
+      //
+      UpperCaseRegexp,
+      ...preparePatterns(option?.ignoreVariable || []),
+    ]
+
     //----------------------------------------------------------------------
     // Public
     //----------------------------------------------------------------------
@@ -264,6 +267,7 @@ export const rule = createRule<Option[], string>({
 
     const isIgnoredAttribute = createMatcher(ignoredAttributes)
     const isIgnoredProperty = createMatcher(ignoredProperties)
+    const isIgnoredVariable = createMatcher(ignoreVariable)
     const isStrictAttribute = createMatcher(strictAttributes)
 
     function isIgnoredJSXElement(
@@ -298,7 +302,7 @@ export const rule = createRule<Option[], string>({
       visited.add(node)
 
       const text = getText(node)
-      if (!text || match(text) || isIgnoredJSXElement(node) || isIgnoredSymbol(text)) {
+      if (!text || isIgnoredJSXElement(node) || isIgnoredSymbol(text)) {
         return
       }
 
@@ -410,7 +414,7 @@ export const rule = createRule<Option[], string>({
         const parent = node.parent as TSESTree.VariableDeclarator
 
         // allow statements like const A_B = "test"
-        if (isIdentifier(parent.id) && isUpperCase(parent.id.name)) {
+        if (isIdentifier(parent.id) && isIgnoredVariable(parent.id.name)) {
           visited.add(node)
         }
       },
@@ -420,7 +424,7 @@ export const rule = createRule<Option[], string>({
         const parent = node.parent as TSESTree.Property
 
         // {A_B: "hello world"};
-        //  ^^^^
+        // ^^^^
         if (isIdentifier(parent.key) && isIgnoredProperty(parent.key.name)) {
           visited.add(node)
         }
@@ -515,13 +519,10 @@ export const rule = createRule<Option[], string>({
       'Literal:exit'(node: TSESTree.Literal) {
         // visited and passed linting
         if (visited.has(node)) return
-        const trimed = `${node.value}`.trim()
-        if (!trimed) return
+        const trimmed = `${node.value}`.trim()
+        if (!trimmed) return
 
-        // allow statements like const a = "FOO"
-        if (isUpperCase(trimed)) return
-
-        if (match(trimed) || !isStrMatched(trimed)) return
+        if (isTextWhiteListed(trimmed)) return
 
         //
         // TYPESCRIPT
@@ -540,9 +541,8 @@ export const rule = createRule<Option[], string>({
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         if (visited.has(node)) return
         const quasisValue = getText(node)
-        if (isUpperCase(quasisValue)) return
 
-        if (match(quasisValue) || !isStrMatched(quasisValue)) return
+        if (isTextWhiteListed(quasisValue)) return
 
         context.report({ node, messageId: 'default' })
       },
