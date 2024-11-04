@@ -28,6 +28,26 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: 'custom.wrapper()({message: "Hello!"})',
       options: [{ ignoreFunction: ['custom.wrapper'] }],
     },
+    {
+      name: 'Should ignore calls using complex object.method expression',
+      code: 'console.log("Hello")',
+      options: [{ ignoreFunction: ['console.log'] }],
+    },
+    {
+      name: 'Should ignore method calls using pattern',
+      code: 'console.log("Hello"); console.error("Hello");',
+      options: [{ ignoreFunction: ['console.*'] }],
+    },
+    {
+      name: 'Should ignore methods multilevel',
+      code: 'context.headers.set("Hello"); level.context.headers.set("Hello");',
+      options: [{ ignoreFunction: ['*.headers.set'] }],
+    },
+    {
+      name: 'Should ignore methods with dynamic segment ',
+      code: 'getData().two.three.four("Hello")',
+      options: [{ ignoreFunction: ['*.three.four'] }],
+    },
     { code: 'name === `Hello brat` || name === `Nice have`' },
     { code: 'switch(a){ case `a`: break; default: break;}' },
     { code: 'a.indexOf(`ios`)' },
@@ -69,7 +89,7 @@ ruleTester.run<string, Option[]>(name, rule, {
     {
       code: 'document.removeEventListener("click", (event) => { event.preventDefault() })',
     },
-    { code: 'window.postMessage("message", "*")' },
+    { code: 'window.postMessage("message", "Ola!")' },
     { code: 'document.getElementById("some-id")' },
     { code: 'require("hello");' },
     { code: 'const a = require(["hello"]);' },

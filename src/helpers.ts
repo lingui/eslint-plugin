@@ -139,3 +139,26 @@ export function isMemberExpression(
 export function isJSXAttribute(node: TSESTree.Node | undefined): node is TSESTree.JSXAttribute {
   return (node as TSESTree.Node)?.type === TSESTree.AST_NODE_TYPES.JSXAttribute
 }
+
+export function buildCalleePath(node: TSESTree.Expression) {
+  let current = node
+
+  const path: string[] = []
+
+  const push = (exp: TSESTree.Node) => {
+    if (isIdentifier(exp)) {
+      path.push(exp.name)
+    } else {
+      path.push('$')
+    }
+  }
+
+  while (isMemberExpression(current)) {
+    push(current.property)
+    current = current.object
+  }
+
+  push(current)
+
+  return path.reverse().join('.')
+}

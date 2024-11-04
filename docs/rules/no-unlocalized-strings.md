@@ -56,7 +56,24 @@ This option also supports member expressions. Example for `{ "ignoreFunction": [
 console.log('Log this message')
 ```
 
-> **Note:** Only single-level patterns are supported. For instance, `foo.bar.baz` will not be matched.
+You can use patterns (processed by [micromatch](https://www.npmjs.com/package/micromatch)) to match function calls.
+
+```js
+/*eslint lingui/no-unlocalized-strings: ["error", {"ignoreFunction": ["console.*"]}]*/
+console.log('Log this message')
+```
+
+```js
+/*eslint lingui/no-unlocalized-strings: ["error", {"ignoreFunction": ["*.headers.set"]}]*/
+context.headers.set('Authorization', `Bearer ${token}`)
+```
+
+Dynamic segments are replaced with `$`, you can target them as
+
+```js
+/*eslint lingui/no-unlocalized-strings: ["error", {"ignoreFunction": ["foo.$.set"]}]*/
+foo[getName()].set('Hello')
+```
 
 ### `ignoreAttribute`
 

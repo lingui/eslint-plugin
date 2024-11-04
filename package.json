@@ -30,7 +30,8 @@
     "**/*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
-    "@typescript-eslint/utils": "^8.0.0"
+    "@typescript-eslint/utils": "^8.0.0",
+    "micromatch": "^4.0.0"
   },
   "peerDependencies": {
     "eslint": "^8.37.0 || ^9.0.0"
@@ -38,6 +39,7 @@
   "devDependencies": {
     "@types/eslint": "^8.40.2",
     "@types/jest": "^29.5.13",
+    "@types/micromatch": "^4.0.9",
     "@types/node": "^20.3.3",
     "@typescript-eslint/parser": "^8.0.0",
     "@typescript-eslint/rule-tester": "^8.0.0",
