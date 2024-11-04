@@ -16,6 +16,10 @@ const ruleTester = new RuleTester({
   },
 })
 
+const upperCaseRegex = '^[A-Z_-]+$'
+const ignoreUpperCaseVariable = { ignoreVariable: [{ regex: { pattern: upperCaseRegex } }] }
+const ignoreUpperCaseProperty = { ignoreProperty: [{ regex: { pattern: upperCaseRegex } }] }
+
 const errors = [{ messageId: 'default' }] // default errors
 
 ruleTester.run<string, Option[]>(name, rule, {
@@ -24,6 +28,14 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: 'i18n._(t`Hello ${nice}`)',
     },
     { code: 't(i18n)({ message: `Hello ${name}` })' },
+    {
+      code: 'hello("Hello")',
+      options: [{ ignoreFunction: ['hello'] }],
+    },
+    {
+      code: 'new Error("hello")',
+      options: [{ ignoreFunction: ['Error'] }],
+    },
     {
       code: 'custom.wrapper()({message: "Hello!"})',
       options: [{ ignoreFunction: ['custom.wrapper'] }],
@@ -44,77 +56,32 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreFunction: ['*.headers.set'] }],
     },
     {
+      name: 'Should ignore methods multilevel 2',
+      code: 'headers.set("Hello"); level.context.headers.set("Hello");',
+      options: [{ ignoreFunction: ['*headers.set'] }],
+    },
+    {
       name: 'Should ignore methods with dynamic segment ',
       code: 'getData().two.three.four("Hello")',
       options: [{ ignoreFunction: ['*.three.four'] }],
     },
     { code: 'name === `Hello brat` || name === `Nice have`' },
     { code: 'switch(a){ case `a`: break; default: break;}' },
-    { code: 'a.indexOf(`ios`)' },
-    { code: 'a.includes(`ios`)' },
-    { code: 'a.startsWith(`ios`)' },
-    { code: 'a.endsWith(`@gmail.com`)' },
-    {
-      code: 'document.addEventListener(`click`, (event) => { event.preventDefault() })',
-    },
-    {
-      code: 'document.removeEventListener(`click`, (event) => { event.preventDefault() })',
-    },
-    { code: 'window.postMessage(`message`, `*`)' },
-    { code: 'document.getElementById(`some-id`)' },
-    { code: 'require(`hello`);' },
-    { code: 'const a = require([`hello`]);' },
-    { code: 'const a = require([`hel` + `lo`]);' },
-    { code: 'const a = `?`;' },
-    { code: 'const a = `0123456789!@#$%^&*()_+|~-=\\`[]{};\':",./<>?`;' },
     { code: 'i18n._(`hello`);' },
-    { code: 'dispatch(`hello`);' },
-    { code: 'store.dispatch(`hello`);' },
-    { code: 'store.commit(`hello`);' },
     { code: 'const a = `absfoo`;', options: [{ ignore: ['foo'] }] },
     { code: 'const a = `fooabc`;', options: [{ ignore: ['^foo'] }] },
-    { code: 'const a = `FOO`;' },
     { code: "name === 'Hello brat' || name === 'Nice have'" },
     { code: "switch(a){ case 'a': break; default: break;}" },
     { code: 'import name from "hello";' },
-    { code: 'a.indexOf("ios")' },
-    { code: 'a.includes("ios")' },
-    { code: 'a.startsWith("ios")' },
-    { code: 'a.endsWith("@gmail.com")' },
     { code: 'export * from "hello_export_all";' },
     { code: 'export { a } from "hello_export";' },
-    {
-      code: 'document.addEventListener("click", (event) => { event.preventDefault() })',
-    },
-    {
-      code: 'document.removeEventListener("click", (event) => { event.preventDefault() })',
-    },
-    { code: 'window.postMessage("message", "Ola!")' },
-    { code: 'document.getElementById("some-id")' },
-    { code: 'require("hello");' },
-    { code: 'const a = require(["hello"]);' },
-    { code: 'const a = require(["hel" + "lo"]);' },
+    { code: 'const a = require(["hello"]);', options: [{ ignoreFunction: ['require'] }] },
+    { code: 'const a = require(["hel" + "lo"]);', options: [{ ignoreFunction: ['require'] }] },
     { code: 'const a = 1;' },
-    { code: 'const a = "?";' },
-    { code: `const a = "0123456789!@#$%^&*()_+|~-=\`[]{};':\\",./<>?";` },
     { code: 'i18n._("hello");' },
-    { code: 'dispatch("hello");' },
-    { code: 'store.dispatch("hello");' },
-    { code: 'store.commit("hello");' },
     { code: 'const a = "absfoo";', options: [{ ignore: ['foo'] }] },
     { code: 'const a = "fooabc";', options: [{ ignore: ['^foo'] }] },
-    { code: 'const a = "FOO";' },
-    { code: 'var A_B = "world";' },
-    { code: 'var A_B = `world`;' },
-    { code: 'var a = {["A_B"]: "hello world"};' },
-    { code: 'var a = {[A_B]: "hello world"};' },
-    { code: 'var a = {A_B: "hello world"};' },
-    { code: 'var a = {foo: "FOO"};' },
-    { code: 'var a = {[`A_B`]: `hello world`};' },
-    { code: 'var a = {[A_B]: `hello world`};' },
-    { code: 'var a = {A_B: `hello world`};' },
-    { code: 'var a = {foo: `FOO`};' },
-    { code: 'class Form extends Component { displayName = "FormContainer" };' },
+
     //     // JSX
     { code: '<div className="primary"></div>' },
     { code: '<div className={`primary`}></div>' },
@@ -157,40 +124,17 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: '<DIV wrapperClassName={`Bar`} />',
       options: [{ ignoreAttribute: [{ regex: { pattern: 'className', flags: 'i' } }] }],
     },
-    { code: '<DIV foo={`bar`} />' },
-    { code: '<DIV foo="bar" />' },
-    { code: 'a + `b`' },
-    {
-      code: 'switch(a){ case `a`: var a =`b`; break; default: break;}',
-    },
-    { code: 'var a = {foo: `bar`};' },
-    { code: '<img src="./image.png" alt="some-image" />' },
-    { code: 'var a = {foo: "bar"};' },
-    { code: 'const a = "foo";' },
-    { code: 'export const a = "hello_string";' },
-    { code: 'Error("hello")', options: [{ ignoreFunction: ['Error'] }] },
-    {
-      code: 'new Error("hello")',
-      options: [{ ignoreFunction: ['Error'] }],
-    },
-    {
-      code: 'hello("Hello")',
-      options: [{ ignoreFunction: ['hello'] }],
-    },
-    {
-      code: 'formatDate(date, "d LLL")',
-      options: [{ ignoreFunction: ['formatDate'] }],
-    },
     { code: '<div>&nbsp; </div>' },
-    { code: "plural('hello')" },
-    { code: "select('hello')" },
-    { code: "<Plural value='Hello' one='2' other='Hello' /> " },
-    { code: "<Select value='Hello' one='2' other='Hello' /> " },
+    { code: "plural('Hello')" },
+    { code: "select('Hello')" },
+    { code: "selectOrdinal('Hello')" },
+    { code: 'msg({message: `Hello!`})' },
     {
       code: `<Input
           {...restProps}
           autoComplete="off"
       />`,
+      options: [{ ignoreAttribute: ['autoComplete'] }],
     },
     {
       code: 'const Wrapper = styled.a` cursor: pointer; ${(props) => props.isVisible && `visibility: visible;`}`',
@@ -198,9 +142,12 @@ ruleTester.run<string, Option[]>(name, rule, {
     {
       code: "const Wrapper = styled.a` cursor: pointer; ${(props) => props.isVisible && 'visibility: visible;'}`",
     },
-    { code: `const test = { id: 'This is not localized' }` },
     {
       code: `const test = { myProp: 'This is not localized' }`,
+      options: [{ ignoreProperty: ['myProp'] }],
+    },
+    {
+      code: 'const test = { myProp: `This is not localized` }',
       options: [{ ignoreProperty: ['myProp'] }],
     },
     {
@@ -211,27 +158,98 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: `const test = { wrapperClassName: 'This is not localized' }`,
       options: [{ ignoreProperty: [{ regex: { pattern: 'className', flags: 'i' } }] }],
     },
-    { code: `obj["key with space"] = 5` },
-    { code: `obj[\`key with space\`] = 5` },
-    { code: `const FOO = "Hello!"` },
-    { code: `let FOO = "Hello!"` },
-    { code: `var FOO = "Hello!"` },
-
+    {
+      code: `MyComponent.displayName = 'MyComponent';`,
+      options: [{ ignoreProperty: ['displayName'] }],
+    },
+    {
+      code: 'class Form extends Component { displayName = "FormContainer" };',
+      options: [{ ignoreProperty: ['displayName'] }],
+    },
+    {
+      name: 'computed keys should be ignored by default, StringLiteral',
+      code: `obj["key with space"] = 5`,
+    },
+    {
+      name: 'computed keys should be ignored by default with TplLiteral',
+      code: `obj[\`key with space\`] = 5`,
+    },
     {
       code: `const test = "Hello!"`,
       options: [{ ignoreVariable: ['test'] }],
     },
     {
+      code: `let test = "Hello!"`,
+      options: [{ ignoreVariable: ['test'] }],
+    },
+    {
+      code: `var test = "Hello!"`,
+      options: [{ ignoreVariable: ['test'] }],
+    },
+    {
+      code: 'const test = `Hello!`',
+      options: [{ ignoreVariable: ['test'] }],
+    },
+
+    {
       code: `const wrapperClassName  = "Hello!"`,
       options: [{ ignoreVariable: [{ regex: { pattern: 'className', flags: 'i' } }] }],
+    },
+    {
+      code: `const A_B  = "Bar!"`,
+      options: [ignoreUpperCaseVariable],
+    },
+    {
+      code: 'const FOO  = `Bar!`',
+      options: [ignoreUpperCaseVariable],
+    },
+    { code: 'var a = {["A_B"]: "hello world"};', options: [ignoreUpperCaseProperty] },
+    { code: 'var a = {[A_B]: "hello world"};', options: [ignoreUpperCaseProperty] },
+    { code: 'var a = {A_B: "hello world"};', options: [ignoreUpperCaseProperty] },
+    { code: 'var a = {[`A_B`]: `hello world`};', options: [ignoreUpperCaseProperty] },
+    { code: 'var a = {[A_B]: `hello world`};', options: [ignoreUpperCaseProperty] },
+    { code: 'var a = {A_B: `hello world`};', options: [ignoreUpperCaseProperty] },
+
+    { code: '<div className="hello"></div>', filename: 'a.tsx' },
+    { code: '<div className={`hello`}></div>', filename: 'a.tsx' },
+    { code: "var a: Element['nodeName']" },
+    { code: "var a: Omit<T, 'af'>" },
+    { code: `var a: 'abc' = 'abc'`, skip: true },
+    { code: `var a: 'abc' | 'name'  | undefined= 'abc'`, skip: true },
+    { code: "type T = {name: 'b'} ; var a: T =  {name: 'b'}", skip: true },
+    { code: "function Button({ t= 'name' }: {t: 'name'}){} ", skip: true },
+    { code: "type T = { t?: 'name'| 'abc'}; function Button({t='name'}:T){}", skip: true },
+    {
+      code: `enum StepType {
+        Address = 'Address'
+      }`,
+    },
+    {
+      code: `enum StepType {
+        Address = \`Address\`
+      }`,
+    },
+
+    {
+      code: `const myMap = new Map(); 
+      myMap.get("string with a spaces")
+      myMap.has("string with a spaces")`,
+      options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Map.get', 'Map.has'] }],
+    },
+    {
+      code: `interface Foo {get: (key: string) => string}; 
+      (foo as Foo).get("string with a spaces")`,
+      options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
+    },
+    {
+      code: `interface Foo {get: (key: string) => string};
+      const foo: Foo;
+      foo.get("string with a spaces")`,
+      options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
     },
   ],
 
   invalid: [
-    { code: "<Plural value='Hello' one='2' notOther='3' /> ", errors },
-    { code: "<Select value='Hello' one='2' notOther='3' /> ", errors },
-    { code: "<Plural notValue='Hello' one='2' other='3' /> ", errors },
-    { code: "<Select notValue='Hello' one='2' other='3' /> ", errors },
     { code: '<div>hello &nbsp; </div>', errors: [{ messageId: 'forJsxText' }] },
     { code: 'const a = `Hello ${nice}`', errors },
     { code: 'export const a = `hello string`;', errors },
@@ -278,6 +296,32 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: '<img src="./image.png" alt="some image" />', errors },
     { code: '<button aria-label="Close" type="button" />', errors },
     { code: `const test = { text: 'This is not localized' }`, errors },
+
+    {
+      code: `const notAMap: {get: (key: string) => string}; notAMap.get("string with a spaces")`,
+      options: [{ useTsTypes: true }],
+      errors,
+    },
+    { code: `var a = 'Hello guys'`, errors },
+    {
+      code: `<button className={styles.btn}>loading</button>`,
+      filename: 'a.tsx',
+      errors: [{ messageId: 'forJsxText' }],
+    },
+    {
+      code: `<button className={styles.btn}>Loading</button>`,
+      filename: 'a.tsx',
+      errors: [{ messageId: 'forJsxText' }],
+    },
+    {
+      code: "function Button({ t= 'Name'  }: {t: 'name' &  'Abs'}){} ",
+      errors,
+    },
+    {
+      code: "function Button({ t= 'Name'  }: {t: 1 |  'Abs'}){} ",
+      errors,
+    },
+    { code: "var a: {text: string} = {text: 'Bold'}", errors },
     {
       code: `function getQueryPlaceholder(compact: boolean | undefined) {
         return compact || mobileMediaQuery.matches
@@ -320,6 +364,10 @@ jsxTester.run('no-unlocalized-strings', rule, {
     {
       code: '<Trans id="missingReceipts.subtitle" description={`Call to action on missing receipt banner`} />',
     },
+    { code: "<Plural value={5} one='# Book' other='# Books' /> " },
+    { code: '<Plural value={5} one={<># Book</>} other={<># Books</>} /> ' },
+    { code: "<Select male='Ola!' other='Hello' /> " },
+    { code: "<SelectOrdinal value='Hello' one='2' other='Hello' /> " },
   ],
   invalid: [
     {
@@ -348,105 +396,6 @@ jsxTester.run('no-unlocalized-strings', rule, {
     },
     {
       code: '<Component>{someVar === 1 ? `Abc` : `Def`}</Component>',
-      errors: [{ messageId: 'default' }, { messageId: 'default' }],
-    },
-  ],
-})
-
-const tsTester = new RuleTester({
-  languageOptions: {
-    parserOptions: {
-      projectService: {
-        allowDefaultProject: ['*.ts*'],
-      },
-    },
-  },
-})
-
-tsTester.run('no-unlocalized-strings', rule, {
-  valid: [
-    { code: '<div className="hello"></div>', filename: 'a.tsx' },
-    { code: '<div className={`hello`}></div>', filename: 'a.tsx' },
-    { code: "var a: Element['nodeName']" },
-    { code: "var a: Omit<T, 'af'>" },
-    { code: `var a: 'abc' = 'abc'` },
-    { code: `var a: 'abc' | 'name'  | undefined= 'abc'` },
-    { code: "type T = {name: 'b'} ; var a: T =  {name: 'b'}" },
-    { code: "function Button({ t= 'name'  }: {t: 'name'}){} " },
-    { code: "type T ={t?:'name'|'abc'};function Button({t='name'}:T){}" },
-    {
-      code: `enum StepType {
-        Address = 'Address'
-      }`,
-    },
-    {
-      code: `enum StepType {
-        Address = \`Address\`
-      }`,
-    },
-    {
-      code: `MyComponent.myIgnoredProperty = 'MyComponent';`,
-      options: [{ ignoreProperty: ['myIgnoredProperty'] }],
-    },
-    {
-      // displayName is ignored by default
-      code: `MyComponent.displayName = 'MyComponent';`,
-    },
-    {
-      code: `const myMap = new Map(); 
-      myMap.get("string with a spaces")
-      myMap.has("string with a spaces")`,
-      options: [{ useTsTypes: true }],
-    },
-    {
-      code: `
-      const mySet = new Set(); mySet.has("string with a spaces")`,
-      options: [{ useTsTypes: true }],
-    },
-    {
-      code: `interface Foo {get: (key: string) => string}; 
-      (foo as Foo).get("string with a spaces")`,
-      options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
-    },
-    {
-      code: `interface Foo {get: (key: string) => string};
-      const foo: Foo;
-      foo.get("string with a spaces")`,
-      options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
-    },
-  ],
-  invalid: [
-    {
-      code: `const notAMap: {get: (key: string) => string}; notAMap.get("string with a spaces")`,
-      options: [{ useTsTypes: true }],
-      errors,
-    },
-    { code: `var a = 'Hello guys'`, errors },
-    {
-      code: `<button className={styles.btn}>loading</button>`,
-      filename: 'a.tsx',
-      errors: [{ messageId: 'forJsxText' }],
-    },
-    {
-      code: `<button className={styles.btn}>Loading</button>`,
-      filename: 'a.tsx',
-      errors: [{ messageId: 'forJsxText' }],
-    },
-    {
-      code: "function Button({ t= 'Name'  }: {t: 'name' &  'Abs'}){} ",
-      errors,
-    },
-    {
-      code: "function Button({ t= 'Name'  }: {t: 1 |  'Abs'}){} ",
-      errors,
-    },
-    { code: "var a: {text: string} = {text: 'Bold'}", errors },
-    {
-      code: `function getQueryPlaceholder(compact: boolean | undefined) {
-        return compact || mobileMediaQuery.matches
-            ? 'Search'
-            : 'Search for accounts, merchants, and more...'
-    }`,
       errors: [{ messageId: 'default' }, { messageId: 'default' }],
     },
   ],

@@ -9,14 +9,12 @@ import {
   getIdentifierName,
   getNearestAncestor,
   getText,
-  hasAncestorWithName,
   isAllowedDOMAttr,
   isIdentifier,
   isJSXAttribute,
   isLiteral,
   isMemberExpression,
   isTemplateLiteral,
-  UpperCaseRegexp,
 } from '../helpers'
 import { createRule } from '../create-rule'
 import * as micromatch from 'micromatch'
@@ -62,15 +60,13 @@ const MatcherSchema: JSONSchema.JSONSchema4 = {
   ],
 }
 
-function preparePatterns(items: MatcherDef[]): (string | RegExp)[] {
-  return items.map((item) =>
+function createMatcher(patterns: MatcherDef[]) {
+  const _patterns = patterns.map((item) =>
     typeof item === 'string' ? item : new RegExp(item.regex.pattern, item.regex.flags),
   )
-}
 
-function createMatcher(patterns: (string | RegExp)[]) {
   return (str: string) => {
-    return patterns.some((pattern) => {
+    return _patterns.some((pattern) => {
       if (typeof pattern === 'string') {
         return pattern === str
       }
@@ -154,32 +150,16 @@ export const rule = createRule<Option[], string>({
     if (option?.useTsTypes) {
       tsService = ESLintUtils.getParserServices(context, false)
     }
-    const whitelists = [
-      /^[^A-Za-z]+$/, // ignore not-word string
-      UpperCaseRegexp,
-      /^(?![A-Z].*|\w+\s\w+).+$/,
-      ...((option && option.ignore) || []),
-    ].map((item) => new RegExp(item))
+    const whitelists = (option?.ignore || []).map((item) => new RegExp(item))
 
     const calleeWhitelists = [
-      // popular callee
-      '*.addEventListener',
-      '*.removeEventListener',
-      '*.postMessage',
-      '*.getElementById',
-      '*.dispatch',
-      '*.commit',
-      '*.includes',
-      '*.indexOf',
-      '*.endsWith',
-      '*.startsWith',
-      'require',
-
       // lingui callee
       'i18n._',
       't',
       'plural',
       'select',
+      'selectOrdinal',
+      'msg',
       ...(option?.ignoreFunction || []),
     ].map((pattern) => micromatch.matcher(pattern))
 
@@ -233,46 +213,9 @@ export const rule = createRule<Option[], string>({
       }
     }
 
-    const ignoredJSXElements = ['Trans']
     const ignoredJSXSymbols = ['&larr;', '&nbsp;', '&middot;']
 
-    const strictAttributes = [...preparePatterns(option?.strictAttribute || [])]
-
-    const ignoredAttributes = [
-      'className',
-      'styleName',
-      'type',
-      'id',
-      'width',
-      'height',
-
-      ...preparePatterns(option?.ignoreAttribute || []),
-    ]
-
-    const ignoredMethodsOnTypes = [
-      'Map.get',
-      'Map.has',
-      'Set.has',
-      ...(option?.ignoreMethodsOnTypes || []),
-    ]
-
-    const ignoredProperties = [
-      'className',
-      'styleName',
-      'type',
-      'id',
-      'width',
-      'height',
-      'displayName',
-      UpperCaseRegexp,
-      ...preparePatterns(option?.ignoreProperty || []),
-    ]
-
-    const ignoreVariable = [
-      //
-      UpperCaseRegexp,
-      ...preparePatterns(option?.ignoreVariable || []),
-    ]
+    const ignoredMethodsOnTypes = option?.ignoreMethodsOnTypes || []
 
     //----------------------------------------------------------------------
     // Public
@@ -283,16 +226,10 @@ export const rule = createRule<Option[], string>({
       return ignoredJSXSymbols.some((name) => name === str)
     }
 
-    const isIgnoredAttribute = createMatcher(ignoredAttributes)
-    const isIgnoredProperty = createMatcher(ignoredProperties)
-    const isIgnoredVariable = createMatcher(ignoreVariable)
-    const isStrictAttribute = createMatcher(strictAttributes)
-
-    function isIgnoredJSXElement(
-      node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
-    ) {
-      return ignoredJSXElements.some((name) => hasAncestorWithName(node, name))
-    }
+    const isIgnoredAttribute = createMatcher(option?.ignoreAttribute || [])
+    const isIgnoredProperty = createMatcher(option?.ignoreProperty || [])
+    const isIgnoredVariable = createMatcher(option?.ignoreVariable || [])
+    const isStrictAttribute = createMatcher(option?.strictAttribute || [])
 
     function isStringLiteral(node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText) {
       switch (node.type) {
@@ -320,7 +257,7 @@ export const rule = createRule<Option[], string>({
       visited.add(node)
 
       const text = getText(node)
-      if (!text || isIgnoredJSXElement(node) || isIgnoredSymbol(text)) {
+      if (!text || isIgnoredSymbol(text)) {
         return
       }
 
@@ -350,8 +287,10 @@ export const rule = createRule<Option[], string>({
         visited.add(node)
       },
 
-      JSXText(node: TSESTree.JSXText) {
-        processTextNode(node)
+      [`:matches(${['Trans', 'Plural', 'Select', 'SelectOrdinal'].map((name) => `JSXElement[openingElement.name.name=${name}]`)}) :matches(TemplateLiteral, Literal, JSXText)`](
+        node,
+      ) {
+        visited.add(node)
       },
 
       'JSXElement > Literal'(node: TSESTree.Literal) {
@@ -534,6 +473,10 @@ export const rule = createRule<Option[], string>({
         visited.add(node)
       },
 
+      'JSXText:exit'(node: TSESTree.JSXText) {
+        if (visited.has(node)) return
+        processTextNode(node)
+      },
       'Literal:exit'(node: TSESTree.Literal) {
         // visited and passed linting
         if (visited.has(node)) return
@@ -544,15 +487,15 @@ export const rule = createRule<Option[], string>({
 
         //
         // TYPESCRIPT
+        // todo: that doesn't work
+        // if (tsService) {
+        //   const typeObj = tsService.getTypeAtLocation(node.parent)
         //
-        if (tsService) {
-          const typeObj = tsService.getTypeAtLocation(node.parent)
-
-          // var a: 'abc' = 'abc'
-          if (typeObj.isStringLiteral() && typeObj.symbol) {
-            return
-          }
-        }
+        //   // var a: 'abc' = 'abc'
+        //   if (typeObj.isStringLiteral() && typeObj.symbol) {
+        //     return
+        //   }
+        // }
 
         context.report({ node, messageId: 'default' })
       },

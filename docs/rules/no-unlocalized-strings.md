@@ -5,17 +5,92 @@ Ensures that all string literals, templates, and JSX text are wrapped using `<Tr
 > [!IMPORTANT]  
 > This rule may require TypeScript type information. Enable this feature by setting `{ useTsTypes: true }`.
 
+This rule is designed to **match all** JSXText, StringLiterals, and TmplLiterals, and then exclude some of them based on attributes, property names, variable names, and so on.
+
+The rule doesn’t come with built-in ignore settings because each project is unique and needs different configurations. You can use the following config as a starting point and then adjust it for your project:
+
+<!-- prettier-ignore -->
+```json5
+{
+  "no-unlocalized-strings": [
+    "error",
+    {
+      "useTsTypes": true,
+      "ignore": [
+        // Ignore strings that do not contain words
+        "^[^A-Za-z]+$",
+        // Ignore strings that don’t start with an uppercase letter
+        //   or don't contain two words separated by whitespace
+        "^(?![A-Z].*|\\w+\\s\\w+).+$",
+        // Ignore UPPERCASE literals
+        // Example: const test = "FOO"
+        "^[A-Z_-]+$"
+      ],
+      "ignoreAttribute": [
+        // Ignore attributes matching className (case-insensitive)
+        { "regex": { "pattern": "className", "flags": "i" } },
+        "styleName",
+        "src",
+        "srcSet",
+        "type",
+        "id",
+        "width",
+        "height"
+      ],
+      "ignoreProperty": [
+        // Ignore properties matching className (case-insensitive)
+        { "regex": { "pattern": "className", "flags": "i" } },
+        "styleName",
+        "type",
+        "id",
+        "width",
+        "height",
+        "displayName",
+        "Authorization",
+        // Ignore UPPERCASE properties
+        // Example: test.FOO = "ola!"
+        { "regex": { "pattern": "^[A-Z_-]+$" } }
+      ],
+      "ignoreFunction": [
+        "cva",
+        "cn",
+        "track",
+        "Error",
+        "console.*",
+        "*headers.set",
+        "*.addEventListener",
+        "*.removeEventListener",
+        "*.postMessage",
+        "*.getElementById",
+        "*.dispatch",
+        "*.commit",
+        "*.includes",
+        "*.indexOf",
+        "*.endsWith",
+        "*.startsWith",
+        "require"
+      ],
+      "ignoreVariable": [
+        // Ignore literals assigned to variables with UPPERCASE names
+        // Example: const FOO = "Ola!"
+        { "regex": { "pattern": "^[A-Z_-]+$" } }
+      ],
+      "ignoreMethodsOnType": [
+        // Ignore specified methods on Map and Set types
+        "Map.get",
+        "Map.has",
+        "Set.has"
+      ]
+    }
+  ]
+}
+```
+
 ## Options
 
 ### `useTsTypes`
 
 Enables the rule to use TypeScript type information. Requires [typed linting](https://typescript-eslint.io/getting-started/typed-linting/) to be configured.
-
-This option automatically excludes built-in methods such as `Map` and `Set`, and cases where string literals are used as TypeScript constants, e.g.:
-
-```ts
-const a: 'abc' = 'abc'
-```
 
 ### `ignore`
 
@@ -77,7 +152,7 @@ foo[getName()].set('Hello')
 
 ### `ignoreAttribute`
 
-Specifies JSX attributes that should be ignored. By default, the attributes `className`, `styleName`, `type`, `id`, `width`, and `height` are ignored.
+Specifies JSX attributes that should be ignored.
 
 Example for `{ "ignoreAttribute": ["style"] }`:
 
@@ -158,16 +233,16 @@ const element = <div description="IMAGE" />
 
 ### `ignoreProperty`
 
-Specifies object property names whose values should be ignored. By default, UPPERCASED properties and `className`, `styleName`, `type`, `id`, `width`, `height`, and `displayName` are ignored.
+Specifies object property names whose values should be ignored.
 
-Example for `{ "ignoreProperty": ["myProperty"] }`:
+Example for `{ "ignoreProperty": ["displayName"] }`:
 
 ```jsx
-const obj = { myProperty: 'Ignored value' }
-obj.myProperty = 'Ignored value'
+const obj = { displayName: 'Ignored value' }
+obj.displayName = 'Ignored value'
 
 class MyClass {
-  myProperty = 'Ignored value'
+  displayName = 'Ignored value'
 }
 ```
 
@@ -208,7 +283,7 @@ class MyClass {
 
 ### `ignoreVariable`
 
-Specifies variable name whose values should be ignored. By default, UPPERCASED variables are ignored.
+Specifies variable name whose values should be ignored.
 
 Example for `{ "ignoreVariable": ["myVariable"] }`:
 
@@ -264,5 +339,3 @@ interface Foo {
 const foo: Foo
 foo.get('Some string')
 ```
-
-The following methods are ignored by default: `Map.get`, `Map.has`, `Set.has`.
