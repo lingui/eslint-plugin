@@ -5,6 +5,7 @@ import {
   TSESTree,
 } from '@typescript-eslint/utils'
 import {
+  buildCalleePath,
   getIdentifierName,
   getNearestAncestor,
   getText,
@@ -18,6 +19,7 @@ import {
   UpperCaseRegexp,
 } from '../helpers'
 import { createRule } from '../create-rule'
+import * as micromatch from 'micromatch'
 
 type MatcherDef = string | { regex: { pattern: string; flags?: string } }
 
@@ -159,7 +161,31 @@ export const rule = createRule<Option[], string>({
       ...((option && option.ignore) || []),
     ].map((item) => new RegExp(item))
 
-    const calleeWhitelists = generateCalleeWhitelists(option)
+    const calleeWhitelists = [
+      // popular callee
+      '*.addEventListener',
+      '*.removeEventListener',
+      '*.postMessage',
+      '*.getElementById',
+      '*.dispatch',
+      '*.commit',
+      '*.includes',
+      '*.indexOf',
+      '*.endsWith',
+      '*.startsWith',
+      'require',
+
+      // lingui callee
+      'i18n._',
+      't',
+      'plural',
+      'select',
+      ...(option?.ignoreFunction || []),
+    ].map((pattern) => micromatch.matcher(pattern))
+
+    const isCalleeWhitelisted = (callee: string) =>
+      calleeWhitelists.some((matcher) => matcher(callee))
+
     //----------------------------------------------------------------------
     // Helpers
     //----------------------------------------------------------------------
@@ -172,16 +198,8 @@ export const rule = createRule<Option[], string>({
     }: TSESTree.CallExpression | TSESTree.NewExpression): boolean {
       switch (callee.type) {
         case TSESTree.AST_NODE_TYPES.MemberExpression: {
-          if (isIdentifier(callee.property) && isIdentifier(callee.object)) {
-            if (calleeWhitelists.simple.includes(callee.property.name)) {
-              return true
-            }
-
-            const calleeName = `${callee.object.name}.${callee.property.name}`
-
-            if (calleeWhitelists.complex.includes(calleeName)) {
-              return true
-            }
+          if (isCalleeWhitelisted(buildCalleePath(callee))) {
+            return true
           }
 
           // use power of TS compiler to exclude call on specific types, such Map.get, Set.get and so on
@@ -202,7 +220,7 @@ export const rule = createRule<Option[], string>({
           return false
         }
         case TSESTree.AST_NODE_TYPES.Identifier: {
-          return calleeWhitelists.simple.includes(callee.name)
+          return isCalleeWhitelisted(callee.name)
         }
         case TSESTree.AST_NODE_TYPES.CallExpression: {
           return (
@@ -570,33 +588,3 @@ export const rule = createRule<Option[], string>({
     return wrapVisitor<TSESTree.Literal>(visitor)
   },
 })
-
-const popularCallee = [
-  'addEventListener',
-  'removeEventListener',
-  'postMessage',
-  'getElementById',
-  'dispatch',
-  'commit',
-  'includes',
-  'indexOf',
-  'endsWith',
-  'startsWith',
-  'require',
-]
-function generateCalleeWhitelists(option: Option) {
-  const result = {
-    simple: ['t', 'plural', 'select', ...popularCallee],
-    complex: ['i18n._'],
-  }
-
-  ;(option?.ignoreFunction || []).forEach((item) => {
-    if (item.includes('.')) {
-      result.complex.push(item)
-    } else {
-      result.simple.push(item)
-    }
-  })
-
-  return result
-}
