@@ -193,6 +193,18 @@ ruleTester.run<string, Option[]>(name, rule, {
     },
     { code: `obj["key with space"] = 5` },
     { code: `obj[\`key with space\`] = 5` },
+    { code: `const FOO = "Hello!"` },
+    { code: `let FOO = "Hello!"` },
+    { code: `var FOO = "Hello!"` },
+
+    {
+      code: `const test = "Hello!"`,
+      options: [{ ignoreVariable: ['test'] }],
+    },
+    {
+      code: `const wrapperClassName  = "Hello!"`,
+      options: [{ ignoreVariable: [{ regex: { pattern: 'className', flags: 'i' } }] }],
+    },
   ],
 
   invalid: [

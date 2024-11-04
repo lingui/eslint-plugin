@@ -189,6 +189,46 @@ class MyClass {
 }
 ```
 
+### `ignoreVariable`
+
+Specifies variable name whose values should be ignored. By default, UPPERCASED variables are ignored.
+
+Example for `{ "ignoreVariable": ["myVariable"] }`:
+
+```jsx
+const myVariable = 'Ignored value'
+```
+
+#### `regex`
+
+Defines regex patterns for ignored variables.
+
+Example:
+
+```json
+{
+  "no-unlocalized-strings": [
+    "error",
+    {
+      "ignoreVariable": [
+        {
+          "regex": {
+            "pattern": "classname",
+            "flags": "i"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+Examples of **correct** code:
+
+```jsx
+const wrapperClassName = 'Ignored value'
+```
+
 ### `ignoreMethodsOnTypes`
 
 Uses TypeScript type information to ignore methods defined on specific types.
