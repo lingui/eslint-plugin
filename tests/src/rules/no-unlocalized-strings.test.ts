@@ -216,6 +216,7 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: `const FOO = "Hello!"` },
     { code: `let FOO = "Hello!"` },
     { code: `var FOO = "Hello!"` },
+    { code: `const FOO_2 = "2"` },
 
     {
       code: `const test = "Hello!"`,

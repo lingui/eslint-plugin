@@ -29,7 +29,7 @@ export const LinguiCallExpressionMessageQuery =
  */
 export const LinguiTransQuery = 'JSXElement[openingElement.name.name=Trans]'
 
-export const UpperCaseRegexp = /^[A-Z_-]+$/
+export const UpperCaseRegexp = /^[A-Z0-9_-]+$/
 
 export function isNativeDOMTag(str: string) {
   return DOM_TAGS.includes(str)
