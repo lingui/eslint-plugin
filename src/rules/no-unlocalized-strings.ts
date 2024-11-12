@@ -23,11 +23,9 @@ type MatcherDef = string | { regex: { pattern: string; flags?: string } }
 
 export type Option = {
   ignore?: string[]
-  ignoreFunction?: string[]
-  ignoreAttribute?: MatcherDef[]
+  ignoreFunctions?: string[]
+  ignoreNames?: MatcherDef[]
   strictAttribute?: MatcherDef[]
-  ignoreProperty?: MatcherDef[]
-  ignoreVariable?: MatcherDef[]
   ignoreMethodsOnTypes?: string[]
   useTsTypes?: boolean
 }
@@ -101,7 +99,11 @@ export const rule = createRule<Option[], string>({
               type: 'string',
             },
           },
-          ignoreFunction: {
+          ignoreNames: {
+            type: 'array',
+            items: MatcherSchema,
+          },
+          ignoreFunctions: {
             type: 'array',
             items: {
               type: 'string',
@@ -113,19 +115,7 @@ export const rule = createRule<Option[], string>({
               type: 'string',
             },
           },
-          ignoreAttribute: {
-            type: 'array',
-            items: MatcherSchema,
-          },
           strictAttribute: {
-            type: 'array',
-            items: MatcherSchema,
-          },
-          ignoreProperty: {
-            type: 'array',
-            items: MatcherSchema,
-          },
-          ignoreVariable: {
             type: 'array',
             items: MatcherSchema,
           },
@@ -164,7 +154,7 @@ export const rule = createRule<Option[], string>({
       'select',
       'selectOrdinal',
       'msg',
-      ...(option?.ignoreFunction || []),
+      ...(option?.ignoreFunctions || []),
     ].map((pattern) => micromatch.matcher(pattern))
 
     const isCalleeWhitelisted = (callee: string) =>
@@ -230,9 +220,7 @@ export const rule = createRule<Option[], string>({
       return ignoredJSXSymbols.some((name) => name === str)
     }
 
-    const isIgnoredAttribute = createMatcher(option?.ignoreAttribute || [])
-    const isIgnoredProperty = createMatcher(option?.ignoreProperty || [])
-    const isIgnoredVariable = createMatcher(option?.ignoreVariable || [])
+    const isIgnoredName = createMatcher(option?.ignoreNames || [])
     const isStrictAttribute = createMatcher(option?.strictAttribute || [])
 
     function isStringLiteral(node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText) {
@@ -325,7 +313,7 @@ export const rule = createRule<Option[], string>({
         }
 
         // allow <MyComponent className="active" />
-        if (isIgnoredAttribute(attrName)) {
+        if (isIgnoredName(attrName)) {
           visited.add(node)
           return
         }
@@ -359,7 +347,7 @@ export const rule = createRule<Option[], string>({
             //@ts-ignore
             parent.type === 'ClassProperty') &&
           isIdentifier(parent.key) &&
-          isIgnoredProperty(parent.key.name)
+          isIgnoredName(parent.key.name)
         ) {
           visited.add(node)
         }
@@ -375,7 +363,7 @@ export const rule = createRule<Option[], string>({
         const parent = node.parent as TSESTree.VariableDeclarator
 
         // allow statements like const A_B = "test"
-        if (isIdentifier(parent.id) && isIgnoredVariable(parent.id.name)) {
+        if (isIdentifier(parent.id) && isIgnoredName(parent.id.name)) {
           visited.add(node)
         }
       },
@@ -386,7 +374,7 @@ export const rule = createRule<Option[], string>({
 
         // {A_B: "hello world"};
         // ^^^^
-        if (isIdentifier(parent.key) && isIgnoredProperty(parent.key.name)) {
+        if (isIdentifier(parent.key) && isIgnoredName(parent.key.name)) {
           visited.add(node)
         }
 
@@ -394,7 +382,7 @@ export const rule = createRule<Option[], string>({
         //   ^^^^
         if (
           (isLiteral(parent.key) || isTemplateLiteral(parent.key)) &&
-          isIgnoredProperty(getText(parent.key))
+          isIgnoredName(getText(parent.key))
         ) {
           visited.add(node)
         }
@@ -413,7 +401,7 @@ export const rule = createRule<Option[], string>({
         if (
           !memberExp.computed &&
           isIdentifier(memberExp.property) &&
-          isIgnoredProperty(memberExp.property.name)
+          isIgnoredName(memberExp.property.name)
         ) {
           visited.add(node)
         }

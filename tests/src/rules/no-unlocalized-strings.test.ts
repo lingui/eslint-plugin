@@ -17,8 +17,7 @@ const ruleTester = new RuleTester({
 })
 
 const upperCaseRegex = '^[A-Z_-]+$'
-const ignoreUpperCaseVariable = { ignoreVariable: [{ regex: { pattern: upperCaseRegex } }] }
-const ignoreUpperCaseProperty = { ignoreProperty: [{ regex: { pattern: upperCaseRegex } }] }
+const ignoreUpperCaseName = { ignoreNames: [{ regex: { pattern: upperCaseRegex } }] }
 
 const errors = [{ messageId: 'default' }] // default errors
 
@@ -38,40 +37,40 @@ ruleTester.run<string, Option[]>(name, rule, {
     },
     {
       code: 'hello("Hello")',
-      options: [{ ignoreFunction: ['hello'] }],
+      options: [{ ignoreFunctions: ['hello'] }],
     },
     {
       code: 'new Error("hello")',
-      options: [{ ignoreFunction: ['Error'] }],
+      options: [{ ignoreFunctions: ['Error'] }],
     },
     {
       code: 'custom.wrapper()({message: "Hello!"})',
-      options: [{ ignoreFunction: ['custom.wrapper'] }],
+      options: [{ ignoreFunctions: ['custom.wrapper'] }],
     },
     {
       name: 'Should ignore calls using complex object.method expression',
       code: 'console.log("Hello")',
-      options: [{ ignoreFunction: ['console.log'] }],
+      options: [{ ignoreFunctions: ['console.log'] }],
     },
     {
       name: 'Should ignore method calls using pattern',
       code: 'console.log("Hello"); console.error("Hello");',
-      options: [{ ignoreFunction: ['console.*'] }],
+      options: [{ ignoreFunctions: ['console.*'] }],
     },
     {
       name: 'Should ignore methods multilevel',
       code: 'context.headers.set("Hello"); level.context.headers.set("Hello");',
-      options: [{ ignoreFunction: ['*.headers.set'] }],
+      options: [{ ignoreFunctions: ['*.headers.set'] }],
     },
     {
       name: 'Should ignore methods multilevel 2',
       code: 'headers.set("Hello"); level.context.headers.set("Hello");',
-      options: [{ ignoreFunction: ['*headers.set'] }],
+      options: [{ ignoreFunctions: ['*headers.set'] }],
     },
     {
       name: 'Should ignore methods with dynamic segment ',
       code: 'getData().two.three.four("Hello")',
-      options: [{ ignoreFunction: ['*.three.four'] }],
+      options: [{ ignoreFunctions: ['*.three.four'] }],
     },
     { code: 'name === `Hello brat` || name === `Nice have`' },
     { code: 'switch(a){ case `a`: break; default: break;}' },
@@ -83,8 +82,8 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: 'import name from "hello";' },
     { code: 'export * from "hello_export_all";' },
     { code: 'export { a } from "hello_export";' },
-    { code: 'const a = require(["hello"]);', options: [{ ignoreFunction: ['require'] }] },
-    { code: 'const a = require(["hel" + "lo"]);', options: [{ ignoreFunction: ['require'] }] },
+    { code: 'const a = require(["hello"]);', options: [{ ignoreFunctions: ['require'] }] },
+    { code: 'const a = require(["hel" + "lo"]);', options: [{ ignoreFunctions: ['require'] }] },
     { code: 'const a = 1;' },
     { code: 'i18n._("hello");' },
     { code: 'const a = "absfoo";', options: [{ ignore: ['foo'] }] },
@@ -126,11 +125,11 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: '<img src={`./image.png`} />' },
     { code: '<button type="button" for="form-id" />' },
     { code: '<button type={`button`} for={`form-id`} />' },
-    { code: '<DIV foo="bar" />', options: [{ ignoreAttribute: ['foo'] }] },
-    { code: '<DIV foo={`Bar`} />', options: [{ ignoreAttribute: ['foo'] }] },
+    { code: '<DIV foo="bar" />', options: [{ ignoreNames: ['foo'] }] },
+    { code: '<DIV foo={`Bar`} />', options: [{ ignoreNames: ['foo'] }] },
     {
       code: '<DIV wrapperClassName={`Bar`} />',
-      options: [{ ignoreAttribute: [{ regex: { pattern: 'className', flags: 'i' } }] }],
+      options: [{ ignoreNames: [{ regex: { pattern: 'className', flags: 'i' } }] }],
     },
     { code: '<div>&nbsp; </div>' },
     { code: "plural('Hello')" },
@@ -142,7 +141,7 @@ ruleTester.run<string, Option[]>(name, rule, {
           {...restProps}
           autoComplete="off"
       />`,
-      options: [{ ignoreAttribute: ['autoComplete'] }],
+      options: [{ ignoreNames: ['autoComplete'] }],
     },
     {
       code: 'const Wrapper = styled.a` cursor: pointer; ${(props) => props.isVisible && `visibility: visible;`}`',
@@ -152,27 +151,27 @@ ruleTester.run<string, Option[]>(name, rule, {
     },
     {
       code: `const test = { myProp: 'This is not localized' }`,
-      options: [{ ignoreProperty: ['myProp'] }],
+      options: [{ ignoreNames: ['myProp'] }],
     },
     {
       code: 'const test = { myProp: `This is not localized` }',
-      options: [{ ignoreProperty: ['myProp'] }],
+      options: [{ ignoreNames: ['myProp'] }],
     },
     {
       code: `const test = { ['myProp']: 'This is not localized' }`,
-      options: [{ ignoreProperty: ['myProp'] }],
+      options: [{ ignoreNames: ['myProp'] }],
     },
     {
       code: `const test = { wrapperClassName: 'This is not localized' }`,
-      options: [{ ignoreProperty: [{ regex: { pattern: 'className', flags: 'i' } }] }],
+      options: [{ ignoreNames: [{ regex: { pattern: 'className', flags: 'i' } }] }],
     },
     {
       code: `MyComponent.displayName = 'MyComponent';`,
-      options: [{ ignoreProperty: ['displayName'] }],
+      options: [{ ignoreNames: ['displayName'] }],
     },
     {
       code: 'class Form extends Component { displayName = "FormContainer" };',
-      options: [{ ignoreProperty: ['displayName'] }],
+      options: [{ ignoreNames: ['displayName'] }],
     },
     {
       name: 'computed keys should be ignored by default, StringLiteral',
@@ -184,39 +183,38 @@ ruleTester.run<string, Option[]>(name, rule, {
     },
     {
       code: `const test = "Hello!"`,
-      options: [{ ignoreVariable: ['test'] }],
+      options: [{ ignoreNames: ['test'] }],
     },
     {
       code: `let test = "Hello!"`,
-      options: [{ ignoreVariable: ['test'] }],
+      options: [{ ignoreNames: ['test'] }],
     },
     {
       code: `var test = "Hello!"`,
-      options: [{ ignoreVariable: ['test'] }],
+      options: [{ ignoreNames: ['test'] }],
     },
     {
       code: 'const test = `Hello!`',
-      options: [{ ignoreVariable: ['test'] }],
+      options: [{ ignoreNames: ['test'] }],
     },
-
     {
       code: `const wrapperClassName  = "Hello!"`,
-      options: [{ ignoreVariable: [{ regex: { pattern: 'className', flags: 'i' } }] }],
+      options: [{ ignoreNames: [{ regex: { pattern: 'className', flags: 'i' } }] }],
     },
     {
       code: `const A_B  = "Bar!"`,
-      options: [ignoreUpperCaseVariable],
+      options: [ignoreUpperCaseName],
     },
     {
       code: 'const FOO  = `Bar!`',
-      options: [ignoreUpperCaseVariable],
+      options: [ignoreUpperCaseName],
     },
-    { code: 'var a = {["A_B"]: "hello world"};', options: [ignoreUpperCaseProperty] },
-    { code: 'var a = {[A_B]: "hello world"};', options: [ignoreUpperCaseProperty] },
-    { code: 'var a = {A_B: "hello world"};', options: [ignoreUpperCaseProperty] },
-    { code: 'var a = {[`A_B`]: `hello world`};', options: [ignoreUpperCaseProperty] },
-    { code: 'var a = {[A_B]: `hello world`};', options: [ignoreUpperCaseProperty] },
-    { code: 'var a = {A_B: `hello world`};', options: [ignoreUpperCaseProperty] },
+    { code: 'var a = {["A_B"]: "hello world"};', options: [ignoreUpperCaseName] },
+    { code: 'var a = {[A_B]: "hello world"};', options: [ignoreUpperCaseName] },
+    { code: 'var a = {A_B: "hello world"};', options: [ignoreUpperCaseName] },
+    { code: 'var a = {[`A_B`]: `hello world`};', options: [ignoreUpperCaseName] },
+    { code: 'var a = {[A_B]: `hello world`};', options: [ignoreUpperCaseName] },
+    { code: 'var a = {A_B: `hello world`};', options: [ignoreUpperCaseName] },
 
     { code: '<div className="hello"></div>', filename: 'a.tsx' },
     { code: '<div className={`hello`}></div>', filename: 'a.tsx' },
