@@ -17,8 +17,6 @@ The rule doesn’t come with built-in ignore settings because each project is un
     {
       "useTsTypes": true,
       "ignore": [
-        // Ignore strings that do not contain words
-        "^[^A-Za-z]+$",
         // Ignore strings that don’t start with an uppercase letter
         //   or don't contain two words separated by whitespace
         "^(?![A-Z].*|\\w+\\s\\w+).+$",

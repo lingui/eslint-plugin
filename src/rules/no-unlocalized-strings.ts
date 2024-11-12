@@ -150,7 +150,11 @@ export const rule = createRule<Option[], string>({
     if (option?.useTsTypes) {
       tsService = ESLintUtils.getParserServices(context, false)
     }
-    const whitelists = (option?.ignore || []).map((item) => new RegExp(item))
+    const whitelists = [
+      //
+      /^[^\p{L}]+$/u, // ignore non word messages
+      ...(option?.ignore || []).map((item) => new RegExp(item)),
+    ]
 
     const calleeWhitelists = [
       // lingui callee

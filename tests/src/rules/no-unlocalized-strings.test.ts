@@ -29,6 +29,14 @@ ruleTester.run<string, Option[]>(name, rule, {
     },
     { code: 't(i18n)({ message: `Hello ${name}` })' },
     {
+      name: 'should ignore non word strings',
+      code: 'const test = "1111"',
+    },
+    {
+      name: 'should ignore non word strings 2',
+      code: 'const a = `0123456789!@#$%^&*()_+|~-=\\`[]{};\':",./<>?`;',
+    },
+    {
       code: 'hello("Hello")',
       options: [{ ignoreFunction: ['hello'] }],
     },
@@ -257,6 +265,21 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: 'const a = `Foo`;', errors },
     { code: 'const a = call(`Ffo`);', errors },
     { code: 'var a = {foo: `Bar`};', errors },
+    {
+      name: 'Should report non latin messages (japanese)',
+      code: 'const a = "こんにちは"',
+      errors,
+    },
+    {
+      name: 'Should report non latin messages (cyrillic)',
+      code: 'const a = "Привет"',
+      errors,
+    },
+    {
+      name: 'Should report non latin messages (chinese)',
+      code: 'const a = "添加筛选器"',
+      errors,
+    },
     { code: 'const a = `a foo`;', options: [{ ignore: ['^foo'] }], errors },
     {
       code: 'class Form extends Component { property = `Something` };',
