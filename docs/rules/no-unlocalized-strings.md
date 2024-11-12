@@ -22,7 +22,7 @@ The rule doesn’t come with built-in ignore settings because each project is un
         "^(?![A-Z].*|\\w+\\s\\w+).+$",
         // Ignore UPPERCASE literals
         // Example: const test = "FOO"
-        "^[A-Z_-]+$"
+        "^[A-Z0-9_-]+$"
       ],
       "ignoreAttribute": [
         // Ignore attributes matching className (case-insensitive)
@@ -47,7 +47,7 @@ The rule doesn’t come with built-in ignore settings because each project is un
         "Authorization",
         // Ignore UPPERCASE properties
         // Example: test.FOO = "ola!"
-        { "regex": { "pattern": "^[A-Z_-]+$" } }
+        { "regex": { "pattern": "^[A-Z0-9_-]+$" } }
       ],
       "ignoreFunction": [
         "cva",
@@ -71,7 +71,7 @@ The rule doesn’t come with built-in ignore settings because each project is un
       "ignoreVariable": [
         // Ignore literals assigned to variables with UPPERCASE names
         // Example: const FOO = "Ola!"
-        { "regex": { "pattern": "^[A-Z_-]+$" } }
+        { "regex": { "pattern": "^[A-Z0-9_-]+$" } }
       ],
       "ignoreMethodsOnType": [
         // Ignore specified methods on Map and Set types
