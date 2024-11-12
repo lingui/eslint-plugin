@@ -202,46 +202,6 @@ class MyClass {
 }
 ```
 
-### `strictAttribute`
-
-Specifies JSX attributes that should always be checked, regardless of other `ignore` settings or defaults.
-
-Example for `{ "strictAttribute": ["alt"] }`:
-
-```jsx
-/*eslint lingui/no-unlocalized-strings: ["error", {"strictAttribute": ["alt"]}]*/
-const element = <img alt="IMAGE" />
-```
-
-#### `regex`
-
-Defines regex patterns for attributes that must always be checked.
-
-Example:
-
-```json
-{
-  "no-unlocalized-strings": [
-    "error",
-    {
-      "strictAttribute": [
-        {
-          "regex": {
-            "pattern": "^desc.*"
-          }
-        }
-      ]
-    }
-  ]
-}
-```
-
-Examples of **incorrect** code:
-
-```jsx
-const element = <div description="IMAGE" />
-```
-
 ### `ignoreMethodsOnTypes`
 
 Uses TypeScript type information to ignore methods defined on specific types.

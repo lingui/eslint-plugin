@@ -304,12 +304,6 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: 'class Form extends Component { property = "Something" };',
       errors,
     },
-    { code: '<img alt="BLA" />', options: [{ strictAttribute: ['alt'] }], errors },
-    {
-      code: '<img altAaa="BLA" />',
-      options: [{ strictAttribute: [{ regex: { pattern: '^alt' } }] }],
-      errors,
-    },
     { code: '<div>foo</div>', errors: [{ messageId: 'forJsxText' }] },
     { code: '<div>Foo</div>', errors: [{ messageId: 'forJsxText' }] },
     { code: '<div>FOO</div>', errors: [{ messageId: 'forJsxText' }] },

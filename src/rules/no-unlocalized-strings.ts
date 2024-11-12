@@ -25,7 +25,6 @@ export type Option = {
   ignore?: string[]
   ignoreFunctions?: string[]
   ignoreNames?: MatcherDef[]
-  strictAttribute?: MatcherDef[]
   ignoreMethodsOnTypes?: string[]
   useTsTypes?: boolean
 }
@@ -114,10 +113,6 @@ export const rule = createRule<Option[], string>({
             items: {
               type: 'string',
             },
-          },
-          strictAttribute: {
-            type: 'array',
-            items: MatcherSchema,
           },
           useTsTypes: {
             type: 'boolean',
@@ -221,7 +216,6 @@ export const rule = createRule<Option[], string>({
     }
 
     const isIgnoredName = createMatcher(option?.ignoreNames || [])
-    const isStrictAttribute = createMatcher(option?.strictAttribute || [])
 
     function isStringLiteral(node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText) {
       switch (node.type) {
@@ -305,12 +299,6 @@ export const rule = createRule<Option[], string>({
           TSESTree.AST_NODE_TYPES.JSXAttribute,
         )
         const attrName = getAttrName(parent?.name?.name)
-
-        if (isStrictAttribute(attrName)) {
-          visited.add(node)
-          context.report({ node, messageId: 'default' })
-          return
-        }
 
         // allow <MyComponent className="active" />
         if (isIgnoredName(attrName)) {
