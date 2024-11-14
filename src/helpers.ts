@@ -29,8 +29,6 @@ export const LinguiCallExpressionMessageQuery =
  */
 export const LinguiTransQuery = 'JSXElement[openingElement.name.name=Trans]'
 
-export const UpperCaseRegexp = /^[A-Z_-]+$/
-
 export function isNativeDOMTag(str: string) {
   return DOM_TAGS.includes(str)
 }
@@ -39,27 +37,13 @@ export function isSvgTag(str: string) {
   return SVG_TAGS.includes(str)
 }
 
-export function containAllAttributes(attributeNames: string[]) {
-  const attrs = ['value', 'other']
-  return attrs.every((attr) => attributeNames.includes(attr))
-}
-
-export function isLinguiTags(str: string, attributeNames: string[]) {
-  if (str === 'Trans') {
-    return true
-  }
-  return ['Plural', 'Select'].includes(str) && containAllAttributes(attributeNames)
-}
-
 const blacklistAttrs = ['placeholder', 'alt', 'aria-label', 'value']
 export function isAllowedDOMAttr(tag: string, attr: string, attributeNames: string[]) {
   if (isSvgTag(tag)) return true
   if (isNativeDOMTag(tag)) {
     return !blacklistAttrs.includes(attr)
   }
-  if (isLinguiTags(tag, attributeNames)) {
-    return true
-  }
+
   return false
 }
 
@@ -85,26 +69,6 @@ export const getText = (
   }
 
   return node.value.toString().trim()
-}
-
-export function hasAncestorWithName(
-  node: TSESTree.JSXElement | TSESTree.TemplateLiteral | TSESTree.Literal | TSESTree.JSXText,
-  name: string,
-) {
-  let p: TSESTree.Node = node.parent
-  while (p) {
-    switch (p.type) {
-      case TSESTree.AST_NODE_TYPES.JSXElement:
-        const identifierName = getIdentifierName(p?.openingElement?.name)
-        if (identifierName === name) {
-          return true
-        }
-      default:
-    }
-
-    p = p.parent
-  }
-  return false
 }
 
 export function getIdentifierName(jsxTagNameExpression: TSESTree.JSXTagNameExpression) {

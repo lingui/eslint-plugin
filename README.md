@@ -36,7 +36,7 @@ yarn add eslint-plugin-lingui --dev
 
 ### Recommended Setup
 
-To enable all of the recommended rules for our plugin, add the following config:
+To enable all the recommended rules for our plugin, add the following config:
 
 ```js
 import pluginLingui from 'eslint-plugin-lingui'
@@ -46,6 +46,8 @@ export default [
   // Any other config...
 ]
 ```
+
+We also recommend enabling the [no-unlocalized-strings](docs/rules/no-unlocalized-strings.md) rule. It’s not enabled by default because it needs to be set up specifically for your project. Please check the rule's documentation for example configurations.
 
 ### Custom setup
 
