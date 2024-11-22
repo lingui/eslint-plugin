@@ -36,6 +36,14 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: 'const a = `0123456789!@#$%^&*()_+|~-=\\`[]{};\':",./<>?`;',
     },
     {
+      name: 'should ignore strings containing only variables',
+      code: 'const t = `${BRAND_NAME}`',
+    },
+    {
+      name: 'should ignore strings containing only variables 2',
+      code: 'const t = `${BRAND_NAME}${BRAND_NAME}`',
+    },
+    {
       code: 'hello("Hello")',
       options: [{ ignoreFunctions: ['hello'] }],
     },
@@ -92,6 +100,15 @@ ruleTester.run<string, Option[]>(name, rule, {
     //     // JSX
     { code: '<div className="primary"></div>' },
     { code: '<div className={`primary`}></div>' },
+    {
+      name: 'Should ignore non-word strings in the JSX Text',
+      code: `<span>+</span>`,
+    },
+    {
+      name: 'Should JSX Text if it matches the ignore option',
+      code: `<span>foo</span>`,
+      options: [{ ignore: ['^foo'] }],
+    },
     { code: '<div className={a ? "active": "inactive"}></div>' },
     { code: '<div className={a ? `active`: `inactive`}></div>' },
     { code: '<div>{i18n._("foo")}</div>' },
@@ -414,4 +431,28 @@ jsxTester.run('no-unlocalized-strings', rule, {
       errors: [{ messageId: 'default' }, { messageId: 'default' }],
     },
   ],
+})
+
+/**
+ * This test is covering the ignore regex proposed in the documentation
+ * This regex doesn't used directly in the code.
+ */
+describe('Default ignore regex', () => {
+  const regex = '^(?![A-Z])\\S+$'
+
+  test.each([
+    ['hello', true],
+    ['helloMyVar', true],
+    ['package.json', true],
+    ['./src/**/*.test*', true],
+    ['camel_case', true],
+
+    // Start from capital letter
+    ['Hello', false],
+    // Multiword string (has space)
+    ['hello world', false],
+    ['Hello World', false],
+  ])('validate %s', (str, pass) => {
+    expect(new RegExp(regex).test(str)).toBe(pass)
+  })
 })
