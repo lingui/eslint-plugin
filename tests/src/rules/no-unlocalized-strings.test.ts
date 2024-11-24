@@ -40,8 +40,12 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: 'const t = `${BRAND_NAME}`',
     },
     {
-      name: 'should ignore strings containing only variables 2',
+      name: 'should ignore strings containing few variables',
       code: 'const t = `${BRAND_NAME}${BRAND_NAME}`',
+    },
+    {
+      name: 'should ignore strings containing few variables with spaces',
+      code: 'const t = ` ${BRAND_NAME} ${BRAND_NAME} `',
     },
     {
       code: 'hello("Hello")',
@@ -142,6 +146,10 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: '<img src={`./image.png`} />' },
     { code: '<button type="button" for="form-id" />' },
     { code: '<button type={`button`} for={`form-id`} />' },
+    {
+      name: 'JSX Space should not be flagged',
+      code: `<button/>{' '}<button/>`,
+    },
     { code: '<DIV foo="bar" />', options: [{ ignoreNames: ['foo'] }] },
     { code: '<DIV foo={`Bar`} />', options: [{ ignoreNames: ['foo'] }] },
     {
@@ -379,6 +387,12 @@ jsxTester.run('no-unlocalized-strings', rule, {
   valid: [
     { code: '<Component>{ i18n._("abc") }</Component>' },
     { code: '<Component>{ i18n._(`abc`) }</Component>' },
+    {
+      name: 'Should not flag the JSX text with only spaces and interpolations',
+      code: `<Component>
+        {variable}
+        </Component>`,
+    },
     { code: '<Trans>Hello</Trans>' },
     { code: '<Trans><Component>Hello</Component></Trans>' },
     {
