@@ -60,7 +60,7 @@ The rule doesn’t come with built-in ignore settings because each project is un
       ],
       // Following settings require typed linting https://typescript-eslint.io/getting-started/typed-linting/
       "useTsTypes": true,
-      "ignoreMethodsOnType": [
+      "ignoreMethodsOnTypes": [
         // Ignore specified methods on Map and Set types
         "Map.get",
         "Map.has",
