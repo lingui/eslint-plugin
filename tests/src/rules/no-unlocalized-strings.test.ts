@@ -148,7 +148,7 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: '<button type={`button`} for={`form-id`} />' },
     {
       name: 'JSX Space should not be flagged',
-      code: `<button/>{' '}<button/>`,
+      code: `<button>{' '}</button>`,
     },
     { code: '<DIV foo="bar" />', options: [{ ignoreNames: ['foo'] }] },
     { code: '<DIV foo={`Bar`} />', options: [{ ignoreNames: ['foo'] }] },
