@@ -243,7 +243,7 @@ export const rule = createRule<Option[], string>({
       visited.add(node)
 
       const text = getText(node)
-      if (!text || isIgnoredSymbol(text)) {
+      if (!text || isIgnoredSymbol(text) || isTextWhiteListed(text)) {
         return
       }
 
@@ -481,9 +481,9 @@ export const rule = createRule<Option[], string>({
       },
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         if (visited.has(node)) return
-        const quasisValue = getText(node)
+        const text = getText(node)
 
-        if (isTextWhiteListed(quasisValue)) return
+        if (!text || isTextWhiteListed(text)) return
 
         context.report({ node, messageId: 'default' })
       },

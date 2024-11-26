@@ -16,9 +16,9 @@ The rule doesn’t come with built-in ignore settings because each project is un
     "error",
     {
       "ignore": [
-        // Ignore strings that don’t start with an uppercase letter
-        //   or don't contain two words separated by whitespace
-        "^(?![A-Z].*|\\w+\\s\\w+).+$",
+        // Ignore strings which are a single "word" (no spaces) 
+        // and doesn't start with an uppercase letter
+        "^(?![A-Z])\\S+$",
         // Ignore UPPERCASE literals
         // Example: const test = "FOO"
         "^[A-Z0-9_-]+$"
@@ -60,7 +60,7 @@ The rule doesn’t come with built-in ignore settings because each project is un
       ],
       // Following settings require typed linting https://typescript-eslint.io/getting-started/typed-linting/
       "useTsTypes": true,
-      "ignoreMethodsOnType": [
+      "ignoreMethodsOnTypes": [
         // Ignore specified methods on Map and Set types
         "Map.get",
         "Map.has",

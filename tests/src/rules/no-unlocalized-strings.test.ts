@@ -36,6 +36,18 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: 'const a = `0123456789!@#$%^&*()_+|~-=\\`[]{};\':",./<>?`;',
     },
     {
+      name: 'should ignore strings containing only variables',
+      code: 'const t = `${BRAND_NAME}`',
+    },
+    {
+      name: 'should ignore strings containing few variables',
+      code: 'const t = `${BRAND_NAME}${BRAND_NAME}`',
+    },
+    {
+      name: 'should ignore strings containing few variables with spaces',
+      code: 'const t = ` ${BRAND_NAME} ${BRAND_NAME} `',
+    },
+    {
       code: 'hello("Hello")',
       options: [{ ignoreFunctions: ['hello'] }],
     },
@@ -92,6 +104,15 @@ ruleTester.run<string, Option[]>(name, rule, {
     //     // JSX
     { code: '<div className="primary"></div>' },
     { code: '<div className={`primary`}></div>' },
+    {
+      name: 'Should ignore non-word strings in the JSX Text',
+      code: `<span>+</span>`,
+    },
+    {
+      name: 'Should JSX Text if it matches the ignore option',
+      code: `<span>foo</span>`,
+      options: [{ ignore: ['^foo'] }],
+    },
     { code: '<div className={a ? "active": "inactive"}></div>' },
     { code: '<div className={a ? `active`: `inactive`}></div>' },
     { code: '<div>{i18n._("foo")}</div>' },
@@ -125,6 +146,10 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: '<img src={`./image.png`} />' },
     { code: '<button type="button" for="form-id" />' },
     { code: '<button type={`button`} for={`form-id`} />' },
+    {
+      name: 'JSX Space should not be flagged',
+      code: `<button>{' '}</button>`,
+    },
     { code: '<DIV foo="bar" />', options: [{ ignoreNames: ['foo'] }] },
     { code: '<DIV foo={`Bar`} />', options: [{ ignoreNames: ['foo'] }] },
     {
@@ -362,6 +387,12 @@ jsxTester.run('no-unlocalized-strings', rule, {
   valid: [
     { code: '<Component>{ i18n._("abc") }</Component>' },
     { code: '<Component>{ i18n._(`abc`) }</Component>' },
+    {
+      name: 'Should not flag the JSX text with only spaces and interpolations',
+      code: `<Component>
+        {variable}
+        </Component>`,
+    },
     { code: '<Trans>Hello</Trans>' },
     { code: '<Trans><Component>Hello</Component></Trans>' },
     {
@@ -414,4 +445,28 @@ jsxTester.run('no-unlocalized-strings', rule, {
       errors: [{ messageId: 'default' }, { messageId: 'default' }],
     },
   ],
+})
+
+/**
+ * This test is covering the ignore regex proposed in the documentation
+ * This regex doesn't used directly in the code.
+ */
+describe('Default ignore regex', () => {
+  const regex = '^(?![A-Z])\\S+$'
+
+  test.each([
+    ['hello', true],
+    ['helloMyVar', true],
+    ['package.json', true],
+    ['./src/**/*.test*', true],
+    ['camel_case', true],
+
+    // Start from capital letter
+    ['Hello', false],
+    // Multiword string (has space)
+    ['hello world', false],
+    ['Hello World', false],
+  ])('validate %s', (str, pass) => {
+    expect(new RegExp(regex).test(str)).toBe(pass)
+  })
 })
