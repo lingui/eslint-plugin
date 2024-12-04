@@ -204,6 +204,7 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: ['intent'] }],
     },
     {
+      name: "Should support ignoreNames when applied the 'as const' assertion",
       code: 'const Shape = { CIRCLE: "circle" as const };',
       options: [{ ignoreNames: [{ regex: { pattern: '^[A-Z0-9_-]+$' } }] }],
     },
