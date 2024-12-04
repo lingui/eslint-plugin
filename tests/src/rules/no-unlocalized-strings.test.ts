@@ -204,6 +204,10 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: ['intent'] }],
     },
     {
+      code: 'const Shape = { CIRCLE: "circle" as const };',
+      options: [{ ignoreNames: [{ regex: { pattern: '^[A-Z0-9_-]+$' } }] }],
+    },
+    {
       name: 'computed keys should be ignored by default, StringLiteral',
       code: `obj["key with space"] = 5`,
     },
@@ -267,13 +271,13 @@ ruleTester.run<string, Option[]>(name, rule, {
     },
 
     {
-      code: `const myMap = new Map(); 
+      code: `const myMap = new Map();
       myMap.get("string with a spaces")
       myMap.has("string with a spaces")`,
       options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Map.get', 'Map.has'] }],
     },
     {
-      code: `interface Foo {get: (key: string) => string}; 
+      code: `interface Foo {get: (key: string) => string};
       (foo as Foo).get("string with a spaces")`,
       options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
     },

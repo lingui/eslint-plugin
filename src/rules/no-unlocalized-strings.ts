@@ -73,6 +73,15 @@ function createMatcher(patterns: MatcherDef[]) {
   }
 }
 
+function unwrapTSAsExpression(
+  node: TSESTree.Expression,
+): TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.Expression {
+  while (node.type === TSESTree.AST_NODE_TYPES.TSAsExpression) {
+    node = node.expression
+  }
+  return node
+}
+
 export const name = 'no-unlocalized-strings'
 export const rule = createRule<Option[], string>({
   name,
@@ -217,7 +226,13 @@ export const rule = createRule<Option[], string>({
 
     const isIgnoredName = createMatcher(option?.ignoreNames || [])
 
-    function isStringLiteral(node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText) {
+    function isStringLiteral(node: TSESTree.Node | null | undefined): boolean {
+      if (!node) return false
+
+      if (node.type === TSESTree.AST_NODE_TYPES.TSAsExpression) {
+        return isStringLiteral(node.expression)
+      }
+
       switch (node.type) {
         case TSESTree.AST_NODE_TYPES.Literal:
           return typeof node.value === 'string'
@@ -355,24 +370,22 @@ export const rule = createRule<Option[], string>({
           visited.add(node)
         }
       },
-      'Property > :matches(Literal,TemplateLiteral)'(
-        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      'Property > :matches(Literal,TemplateLiteral,TSAsExpression)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.TSAsExpression,
       ) {
         const parent = node.parent as TSESTree.Property
 
-        // {A_B: "hello world"};
-        // ^^^^
-        if (isIdentifier(parent.key) && isIgnoredName(parent.key.name)) {
-          visited.add(node)
-        }
-
-        // {["A_B"]: "hello world"};
-        //   ^^^^
         if (
-          (isLiteral(parent.key) || isTemplateLiteral(parent.key)) &&
-          isIgnoredName(getText(parent.key))
+          (isIdentifier(parent.key) && isIgnoredName(parent.key.name)) ||
+          ((isLiteral(parent.key) || isTemplateLiteral(parent.key)) &&
+            isIgnoredName(getText(parent.key)))
         ) {
-          visited.add(node)
+          // Unwrap TSAsExpression nodes
+          const unwrappedNode = unwrapTSAsExpression(node)
+
+          if (isLiteral(unwrappedNode) || isTemplateLiteral(unwrappedNode)) {
+            visited.add(unwrappedNode)
+          }
         }
       },
       'MemberExpression[computed=true] > :matches(Literal,TemplateLiteral)'(
