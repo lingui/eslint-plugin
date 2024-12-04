@@ -199,6 +199,7 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: ['displayName'] }],
     },
     {
+      name: 'Respect the name of the parameter when a default is applied',
       code: 'function Input({ intent = "none"}) {}',
       options: [{ ignoreNames: ['intent'] }],
     },
