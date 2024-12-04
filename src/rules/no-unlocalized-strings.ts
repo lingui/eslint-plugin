@@ -487,6 +487,16 @@ export const rule = createRule<Option[], string>({
 
         context.report({ node, messageId: 'default' })
       },
+
+      'AssignmentPattern > :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
+        const parent = node.parent as TSESTree.AssignmentPattern
+
+        if (isIdentifier(parent.left) && isIgnoredName(parent.left.name)) {
+          visited.add(node)
+        }
+      },
     }
 
     function wrapVisitor<

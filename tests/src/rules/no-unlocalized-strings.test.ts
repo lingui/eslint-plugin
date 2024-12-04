@@ -199,6 +199,10 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: ['displayName'] }],
     },
     {
+      code: 'function Input({ intent = "none"}) {}',
+      options: [{ ignoreNames: ['intent'] }],
+    },
+    {
       name: 'computed keys should be ignored by default, StringLiteral',
       code: `obj["key with space"] = 5`,
     },
