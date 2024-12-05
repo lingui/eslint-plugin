@@ -232,6 +232,21 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: ['value'] }],
     },
     {
+      name: 'Supports default value assignment - template literal version',
+      code: 'const variant = input || `body`',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Supports nullish coalescing operator - template literal version',
+      code: 'const variant = input ?? `body`',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Supports ternary operator - template literal version',
+      code: 'const value = condition ? `yes` : `no`',
+      options: [{ ignoreNames: ['value'] }],
+    },
+    {
       name: 'Ignores literals in assignment expression after variable declaration',
       code: `let variant; variant = input ?? "body";`,
       options: [{ ignoreNames: ['variant'] }],
