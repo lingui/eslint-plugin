@@ -301,6 +301,24 @@ export const rule = createRule<Option[], string>({
       return node?.name
     }
 
+    function isLiteralInsideJSX(node: TSESTree.Node): boolean {
+      let parent = node.parent
+      let insideJSXExpression = false
+
+      while (parent) {
+        if (parent.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer) {
+          insideJSXExpression = true
+        }
+        if (parent.type === TSESTree.AST_NODE_TYPES.JSXElement && insideJSXExpression) {
+          return true
+        }
+        parent = parent.parent
+      }
+
+      /* istanbul ignore next */
+      return false
+    }
+
     const processTextNode = (
       node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
     ) => {
@@ -311,11 +329,23 @@ export const rule = createRule<Option[], string>({
         return
       }
 
+      // First, handle the JSXText case directly
       if (node.type === TSESTree.AST_NODE_TYPES.JSXText) {
         context.report({ node, messageId: 'forJsxText' })
         return
       }
 
+      // If it's not JSXText, it might be a Literal or TemplateLiteral.
+      // Check if it's inside JSX.
+      if (isLiteralInsideJSX(node)) {
+        // If it's a Literal/TemplateLiteral inside a JSXExpressionContainer within JSXElement,
+        // treat it like JSX text and report with `forJsxText`.
+        context.report({ node, messageId: 'forJsxText' })
+        return
+      }
+
+      /* istanbul ignore next */
+      // If neither JSXText nor a Literal inside JSX, fall back to default messageId.
       context.report({ node, messageId: 'default' })
     }
 

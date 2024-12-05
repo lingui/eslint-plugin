@@ -342,6 +342,11 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: "const ge = 'Select tax code'", errors },
     { code: 'const a = `Foo`;', errors },
     {
+      name: 'Reports error for unlocalized strings inside JSX',
+      code: '<div>{"Hello World!"}</div>',
+      errors: [{ messageId: 'forJsxText', line: 1, column: 7 }],
+    },
+    {
       name: 'Reports error when variable name is not in ignoreNames',
       code: 'const other = input ?? "body";',
       options: [{ ignoreNames: ['variant'] }],
@@ -495,11 +500,11 @@ jsxTester.run('no-unlocalized-strings', rule, {
     },
     {
       code: '<Component>{"Hello"}</Component>',
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: '<Component>{`Hello`}</Component>',
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: '<Component>abc</Component>',
@@ -507,11 +512,11 @@ jsxTester.run('no-unlocalized-strings', rule, {
     },
     {
       code: "<Component>{'abc'}</Component>",
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: '<Component>{`abc`}</Component>',
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: '<Component>{someVar === 1 ? `Abc` : `Def`}</Component>',
