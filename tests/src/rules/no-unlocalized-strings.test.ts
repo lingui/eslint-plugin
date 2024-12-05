@@ -262,6 +262,16 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: ['variant'] }],
     },
     {
+      name: 'Covers Literal in a nullish coalescing acceptable expression',
+      code: 'const variant = input ?? "Hello!";',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Covers TemplateLiteral in a ternary acceptable expression',
+      code: 'const variant = condition ? `Hello ${"World"}` : `Fallback`;',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
       code: `const test = "Hello!"`,
       options: [{ ignoreNames: ['test'] }],
     },
