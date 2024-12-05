@@ -254,6 +254,7 @@ export const rule = createRule<Option[], string>({
           )
         }
         default:
+          /* istanbul ignore next */
           return false
       }
     }
@@ -288,6 +289,7 @@ export const rule = createRule<Option[], string>({
         case TSESTree.AST_NODE_TYPES.JSXText:
           return true
         default:
+          /* istanbul ignore next */
           return false
       }
     }
