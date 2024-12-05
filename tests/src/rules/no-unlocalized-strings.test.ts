@@ -217,6 +217,21 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: `obj[\`key with space\`] = 5`,
     },
     {
+      name: 'Supports default value assignment',
+      code: 'const variant = input || "body"',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Supports nullish coalescing operator',
+      code: 'const variant = input ?? "body"',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Supports ternary operator',
+      code: 'const value = condition ? "yes" : "no"',
+      options: [{ ignoreNames: ['value'] }],
+    },
+    {
       code: `const test = "Hello!"`,
       options: [{ ignoreNames: ['test'] }],
     },

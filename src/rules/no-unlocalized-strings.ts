@@ -471,24 +471,31 @@ export const rule = createRule<Option[], string>({
         processTextNode(node)
       },
       'Literal:exit'(node: TSESTree.Literal) {
-        // visited and passed linting
         if (visited.has(node)) return
         const trimmed = `${node.value}`.trim()
         if (!trimmed) return
 
         if (isTextWhiteListed(trimmed)) return
 
-        //
-        // TYPESCRIPT
-        // todo: that doesn't work
-        // if (tsService) {
-        //   const typeObj = tsService.getTypeAtLocation(node.parent)
-        //
-        //   // var a: 'abc' = 'abc'
-        //   if (typeObj.isStringLiteral() && typeObj.symbol) {
-        //     return
-        //   }
-        // }
+        // Check if this literal is part of a VariableDeclarator or AssignmentExpression with id/name in ignoreNames
+        let parent = node.parent
+        while (parent) {
+          if (parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator) {
+            const variableDeclarator = parent as TSESTree.VariableDeclarator
+            if (isIdentifier(variableDeclarator.id) && isIgnoredName(variableDeclarator.id.name)) {
+              return // Do not report this literal
+            }
+          } else if (parent.type === TSESTree.AST_NODE_TYPES.AssignmentExpression) {
+            const assignmentExpression = parent as TSESTree.AssignmentExpression
+            if (
+              isIdentifier(assignmentExpression.left) &&
+              isIgnoredName(assignmentExpression.left.name)
+            ) {
+              return // Do not report this literal
+            }
+          }
+          parent = parent.parent
+        }
 
         context.report({ node, messageId: 'default' })
       },
@@ -497,6 +504,26 @@ export const rule = createRule<Option[], string>({
         const text = getText(node)
 
         if (!text || isTextWhiteListed(text)) return
+
+        // Check if this template literal is part of a VariableDeclarator or AssignmentExpression with id/name in ignoreNames
+        let parent = node.parent
+        while (parent) {
+          if (parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator) {
+            const variableDeclarator = parent as TSESTree.VariableDeclarator
+            if (isIdentifier(variableDeclarator.id) && isIgnoredName(variableDeclarator.id.name)) {
+              return // Do not report this template literal
+            }
+          } else if (parent.type === TSESTree.AST_NODE_TYPES.AssignmentExpression) {
+            const assignmentExpression = parent as TSESTree.AssignmentExpression
+            if (
+              isIdentifier(assignmentExpression.left) &&
+              isIgnoredName(assignmentExpression.left.name)
+            ) {
+              return // Do not report this template literal
+            }
+          }
+          parent = parent.parent
+        }
 
         context.report({ node, messageId: 'default' })
       },
