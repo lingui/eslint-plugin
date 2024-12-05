@@ -253,8 +253,8 @@ export const rule = createRule<Option[], string>({
             isValidFunctionCall(callee)
           )
         }
+        /* istanbul ignore next */
         default:
-          /* istanbul ignore next */
           return false
       }
     }
