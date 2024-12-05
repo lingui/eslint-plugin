@@ -237,6 +237,11 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: ['variant'] }],
     },
     {
+      name: 'Ignores literals in assignment expression to variable in ignoreNames',
+      code: `let variant; variant = "body";`,
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
       code: `const test = "Hello!"`,
       options: [{ ignoreNames: ['test'] }],
     },
