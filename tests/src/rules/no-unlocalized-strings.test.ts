@@ -232,6 +232,11 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: ['value'] }],
     },
     {
+      name: 'Ignores literals in assignment expression after variable declaration',
+      code: `let variant; variant = input ?? "body";`,
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
       code: `const test = "Hello!"`,
       options: [{ ignoreNames: ['test'] }],
     },
@@ -311,6 +316,12 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: 'export const a = `hello string`;', errors },
     { code: "const ge = 'Select tax code'", errors },
     { code: 'const a = `Foo`;', errors },
+    {
+      name: 'Reports error when variable name is not in ignoreNames',
+      code: 'const other = input ?? "body";',
+      options: [{ ignoreNames: ['variant'] }],
+      errors: [{ messageId: 'default', line: 1, column: 24 }],
+    },
     { code: 'const a = call(`Ffo`);', errors },
     { code: 'var a = {foo: `Bar`};', errors },
     {
