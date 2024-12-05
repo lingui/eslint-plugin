@@ -82,6 +82,31 @@ function unwrapTSAsExpression(
   return node
 }
 
+function isInIgnoredVariableOrAssignment(
+  node: TSESTree.Node,
+  isIgnoredName: (name: string) => boolean,
+): boolean {
+  let parent = node.parent
+  while (parent) {
+    if (parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator) {
+      const variableDeclarator = parent as TSESTree.VariableDeclarator
+      if (isIdentifier(variableDeclarator.id) && isIgnoredName(variableDeclarator.id.name)) {
+        return true
+      }
+    } else if (parent.type === TSESTree.AST_NODE_TYPES.AssignmentExpression) {
+      const assignmentExpression = parent as TSESTree.AssignmentExpression
+      if (
+        isIdentifier(assignmentExpression.left) &&
+        isIgnoredName(assignmentExpression.left.name)
+      ) {
+        return true
+      }
+    }
+    parent = parent.parent
+  }
+  return false
+}
+
 export const name = 'no-unlocalized-strings'
 export const rule = createRule<Option[], string>({
   name,
@@ -470,6 +495,7 @@ export const rule = createRule<Option[], string>({
         if (visited.has(node)) return
         processTextNode(node)
       },
+
       'Literal:exit'(node: TSESTree.Literal) {
         if (visited.has(node)) return
         const trimmed = `${node.value}`.trim()
@@ -477,52 +503,21 @@ export const rule = createRule<Option[], string>({
 
         if (isTextWhiteListed(trimmed)) return
 
-        // Check if this literal is part of a VariableDeclarator or AssignmentExpression with id/name in ignoreNames
-        let parent = node.parent
-        while (parent) {
-          if (parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator) {
-            const variableDeclarator = parent as TSESTree.VariableDeclarator
-            if (isIdentifier(variableDeclarator.id) && isIgnoredName(variableDeclarator.id.name)) {
-              return // Do not report this literal
-            }
-          } else if (parent.type === TSESTree.AST_NODE_TYPES.AssignmentExpression) {
-            const assignmentExpression = parent as TSESTree.AssignmentExpression
-            if (
-              isIdentifier(assignmentExpression.left) &&
-              isIgnoredName(assignmentExpression.left.name)
-            ) {
-              return // Do not report this literal
-            }
-          }
-          parent = parent.parent
+        if (isInIgnoredVariableOrAssignment(node, isIgnoredName)) {
+          return // Do not report this literal
         }
 
         context.report({ node, messageId: 'default' })
       },
+
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         if (visited.has(node)) return
         const text = getText(node)
 
         if (!text || isTextWhiteListed(text)) return
 
-        // Check if this template literal is part of a VariableDeclarator or AssignmentExpression with id/name in ignoreNames
-        let parent = node.parent
-        while (parent) {
-          if (parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator) {
-            const variableDeclarator = parent as TSESTree.VariableDeclarator
-            if (isIdentifier(variableDeclarator.id) && isIgnoredName(variableDeclarator.id.name)) {
-              return // Do not report this template literal
-            }
-          } else if (parent.type === TSESTree.AST_NODE_TYPES.AssignmentExpression) {
-            const assignmentExpression = parent as TSESTree.AssignmentExpression
-            if (
-              isIdentifier(assignmentExpression.left) &&
-              isIgnoredName(assignmentExpression.left.name)
-            ) {
-              return // Do not report this template literal
-            }
-          }
-          parent = parent.parent
+        if (isInIgnoredVariableOrAssignment(node, isIgnoredName)) {
+          return // Do not report this template literal
         }
 
         context.report({ node, messageId: 'default' })

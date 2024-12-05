@@ -242,6 +242,11 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: ['variant'] }],
     },
     {
+      name: 'Ignores literals assigned to object properties when property name is in ignoreNames',
+      code: `const obj = {}; obj.variant = "body";`,
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
       code: `const test = "Hello!"`,
       options: [{ ignoreNames: ['test'] }],
     },
@@ -326,6 +331,12 @@ ruleTester.run<string, Option[]>(name, rule, {
       code: 'const other = input ?? "body";',
       options: [{ ignoreNames: ['variant'] }],
       errors: [{ messageId: 'default', line: 1, column: 24 }],
+    },
+    {
+      name: 'Reports error for assignment expression to variable not in ignoreNames',
+      code: `let otherVariable; otherVariable = "body";`,
+      options: [{ ignoreNames: ['variant'] }],
+      errors: [{ messageId: 'default', line: 1, column: 36 }],
     },
     { code: 'const a = call(`Ffo`);', errors },
     { code: 'var a = {foo: `Bar`};', errors },
