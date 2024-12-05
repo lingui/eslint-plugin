@@ -82,28 +82,50 @@ function unwrapTSAsExpression(
   return node
 }
 
-function isInIgnoredVariableOrAssignment(
+function isAcceptableExpression(node: TSESTree.Node): boolean {
+  switch (node.type) {
+    case TSESTree.AST_NODE_TYPES.Literal:
+    case TSESTree.AST_NODE_TYPES.TemplateLiteral:
+    case TSESTree.AST_NODE_TYPES.LogicalExpression:
+    case TSESTree.AST_NODE_TYPES.BinaryExpression:
+    case TSESTree.AST_NODE_TYPES.ConditionalExpression:
+    case TSESTree.AST_NODE_TYPES.UnaryExpression:
+    case TSESTree.AST_NODE_TYPES.TSAsExpression:
+      return true
+    default:
+      return false
+  }
+}
+
+function isAssignedToIgnoredVariable(
   node: TSESTree.Node,
   isIgnoredName: (name: string) => boolean,
 ): boolean {
-  let parent = node.parent
-  while (parent) {
-    if (parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator) {
-      const variableDeclarator = parent as TSESTree.VariableDeclarator
-      if (isIdentifier(variableDeclarator.id) && isIgnoredName(variableDeclarator.id.name)) {
-        return true
-      }
-    } else if (parent.type === TSESTree.AST_NODE_TYPES.AssignmentExpression) {
-      const assignmentExpression = parent as TSESTree.AssignmentExpression
-      if (
-        isIdentifier(assignmentExpression.left) &&
-        isIgnoredName(assignmentExpression.left.name)
-      ) {
-        return true
-      }
-    }
+  let current = node
+  let parent = current.parent
+
+  while (parent && isAcceptableExpression(parent)) {
+    current = parent
     parent = parent.parent
   }
+
+  if (!parent) return false
+
+  if (parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator && parent.init === current) {
+    const variableDeclarator = parent as TSESTree.VariableDeclarator
+    if (isIdentifier(variableDeclarator.id) && isIgnoredName(variableDeclarator.id.name)) {
+      return true
+    }
+  } else if (
+    parent.type === TSESTree.AST_NODE_TYPES.AssignmentExpression &&
+    parent.right === current
+  ) {
+    const assignmentExpression = parent as TSESTree.AssignmentExpression
+    if (isIdentifier(assignmentExpression.left) && isIgnoredName(assignmentExpression.left.name)) {
+      return true
+    }
+  }
+
   return false
 }
 
@@ -503,7 +525,7 @@ export const rule = createRule<Option[], string>({
 
         if (isTextWhiteListed(trimmed)) return
 
-        if (isInIgnoredVariableOrAssignment(node, isIgnoredName)) {
+        if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
           return // Do not report this literal
         }
 
@@ -516,7 +538,7 @@ export const rule = createRule<Option[], string>({
 
         if (!text || isTextWhiteListed(text)) return
 
-        if (isInIgnoredVariableOrAssignment(node, isIgnoredName)) {
+        if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
           return // Do not report this template literal
         }
 

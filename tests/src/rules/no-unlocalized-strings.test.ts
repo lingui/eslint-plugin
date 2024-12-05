@@ -353,6 +353,12 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: ['variant'] }],
       errors: [{ messageId: 'default', line: 1, column: 36 }],
     },
+    {
+      name: 'Reports error for assignment expression to object property not in ignoreNames',
+      code: 'const variant = myFunction({someProperty: "Hello World!"})',
+      options: [{ ignoreNames: ['variant'] }],
+      errors: [{ messageId: 'default', line: 1, column: 43 }],
+    },
     { code: 'const a = call(`Ffo`);', errors },
     { code: 'var a = {foo: `Bar`};', errors },
     {
