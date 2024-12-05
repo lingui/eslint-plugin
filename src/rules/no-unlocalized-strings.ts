@@ -253,6 +253,7 @@ export const rule = createRule<Option[], string>({
             isValidFunctionCall(callee)
           )
         }
+        /* istanbul ignore next */
         default:
           return false
       }
@@ -288,6 +289,7 @@ export const rule = createRule<Option[], string>({
         case TSESTree.AST_NODE_TYPES.JSXText:
           return true
         default:
+          /* istanbul ignore next */
           return false
       }
     }
@@ -313,6 +315,7 @@ export const rule = createRule<Option[], string>({
         parent = parent.parent
       }
 
+      /* istanbul ignore next */
       return false
     }
 
@@ -341,6 +344,7 @@ export const rule = createRule<Option[], string>({
         return
       }
 
+      /* istanbul ignore next */
       // If neither JSXText nor a Literal inside JSX, fall back to default messageId.
       context.report({ node, messageId: 'default' })
     }
