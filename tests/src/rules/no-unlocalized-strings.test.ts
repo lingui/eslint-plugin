@@ -383,6 +383,10 @@ ruleTester.run<string, Option[]>(name, rule, {
       errors: [{ messageId: 'default', line: 1, column: 24 }],
     },
     {
+      code: 'const comp = <div>{myFunction("Hello world")}</div>',
+      errors: [{ messageId: 'default' }],
+    },
+    {
       name: 'Reports error for assignment expression to variable not in ignoreNames',
       code: `let otherVariable; otherVariable = "body";`,
       options: [{ ignoreNames: ['variant'] }],
