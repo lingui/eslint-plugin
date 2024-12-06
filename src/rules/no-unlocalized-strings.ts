@@ -73,15 +73,6 @@ function createMatcher(patterns: MatcherDef[]) {
   }
 }
 
-function unwrapTSAsExpression(
-  node: TSESTree.Expression,
-): TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.Expression {
-  while (node.type === TSESTree.AST_NODE_TYPES.TSAsExpression) {
-    node = node.expression
-  }
-  return node
-}
-
 function isAcceptableExpression(node: TSESTree.Node): boolean {
   switch (node.type) {
     case TSESTree.AST_NODE_TYPES.Literal:
