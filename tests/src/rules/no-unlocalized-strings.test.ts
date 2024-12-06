@@ -209,12 +209,87 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: [{ regex: { pattern: '^[A-Z0-9_-]+$' } }] }],
     },
     {
+      name: 'Does not report when literal is assigned to an object property named in ignoreNames',
+      code: 'const x = { variant: "Hello!" }',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Does not report when template literal is assigned to an object property named in ignoreNames',
+      code: 'const x = { variant: `Hello ${"World"}` }',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Does not report with nullish coalescing inside object property named in ignoreNames',
+      code: 'const x = { variant: props.variant ?? "body" }',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Does not report with ternary operator inside object property named in ignoreNames',
+      code: 'const x = { variant: condition ? "yes" : "no" }',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
       name: 'computed keys should be ignored by default, StringLiteral',
       code: `obj["key with space"] = 5`,
     },
     {
       name: 'computed keys should be ignored by default with TplLiteral',
       code: `obj[\`key with space\`] = 5`,
+    },
+    {
+      name: 'Supports default value assignment',
+      code: 'const variant = input || "body"',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Supports nullish coalescing operator',
+      code: 'const variant = input ?? "body"',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Supports ternary operator',
+      code: 'const value = condition ? "yes" : "no"',
+      options: [{ ignoreNames: ['value'] }],
+    },
+    {
+      name: 'Supports default value assignment - template literal version',
+      code: 'const variant = input || `body`',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Supports nullish coalescing operator - template literal version',
+      code: 'const variant = input ?? `body`',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Supports ternary operator - template literal version',
+      code: 'const value = condition ? `yes` : `no`',
+      options: [{ ignoreNames: ['value'] }],
+    },
+    {
+      name: 'Ignores literals in assignment expression after variable declaration',
+      code: `let variant; variant = input ?? "body";`,
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Ignores literals in assignment expression to variable in ignoreNames',
+      code: `let variant; variant = "body";`,
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Ignores literals assigned to object properties when property name is in ignoreNames',
+      code: `const obj = {}; obj.variant = "body";`,
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Covers Literal in a nullish coalescing acceptable expression',
+      code: 'const variant = input ?? "Hello!";',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Covers TemplateLiteral in a ternary acceptable expression',
+      code: 'const variant = condition ? `Hello ${"World"}` : `Fallback`;',
+      options: [{ ignoreNames: ['variant'] }],
     },
     {
       code: `const test = "Hello!"`,
@@ -296,6 +371,33 @@ ruleTester.run<string, Option[]>(name, rule, {
     { code: 'export const a = `hello string`;', errors },
     { code: "const ge = 'Select tax code'", errors },
     { code: 'const a = `Foo`;', errors },
+    {
+      name: 'Reports error for unlocalized strings inside JSX',
+      code: '<div>{"Hello World!"}</div>',
+      errors: [{ messageId: 'forJsxText', line: 1, column: 7 }],
+    },
+    {
+      name: 'Reports error when variable name is not in ignoreNames',
+      code: 'const other = input ?? "body";',
+      options: [{ ignoreNames: ['variant'] }],
+      errors: [{ messageId: 'default', line: 1, column: 24 }],
+    },
+    {
+      code: 'const comp = <div>{myFunction("Hello world")}</div>',
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'Reports error for assignment expression to variable not in ignoreNames',
+      code: `let otherVariable; otherVariable = "body";`,
+      options: [{ ignoreNames: ['variant'] }],
+      errors: [{ messageId: 'default', line: 1, column: 36 }],
+    },
+    {
+      name: 'Reports error for assignment expression to object property not in ignoreNames',
+      code: 'const variant = myFunction({someProperty: "Hello World!"})',
+      options: [{ ignoreNames: ['variant'] }],
+      errors: [{ messageId: 'default', line: 1, column: 43 }],
+    },
     { code: 'const a = call(`Ffo`);', errors },
     { code: 'var a = {foo: `Bar`};', errors },
     {
@@ -432,11 +534,11 @@ jsxTester.run('no-unlocalized-strings', rule, {
     },
     {
       code: '<Component>{"Hello"}</Component>',
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: '<Component>{`Hello`}</Component>',
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: '<Component>abc</Component>',
@@ -444,11 +546,11 @@ jsxTester.run('no-unlocalized-strings', rule, {
     },
     {
       code: "<Component>{'abc'}</Component>",
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: '<Component>{`abc`}</Component>',
-      errors,
+      errors: [{ messageId: 'forJsxText' }],
     },
     {
       code: '<Component>{someVar === 1 ? `Abc` : `Def`}</Component>',
