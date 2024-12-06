@@ -209,6 +209,26 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ ignoreNames: [{ regex: { pattern: '^[A-Z0-9_-]+$' } }] }],
     },
     {
+      name: 'Does not report when literal is assigned to an object property named in ignoreNames',
+      code: 'const x = { variant: "Hello!" }',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Does not report when template literal is assigned to an object property named in ignoreNames',
+      code: 'const x = { variant: `Hello ${"World"}` }',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Does not report with nullish coalescing inside object property named in ignoreNames',
+      code: 'const x = { variant: props.variant ?? "body" }',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
+      name: 'Does not report with ternary operator inside object property named in ignoreNames',
+      code: 'const x = { variant: condition ? "yes" : "no" }',
+      options: [{ ignoreNames: ['variant'] }],
+    },
+    {
       name: 'computed keys should be ignored by default, StringLiteral',
       code: `obj["key with space"] = 5`,
     },
