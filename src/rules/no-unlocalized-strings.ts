@@ -259,6 +259,28 @@ export const rule = createRule<Option[], string>({
       }
     }
 
+    /**
+     * Helper function to determine if a node is inside an ignored property.
+     */
+    function isInsideIgnoredProperty(node: TSESTree.Node): boolean {
+      let parent = node.parent
+
+      while (parent) {
+        if (parent.type === TSESTree.AST_NODE_TYPES.Property) {
+          const key = parent.key
+          if (
+            (isIdentifier(key) && isIgnoredName(key.name)) ||
+            ((isLiteral(key) || isTemplateLiteral(key)) && isIgnoredName(getText(key)))
+          ) {
+            return true
+          }
+        }
+        parent = parent.parent
+      }
+
+      return false
+    }
+
     const ignoredJSXSymbols = ['&larr;', '&nbsp;', '&middot;']
 
     const ignoredMethodsOnTypes = option?.ignoreMethodsOnTypes || []
@@ -449,24 +471,6 @@ export const rule = createRule<Option[], string>({
           visited.add(node)
         }
       },
-      'Property > :matches(Literal,TemplateLiteral,TSAsExpression)'(
-        node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.TSAsExpression,
-      ) {
-        const parent = node.parent as TSESTree.Property
-
-        if (
-          (isIdentifier(parent.key) && isIgnoredName(parent.key.name)) ||
-          ((isLiteral(parent.key) || isTemplateLiteral(parent.key)) &&
-            isIgnoredName(getText(parent.key)))
-        ) {
-          // Unwrap TSAsExpression nodes
-          const unwrappedNode = unwrapTSAsExpression(node)
-
-          if (isLiteral(unwrappedNode) || isTemplateLiteral(unwrappedNode)) {
-            visited.add(unwrappedNode)
-          }
-        }
-      },
       'MemberExpression[computed=true] > :matches(Literal,TemplateLiteral)'(
         node: TSESTree.Literal | TSESTree.TemplateLiteral,
       ) {
@@ -561,6 +565,11 @@ export const rule = createRule<Option[], string>({
           return // Do not report this literal
         }
 
+        // New check: if the literal is inside an ignored property, do not report
+        if (isInsideIgnoredProperty(node)) {
+          return
+        }
+
         context.report({ node, messageId: 'default' })
       },
 
@@ -572,6 +581,11 @@ export const rule = createRule<Option[], string>({
 
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
           return // Do not report this template literal
+        }
+
+        // New check: if the template literal is inside an ignored property, do not report
+        if (isInsideIgnoredProperty(node)) {
+          return
         }
 
         context.report({ node, messageId: 'default' })
