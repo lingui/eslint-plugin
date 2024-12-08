@@ -309,10 +309,7 @@ export const rule = createRule<Option[], string>({
       'JSXAttribute :matches(Literal,TemplateLiteral)'(
         node: TSESTree.Literal | TSESTree.TemplateLiteral,
       ) {
-        const parent = getNearestAncestor<TSESTree.JSXAttribute>(
-          node,
-          TSESTree.AST_NODE_TYPES.JSXAttribute,
-        )
+        const parent = getNearestAncestor(node, TSESTree.AST_NODE_TYPES.JSXAttribute)
         const attrName = getAttrName(parent?.name?.name)
 
         // allow <MyComponent className="active" />
@@ -321,10 +318,7 @@ export const rule = createRule<Option[], string>({
           return
         }
 
-        const jsxElement = getNearestAncestor<TSESTree.JSXOpeningElement>(
-          node,
-          TSESTree.AST_NODE_TYPES.JSXOpeningElement,
-        )
+        const jsxElement = getNearestAncestor(node, TSESTree.AST_NODE_TYPES.JSXOpeningElement)
         const tagName = getIdentifierName(jsxElement?.name)
         const attributeNames = jsxElement?.attributes.map(
           (attr) => isJSXAttribute(attr) && getAttrName(attr.name.name),
@@ -425,10 +419,7 @@ export const rule = createRule<Option[], string>({
       'CallExpression :matches(Literal,TemplateLiteral)'(
         node: TSESTree.Literal | TSESTree.TemplateLiteral,
       ) {
-        const parent = getNearestAncestor<TSESTree.CallExpression>(
-          node,
-          TSESTree.AST_NODE_TYPES.CallExpression,
-        )
+        const parent = getNearestAncestor(node, TSESTree.AST_NODE_TYPES.CallExpression)
 
         if (isValidFunctionCall(parent)) {
           visited.add(node)
@@ -439,10 +430,7 @@ export const rule = createRule<Option[], string>({
       'NewExpression :matches(Literal,TemplateLiteral)'(
         node: TSESTree.Literal | TSESTree.TemplateLiteral,
       ) {
-        const parent = getNearestAncestor<TSESTree.NewExpression>(
-          node,
-          TSESTree.AST_NODE_TYPES.NewExpression,
-        )
+        const parent = getNearestAncestor(node, TSESTree.AST_NODE_TYPES.NewExpression)
 
         if (isValidFunctionCall(parent)) {
           visited.add(node)
