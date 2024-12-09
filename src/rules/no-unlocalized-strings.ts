@@ -269,8 +269,9 @@ export const rule = createRule<Option[], string>({
       return (
         // Property value in object literal
         (parent.type === TSESTree.AST_NODE_TYPES.Property && parent.value === node) ||
-        // Property value in interface/type (string literal type)
-        parent.type === TSESTree.AST_NODE_TYPES.TSLiteralType
+        // Property value in interface/type
+        (parent.type === TSESTree.AST_NODE_TYPES.TSPropertySignature &&
+          parent.typeAnnotation === node.parent)
       )
     }
 
