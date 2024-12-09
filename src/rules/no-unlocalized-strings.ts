@@ -75,7 +75,6 @@ function createMatcher(patterns: MatcherDef[]) {
 
 function isAcceptableExpression(node: TSESTree.Node): boolean {
   switch (node.type) {
-    case TSESTree.AST_NODE_TYPES.Literal:
     case TSESTree.AST_NODE_TYPES.TemplateLiteral:
     case TSESTree.AST_NODE_TYPES.LogicalExpression:
     case TSESTree.AST_NODE_TYPES.BinaryExpression:
@@ -250,6 +249,18 @@ export const rule = createRule<Option[], string>({
       }
     }
 
+    function isPropertyKey(node: TSESTree.Node): boolean {
+      const parent = node.parent
+      if (!parent) return false
+
+      return (
+        // Property in object literal
+        (parent.type === TSESTree.AST_NODE_TYPES.Property && parent.key === node) ||
+        // Property in interface/type
+        (parent.type === TSESTree.AST_NODE_TYPES.TSPropertySignature && parent.key === node)
+      )
+    }
+
     /**
      * Helper function to determine if a node is inside an ignored property.
      */
@@ -332,6 +343,24 @@ export const rule = createRule<Option[], string>({
       return false
     }
 
+    function isInsideTypeContext(node: TSESTree.Node): boolean {
+      let parent = node.parent
+
+      while (parent) {
+        switch (parent.type) {
+          case TSESTree.AST_NODE_TYPES.TSPropertySignature:
+          case TSESTree.AST_NODE_TYPES.TSIndexSignature:
+          case TSESTree.AST_NODE_TYPES.TSTypeAnnotation:
+          case TSESTree.AST_NODE_TYPES.TSTypeLiteral:
+          case TSESTree.AST_NODE_TYPES.TSLiteralType:
+            return true
+        }
+        parent = parent.parent
+      }
+
+      return false
+    }
+
     const processTextNode = (
       node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
     ) => {
@@ -384,10 +413,6 @@ export const rule = createRule<Option[], string>({
         node,
       ) {
         visited.add(node)
-      },
-
-      'JSXElement > Literal'(node: TSESTree.Literal) {
-        processTextNode(node)
       },
 
       'JSXElement > JSXExpressionContainer > Literal'(node: TSESTree.Literal) {
@@ -552,12 +577,21 @@ export const rule = createRule<Option[], string>({
 
         if (isTextWhiteListed(trimmed)) return
 
+        // If this is a property key and the property name is ignored, skip it
+        if (isPropertyKey(node) && isIgnoredName(String(node.value))) {
+          return
+        }
+
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
           return // Do not report this literal
         }
 
-        // New check: if the literal is inside an ignored property, do not report
         if (isInsideIgnoredProperty(node)) {
+          return
+        }
+
+        // Only ignore type context for property keys
+        if (isInsideTypeContext(node)) {
           return
         }
 
@@ -574,7 +608,6 @@ export const rule = createRule<Option[], string>({
           return // Do not report this template literal
         }
 
-        // New check: if the template literal is inside an ignored property, do not report
         if (isInsideIgnoredProperty(node)) {
           return
         }

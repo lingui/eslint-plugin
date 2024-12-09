@@ -363,6 +363,159 @@ ruleTester.run<string, Option[]>(name, rule, {
       foo.get("string with a spaces")`,
       options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
     },
+    {
+      name: 'interface property with html attribute',
+      code: "interface FieldLabelProps { 'htmlFor': string; }",
+    },
+    {
+      name: 'interface property with aria attribute',
+      code: "interface FieldInputProps { 'aria-required': boolean; }",
+    },
+    {
+      name: 'type alias with string literal properties',
+      code: `
+        type ButtonProps = {
+          'aria-pressed': boolean;
+          'data-testid': string;
+        }
+      `,
+    },
+    {
+      name: 'interface with nested type',
+      code: `
+        interface ComplexProps {
+          details: {
+            'nested-attr': string;
+          };
+        }
+      `,
+    },
+    {
+      name: 'interface with string literal type',
+      code: `
+        interface Props {
+          message: 'This is a type';
+          variant: 'primary' | 'secondary';
+        }
+      `,
+    },
+    {
+      name: 'type alias with string literal union',
+      code: "type ButtonVariant = 'primary' | 'secondary' | 'tertiary';",
+    },
+    {
+      name: 'interface with optional property using string literal type',
+      code: `
+        interface Props {
+          type?: 'success' | 'error';
+          message: string;
+        }
+      `,
+    },
+    {
+      name: 'type with index signature using string literal',
+      code: `
+        type Dict = {
+          [K in 'foo' | 'bar']: string;
+        }
+      `,
+    },
+    {
+      name: 'interface with index signature using string literal',
+      code: `
+        interface Dict {
+          ['some-key']: string;
+        }
+      `,
+    },
+    {
+      name: 'JSX with empty text',
+      code: `
+        function Component() {
+          return <div>
+            {/* this creates an empty JSXText node */}
+          </div>
+        }
+      `,
+    },
+    {
+      name: 'property key in type literal',
+      code: `
+        type Options = {
+          'some-key': {
+            'nested-key': string;
+          }
+        }
+      `,
+    },
+    {
+      name: 'JSX with empty template literal in expression container',
+      code: 'function Component() { return <div>{``}</div> }',
+    },
+    {
+      name: 'JSX with empty text node',
+      code: `
+        function Component() {
+          return <div>
+
+          </div>
+        }
+      `,
+    },
+    {
+      name: 'JSX with empty string literal',
+      code: `
+        function Component() {
+          return <div>
+            {''}
+          </div>
+        }
+      `,
+    },
+    // For isAcceptableExpression coverage (Image 1)
+    {
+      name: 'logical expression in ignored name assignment',
+      code: `const MY_CONST = foo && 'some string';`,
+      options: [ignoreUpperCaseName],
+    },
+    {
+      name: 'unary expression in ignored name assignment',
+      code: `const MY_CONST = !'some string';`,
+      options: [ignoreUpperCaseName],
+    },
+    {
+      name: 'TSAsExpression in ignored name assignment',
+      code: `const MY_CONST = ('some string' as string);`,
+      options: [ignoreUpperCaseName],
+    },
+    {
+      name: 'type with string literal in index signature',
+      code: `
+        type Test = {
+          ['literal key']: string;
+        }
+      `,
+    },
+    {
+      name: 'type annotation with literal type',
+      code: `let x: 'foo' | 'bar';`,
+    },
+    {
+      name: 'type literal with string literal',
+      code: `
+        type Test = {
+          prop: 'literal value';
+        }
+      `,
+    },
+    {
+      name: 'JSX text content',
+      code: `
+        function Component() {
+          return <Trans>JSX text content</Trans>
+        }
+      `,
+    },
   ],
 
   invalid: [
@@ -481,6 +634,38 @@ ruleTester.run<string, Option[]>(name, rule, {
             : 'Search for accounts, merchants, and more...'
     }`,
       errors: [{ messageId: 'default' }, { messageId: 'default' }],
+    },
+    {
+      name: 'object literal properties should still be checked',
+      code: `
+        const props = {
+          label: 'This should be translated'
+        };
+      `,
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'regular string assignments should still be checked',
+      code: `
+        let message = 'This should be translated';
+      `,
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'JSX with direct string literal child',
+      code: `
+        function Component() {
+          return <Trans>{'direct literal'}</Trans>
+        }
+      `,
+      errors: [{ messageId: 'forJsxText' }],
+    },
+    {
+      name: 'TSAs expression with string literal',
+      code: `
+        const test = ('hello' as any as string);
+      `,
+      errors: [{ messageId: 'default' }],
     },
   ],
 })
