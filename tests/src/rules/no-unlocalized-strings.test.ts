@@ -364,15 +364,15 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
     },
     {
-      name: 'basic interface with htmlFor attribute',
+      name: 'interface property with html attribute',
       code: "interface FieldLabelProps { 'htmlFor': string; }",
     },
     {
-      name: 'interface with aria attribute',
+      name: 'interface property with aria attribute',
       code: "interface FieldInputProps { 'aria-required': boolean; }",
     },
     {
-      name: 'type alias with multiple attributes',
+      name: 'type alias with string literal properties',
       code: `
         type ButtonProps = {
           'aria-pressed': boolean;
@@ -391,11 +391,24 @@ ruleTester.run<string, Option[]>(name, rule, {
       `,
     },
     {
-      name: 'interface with optional and readonly properties',
+      name: 'interface with string literal type',
       code: `
         interface Props {
-          readonly 'data-locked': string;
-          'data-optional'?: string;
+          message: 'This is a type';
+          variant: 'primary' | 'secondary';
+        }
+      `,
+    },
+    {
+      name: 'type alias with string literal union',
+      code: "type ButtonVariant = 'primary' | 'secondary' | 'tertiary';",
+    },
+    {
+      name: 'interface with optional property using string literal type',
+      code: `
+        interface Props {
+          type?: 'success' | 'error';
+          message: string;
         }
       `,
     },
@@ -519,13 +532,20 @@ ruleTester.run<string, Option[]>(name, rule, {
       errors: [{ messageId: 'default' }, { messageId: 'default' }],
     },
     {
-      name: 'string literals in object literals should be translated',
+      name: 'object literal properties should still be checked',
       code: `
         const props = {
-          'data-testid': 'This should be translated'
+          label: 'This should be translated'
         };
       `,
-      errors: [{ messageId: 'default' }, { messageId: 'default' }],
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'regular string assignments should still be checked',
+      code: `
+        let message = 'This should be translated';
+      `,
+      errors: [{ messageId: 'default' }],
     },
   ],
 })
