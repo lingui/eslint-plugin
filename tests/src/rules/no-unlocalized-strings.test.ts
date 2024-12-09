@@ -472,6 +472,50 @@ ruleTester.run<string, Option[]>(name, rule, {
         }
       `,
     },
+    // For isAcceptableExpression coverage (Image 1)
+    {
+      name: 'logical expression in ignored name assignment',
+      code: `const MY_CONST = foo && 'some string';`,
+      options: [ignoreUpperCaseName],
+    },
+    {
+      name: 'unary expression in ignored name assignment',
+      code: `const MY_CONST = !'some string';`,
+      options: [ignoreUpperCaseName],
+    },
+    {
+      name: 'TSAsExpression in ignored name assignment',
+      code: `const MY_CONST = ('some string' as string);`,
+      options: [ignoreUpperCaseName],
+    },
+    {
+      name: 'type with string literal in index signature',
+      code: `
+        type Test = {
+          ['literal key']: string;
+        }
+      `,
+    },
+    {
+      name: 'type annotation with literal type',
+      code: `let x: 'foo' | 'bar';`,
+    },
+    {
+      name: 'type literal with string literal',
+      code: `
+        type Test = {
+          prop: 'literal value';
+        }
+      `,
+    },
+    {
+      name: 'JSX text content',
+      code: `
+        function Component() {
+          return <Trans>JSX text content</Trans>
+        }
+      `,
+    },
   ],
 
   invalid: [
@@ -604,6 +648,22 @@ ruleTester.run<string, Option[]>(name, rule, {
       name: 'regular string assignments should still be checked',
       code: `
         let message = 'This should be translated';
+      `,
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'JSX with direct string literal child',
+      code: `
+        function Component() {
+          return <Trans>{'direct literal'}</Trans>
+        }
+      `,
+      errors: [{ messageId: 'forJsxText' }],
+    },
+    {
+      name: 'TSAs expression with string literal',
+      code: `
+        const test = ('hello' as any as string);
       `,
       errors: [{ messageId: 'default' }],
     },
