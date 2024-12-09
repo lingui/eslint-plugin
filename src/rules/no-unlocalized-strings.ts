@@ -613,11 +613,6 @@ export const rule = createRule<Option[], string>({
           return
         }
 
-        // Add check for interface and type contexts
-        if (isInsideTypeContext(node)) {
-          return
-        }
-
         context.report({ node, messageId: 'default' })
       },
 
