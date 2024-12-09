@@ -75,7 +75,6 @@ function createMatcher(patterns: MatcherDef[]) {
 
 function isAcceptableExpression(node: TSESTree.Node): boolean {
   switch (node.type) {
-    case TSESTree.AST_NODE_TYPES.Literal:
     case TSESTree.AST_NODE_TYPES.TemplateLiteral:
     case TSESTree.AST_NODE_TYPES.LogicalExpression:
     case TSESTree.AST_NODE_TYPES.BinaryExpression:
@@ -349,8 +348,6 @@ export const rule = createRule<Option[], string>({
 
       while (parent) {
         switch (parent.type) {
-          case TSESTree.AST_NODE_TYPES.TSInterfaceDeclaration:
-          case TSESTree.AST_NODE_TYPES.TSTypeAliasDeclaration:
           case TSESTree.AST_NODE_TYPES.TSPropertySignature:
           case TSESTree.AST_NODE_TYPES.TSIndexSignature:
           case TSESTree.AST_NODE_TYPES.TSTypeAnnotation:
@@ -416,10 +413,6 @@ export const rule = createRule<Option[], string>({
         node,
       ) {
         visited.add(node)
-      },
-
-      'JSXElement > Literal'(node: TSESTree.Literal) {
-        processTextNode(node)
       },
 
       'JSXElement > JSXExpressionContainer > Literal'(node: TSESTree.Literal) {
@@ -575,13 +568,6 @@ export const rule = createRule<Option[], string>({
       'JSXText:exit'(node: TSESTree.JSXText) {
         if (visited.has(node)) return
         processTextNode(node)
-      },
-
-      'TSIndexSignature :matches(Literal,TemplateLiteral)'(
-        node: TSESTree.Literal | TSESTree.TemplateLiteral,
-      ) {
-        // Handle index signatures
-        visited.add(node)
       },
 
       // Modify the existing Literal:exit visitor to check for interface contexts
