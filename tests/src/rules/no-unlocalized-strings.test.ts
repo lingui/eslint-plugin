@@ -525,7 +525,7 @@ ruleTester.run<string, Option[]>(name, rule, {
           'data-testid': 'This should be translated'
         };
       `,
-      errors: [{ messageId: 'default' }],
+      errors: [{ messageId: 'default' }, { messageId: 'default' }],
     },
   ],
 })
