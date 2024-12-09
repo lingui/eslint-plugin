@@ -448,6 +448,30 @@ ruleTester.run<string, Option[]>(name, rule, {
         }
       `,
     },
+    {
+      name: 'JSX with empty template literal in expression container',
+      code: 'function Component() { return <div>{``}</div> }',
+    },
+    {
+      name: 'JSX with empty text node',
+      code: `
+        function Component() {
+          return <div>
+
+          </div>
+        }
+      `,
+    },
+    {
+      name: 'JSX with empty string literal',
+      code: `
+        function Component() {
+          return <div>
+            {''}
+          </div>
+        }
+      `,
+    },
   ],
 
   invalid: [
