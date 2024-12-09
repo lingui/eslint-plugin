@@ -332,6 +332,25 @@ export const rule = createRule<Option[], string>({
       return false
     }
 
+    function isInsideTypeContext(node: TSESTree.Node): boolean {
+      let parent = node.parent
+
+      while (parent) {
+        switch (parent.type) {
+          case TSESTree.AST_NODE_TYPES.TSInterfaceDeclaration:
+          case TSESTree.AST_NODE_TYPES.TSTypeAliasDeclaration:
+          case TSESTree.AST_NODE_TYPES.TSPropertySignature:
+          case TSESTree.AST_NODE_TYPES.TSIndexSignature:
+          case TSESTree.AST_NODE_TYPES.TSTypeAnnotation:
+          case TSESTree.AST_NODE_TYPES.TSTypeLiteral:
+            return true
+        }
+        parent = parent.parent
+      }
+
+      return false
+    }
+
     const processTextNode = (
       node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
     ) => {
@@ -545,6 +564,36 @@ export const rule = createRule<Option[], string>({
         processTextNode(node)
       },
 
+      // Add new visitors for interface-related nodes
+      'TSInterfaceDeclaration :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
+        // Mark all string literals in interfaces as visited to prevent them from being reported
+        visited.add(node)
+      },
+
+      'TSTypeAliasDeclaration :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
+        // Also handle type aliases similarly
+        visited.add(node)
+      },
+
+      'TSPropertySignature :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
+        // Handle property signatures in interfaces and type literals
+        visited.add(node)
+      },
+
+      'TSIndexSignature :matches(Literal,TemplateLiteral)'(
+        node: TSESTree.Literal | TSESTree.TemplateLiteral,
+      ) {
+        // Handle index signatures
+        visited.add(node)
+      },
+
+      // Modify the existing Literal:exit visitor to check for interface contexts
       'Literal:exit'(node: TSESTree.Literal) {
         if (visited.has(node)) return
         const trimmed = `${node.value}`.trim()
@@ -556,8 +605,12 @@ export const rule = createRule<Option[], string>({
           return // Do not report this literal
         }
 
-        // New check: if the literal is inside an ignored property, do not report
         if (isInsideIgnoredProperty(node)) {
+          return
+        }
+
+        // Add check for interface and type contexts
+        if (isInsideTypeContext(node)) {
           return
         }
 
@@ -574,8 +627,12 @@ export const rule = createRule<Option[], string>({
           return // Do not report this template literal
         }
 
-        // New check: if the template literal is inside an ignored property, do not report
         if (isInsideIgnoredProperty(node)) {
+          return
+        }
+
+        // Add check for interface and type contexts
+        if (isInsideTypeContext(node)) {
           return
         }
 

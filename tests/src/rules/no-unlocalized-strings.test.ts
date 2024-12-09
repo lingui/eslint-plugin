@@ -363,6 +363,12 @@ ruleTester.run<string, Option[]>(name, rule, {
       foo.get("string with a spaces")`,
       options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
     },
+    {
+      code: "interface FieldLabelProps { 'htmlFor': string; }",
+    },
+    {
+      code: "interface FieldInputProps { 'aria-required': boolean; }",
+    },
   ],
 
   invalid: [
