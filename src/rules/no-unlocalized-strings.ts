@@ -570,7 +570,6 @@ export const rule = createRule<Option[], string>({
         processTextNode(node)
       },
 
-      // Modify the existing Literal:exit visitor to check for interface contexts
       'Literal:exit'(node: TSESTree.Literal) {
         if (visited.has(node)) return
         const trimmed = `${node.value}`.trim()
@@ -584,7 +583,7 @@ export const rule = createRule<Option[], string>({
         }
 
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
-          return
+          return // Do not report this literal
         }
 
         if (isInsideIgnoredProperty(node)) {
