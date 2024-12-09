@@ -364,10 +364,40 @@ ruleTester.run<string, Option[]>(name, rule, {
       options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
     },
     {
+      name: 'basic interface with htmlFor attribute',
       code: "interface FieldLabelProps { 'htmlFor': string; }",
     },
     {
+      name: 'interface with aria attribute',
       code: "interface FieldInputProps { 'aria-required': boolean; }",
+    },
+    {
+      name: 'type alias with multiple attributes',
+      code: `
+        type ButtonProps = {
+          'aria-pressed': boolean;
+          'data-testid': string;
+        }
+      `,
+    },
+    {
+      name: 'interface with nested type',
+      code: `
+        interface ComplexProps {
+          details: {
+            'nested-attr': string;
+          };
+        }
+      `,
+    },
+    {
+      name: 'interface with optional and readonly properties',
+      code: `
+        interface Props {
+          readonly 'data-locked': string;
+          'data-optional'?: string;
+        }
+      `,
     },
   ],
 
@@ -487,6 +517,15 @@ ruleTester.run<string, Option[]>(name, rule, {
             : 'Search for accounts, merchants, and more...'
     }`,
       errors: [{ messageId: 'default' }, { messageId: 'default' }],
+    },
+    {
+      name: 'string literals in object literals should be translated',
+      code: `
+        const props = {
+          'data-testid': 'This should be translated'
+        };
+      `,
+      errors: [{ messageId: 'default' }],
     },
   ],
 })

@@ -250,6 +250,30 @@ export const rule = createRule<Option[], string>({
       }
     }
 
+    function isPropertyKey(node: TSESTree.Node): boolean {
+      const parent = node.parent
+      if (!parent) return false
+
+      return (
+        // Property in object literal
+        (parent.type === TSESTree.AST_NODE_TYPES.Property && parent.key === node) ||
+        // Property in interface/type
+        (parent.type === TSESTree.AST_NODE_TYPES.TSPropertySignature && parent.key === node)
+      )
+    }
+
+    function isPropertyValue(node: TSESTree.Node): boolean {
+      const parent = node.parent
+      if (!parent) return false
+
+      return (
+        // Property value in object literal
+        (parent.type === TSESTree.AST_NODE_TYPES.Property && parent.value === node) ||
+        // Property value in interface/type (string literal type)
+        parent.type === TSESTree.AST_NODE_TYPES.TSLiteralType
+      )
+    }
+
     /**
      * Helper function to determine if a node is inside an ignored property.
      */
@@ -335,6 +359,16 @@ export const rule = createRule<Option[], string>({
     function isInsideTypeContext(node: TSESTree.Node): boolean {
       let parent = node.parent
 
+      // Only ignore the node if it's being used as a property key
+      if (isPropertyKey(node)) {
+        return true
+      }
+
+      // Add this check: If this is a property value, don't ignore it even in type contexts
+      if (isPropertyValue(node)) {
+        return false
+      }
+
       while (parent) {
         switch (parent.type) {
           case TSESTree.AST_NODE_TYPES.TSInterfaceDeclaration:
@@ -343,7 +377,10 @@ export const rule = createRule<Option[], string>({
           case TSESTree.AST_NODE_TYPES.TSIndexSignature:
           case TSESTree.AST_NODE_TYPES.TSTypeAnnotation:
           case TSESTree.AST_NODE_TYPES.TSTypeLiteral:
-            return true
+            // Only return true if we're a property key
+            if (isPropertyKey(node)) {
+              return true
+            }
         }
         parent = parent.parent
       }
@@ -564,28 +601,6 @@ export const rule = createRule<Option[], string>({
         processTextNode(node)
       },
 
-      // Add new visitors for interface-related nodes
-      'TSInterfaceDeclaration :matches(Literal,TemplateLiteral)'(
-        node: TSESTree.Literal | TSESTree.TemplateLiteral,
-      ) {
-        // Mark all string literals in interfaces as visited to prevent them from being reported
-        visited.add(node)
-      },
-
-      'TSTypeAliasDeclaration :matches(Literal,TemplateLiteral)'(
-        node: TSESTree.Literal | TSESTree.TemplateLiteral,
-      ) {
-        // Also handle type aliases similarly
-        visited.add(node)
-      },
-
-      'TSPropertySignature :matches(Literal,TemplateLiteral)'(
-        node: TSESTree.Literal | TSESTree.TemplateLiteral,
-      ) {
-        // Handle property signatures in interfaces and type literals
-        visited.add(node)
-      },
-
       'TSIndexSignature :matches(Literal,TemplateLiteral)'(
         node: TSESTree.Literal | TSESTree.TemplateLiteral,
       ) {
@@ -601,16 +616,21 @@ export const rule = createRule<Option[], string>({
 
         if (isTextWhiteListed(trimmed)) return
 
+        // If this is a property key and the property name is ignored, skip it
+        if (isPropertyKey(node) && isIgnoredName(String(node.value))) {
+          return
+        }
+
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
-          return // Do not report this literal
+          return
         }
 
         if (isInsideIgnoredProperty(node)) {
           return
         }
 
-        // Add check for interface and type contexts
-        if (isInsideTypeContext(node)) {
+        // Only ignore type context for property keys
+        if (isInsideTypeContext(node) && !isPropertyValue(node)) {
           return
         }
 
