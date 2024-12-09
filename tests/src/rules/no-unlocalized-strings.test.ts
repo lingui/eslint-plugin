@@ -412,6 +412,42 @@ ruleTester.run<string, Option[]>(name, rule, {
         }
       `,
     },
+    {
+      name: 'type with index signature using string literal',
+      code: `
+        type Dict = {
+          [K in 'foo' | 'bar']: string;
+        }
+      `,
+    },
+    {
+      name: 'interface with index signature using string literal',
+      code: `
+        interface Dict {
+          ['some-key']: string;
+        }
+      `,
+    },
+    {
+      name: 'JSX with empty text',
+      code: `
+        function Component() {
+          return <div>
+            {/* this creates an empty JSXText node */}
+          </div>
+        }
+      `,
+    },
+    {
+      name: 'property key in type literal',
+      code: `
+        type Options = {
+          'some-key': {
+            'nested-key': string;
+          }
+        }
+      `,
+    },
   ],
 
   invalid: [
