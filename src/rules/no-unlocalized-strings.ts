@@ -73,13 +73,51 @@ function createMatcher(patterns: MatcherDef[]) {
   }
 }
 
-function unwrapTSAsExpression(
-  node: TSESTree.Expression,
-): TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.Expression {
-  while (node.type === TSESTree.AST_NODE_TYPES.TSAsExpression) {
-    node = node.expression
+function isAcceptableExpression(node: TSESTree.Node): boolean {
+  switch (node.type) {
+    case TSESTree.AST_NODE_TYPES.Literal:
+    case TSESTree.AST_NODE_TYPES.TemplateLiteral:
+    case TSESTree.AST_NODE_TYPES.LogicalExpression:
+    case TSESTree.AST_NODE_TYPES.BinaryExpression:
+    case TSESTree.AST_NODE_TYPES.ConditionalExpression:
+    case TSESTree.AST_NODE_TYPES.UnaryExpression:
+    case TSESTree.AST_NODE_TYPES.TSAsExpression:
+      return true
+    default:
+      return false
   }
-  return node
+}
+
+function isAssignedToIgnoredVariable(
+  node: TSESTree.Node,
+  isIgnoredName: (name: string) => boolean,
+): boolean {
+  let current = node
+  let parent = current.parent
+
+  while (parent && isAcceptableExpression(parent)) {
+    current = parent
+    parent = parent.parent
+  }
+
+  if (!parent) return false
+
+  if (parent.type === TSESTree.AST_NODE_TYPES.VariableDeclarator && parent.init === current) {
+    const variableDeclarator = parent as TSESTree.VariableDeclarator
+    if (isIdentifier(variableDeclarator.id) && isIgnoredName(variableDeclarator.id.name)) {
+      return true
+    }
+  } else if (
+    parent.type === TSESTree.AST_NODE_TYPES.AssignmentExpression &&
+    parent.right === current
+  ) {
+    const assignmentExpression = parent as TSESTree.AssignmentExpression
+    if (isIdentifier(assignmentExpression.left) && isIgnoredName(assignmentExpression.left.name)) {
+      return true
+    }
+  }
+
+  return false
 }
 
 export const name = 'no-unlocalized-strings'
@@ -206,9 +244,32 @@ export const rule = createRule<Option[], string>({
             isValidFunctionCall(callee)
           )
         }
+        /* istanbul ignore next */
         default:
           return false
       }
+    }
+
+    /**
+     * Helper function to determine if a node is inside an ignored property.
+     */
+    function isInsideIgnoredProperty(node: TSESTree.Node): boolean {
+      let parent = node.parent
+
+      while (parent) {
+        if (parent.type === TSESTree.AST_NODE_TYPES.Property) {
+          const key = parent.key
+          if (
+            (isIdentifier(key) && isIgnoredName(key.name)) ||
+            ((isLiteral(key) || isTemplateLiteral(key)) && isIgnoredName(getText(key)))
+          ) {
+            return true
+          }
+        }
+        parent = parent.parent
+      }
+
+      return false
     }
 
     const ignoredJSXSymbols = ['&larr;', '&nbsp;', '&middot;']
@@ -241,6 +302,7 @@ export const rule = createRule<Option[], string>({
         case TSESTree.AST_NODE_TYPES.JSXText:
           return true
         default:
+          /* istanbul ignore next */
           return false
       }
     }
@@ -250,6 +312,24 @@ export const rule = createRule<Option[], string>({
         return node
       }
       return node?.name
+    }
+
+    function isLiteralInsideJSX(node: TSESTree.Node): boolean {
+      let parent = node.parent
+      let insideJSXExpression = false
+
+      while (parent) {
+        if (parent.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer) {
+          insideJSXExpression = true
+        }
+        if (parent.type === TSESTree.AST_NODE_TYPES.JSXElement && insideJSXExpression) {
+          return true
+        }
+        parent = parent.parent
+      }
+
+      /* istanbul ignore next */
+      return false
     }
 
     const processTextNode = (
@@ -262,11 +342,23 @@ export const rule = createRule<Option[], string>({
         return
       }
 
+      // First, handle the JSXText case directly
       if (node.type === TSESTree.AST_NODE_TYPES.JSXText) {
         context.report({ node, messageId: 'forJsxText' })
         return
       }
 
+      // If it's not JSXText, it might be a Literal or TemplateLiteral.
+      // Check if it's inside JSX.
+      if (isLiteralInsideJSX(node)) {
+        // If it's a Literal/TemplateLiteral inside a JSXExpressionContainer within JSXElement,
+        // treat it like JSX text and report with `forJsxText`.
+        context.report({ node, messageId: 'forJsxText' })
+        return
+      }
+
+      /* istanbul ignore next */
+      // If neither JSXText nor a Literal inside JSX, fall back to default messageId.
       context.report({ node, messageId: 'default' })
     }
 
@@ -370,24 +462,6 @@ export const rule = createRule<Option[], string>({
           visited.add(node)
         }
       },
-      'Property > :matches(Literal,TemplateLiteral,TSAsExpression)'(
-        node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.TSAsExpression,
-      ) {
-        const parent = node.parent as TSESTree.Property
-
-        if (
-          (isIdentifier(parent.key) && isIgnoredName(parent.key.name)) ||
-          ((isLiteral(parent.key) || isTemplateLiteral(parent.key)) &&
-            isIgnoredName(getText(parent.key)))
-        ) {
-          // Unwrap TSAsExpression nodes
-          const unwrappedNode = unwrapTSAsExpression(node)
-
-          if (isLiteral(unwrappedNode) || isTemplateLiteral(unwrappedNode)) {
-            visited.add(unwrappedNode)
-          }
-        }
-      },
       'MemberExpression[computed=true] > :matches(Literal,TemplateLiteral)'(
         node: TSESTree.Literal | TSESTree.TemplateLiteral,
       ) {
@@ -470,33 +544,40 @@ export const rule = createRule<Option[], string>({
         if (visited.has(node)) return
         processTextNode(node)
       },
+
       'Literal:exit'(node: TSESTree.Literal) {
-        // visited and passed linting
         if (visited.has(node)) return
         const trimmed = `${node.value}`.trim()
         if (!trimmed) return
 
         if (isTextWhiteListed(trimmed)) return
 
-        //
-        // TYPESCRIPT
-        // todo: that doesn't work
-        // if (tsService) {
-        //   const typeObj = tsService.getTypeAtLocation(node.parent)
-        //
-        //   // var a: 'abc' = 'abc'
-        //   if (typeObj.isStringLiteral() && typeObj.symbol) {
-        //     return
-        //   }
-        // }
+        if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
+          return // Do not report this literal
+        }
+
+        // New check: if the literal is inside an ignored property, do not report
+        if (isInsideIgnoredProperty(node)) {
+          return
+        }
 
         context.report({ node, messageId: 'default' })
       },
+
       'TemplateLiteral:exit'(node: TSESTree.TemplateLiteral) {
         if (visited.has(node)) return
         const text = getText(node)
 
         if (!text || isTextWhiteListed(text)) return
+
+        if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
+          return // Do not report this template literal
+        }
+
+        // New check: if the template literal is inside an ignored property, do not report
+        if (isInsideIgnoredProperty(node)) {
+          return
+        }
 
         context.report({ node, messageId: 'default' })
       },
