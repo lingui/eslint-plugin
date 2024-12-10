@@ -75,7 +75,6 @@ function createMatcher(patterns: MatcherDef[]) {
 
 function isAcceptableExpression(node: TSESTree.Node): boolean {
   switch (node.type) {
-    case TSESTree.AST_NODE_TYPES.TemplateLiteral:
     case TSESTree.AST_NODE_TYPES.LogicalExpression:
     case TSESTree.AST_NODE_TYPES.BinaryExpression:
     case TSESTree.AST_NODE_TYPES.ConditionalExpression:
@@ -247,18 +246,6 @@ export const rule = createRule<Option[], string>({
         default:
           return false
       }
-    }
-
-    function isPropertyKey(node: TSESTree.Node): boolean {
-      const parent = node.parent
-      if (!parent) return false
-
-      return (
-        // Property in object literal
-        (parent.type === TSESTree.AST_NODE_TYPES.Property && parent.key === node) ||
-        // Property in interface/type
-        (parent.type === TSESTree.AST_NODE_TYPES.TSPropertySignature && parent.key === node)
-      )
     }
 
     /**
@@ -575,15 +562,12 @@ export const rule = createRule<Option[], string>({
         const trimmed = `${node.value}`.trim()
         if (!trimmed) return
 
-        if (isTextWhiteListed(trimmed)) return
-
-        // If this is a property key and the property name is ignored, skip it
-        if (isPropertyKey(node) && isIgnoredName(String(node.value))) {
+        if (isTextWhiteListed(trimmed)) {
           return
         }
 
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
-          return // Do not report this literal
+          return
         }
 
         if (isInsideIgnoredProperty(node)) {
