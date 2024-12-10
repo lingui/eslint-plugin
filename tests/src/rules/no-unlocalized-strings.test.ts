@@ -67,6 +67,49 @@ ruleTester.run(name, rule, {
       code: 'const t = ` ${BRAND_NAME} ${BRAND_NAME} `',
     },
 
+    // ==================== Class Properties ====================
+    {
+      name: 'allows string in class property with ignored name',
+      code: 'class MyClass { MY_PROP = "Hello World" }',
+      options: [ignoreUpperCaseName],
+    },
+    {
+      name: 'allows string in property definition with ignored name',
+      code: 'class MyClass { static MY_STATIC = "Hello World" }',
+      options: [ignoreUpperCaseName],
+    },
+
+    // ==================== Member Expressions ====================
+    {
+      name: 'allows computed member expression with string literal',
+      code: 'obj["key with spaces"] = value',
+    },
+    {
+      name: 'allows computed member expression with template literal',
+      code: 'obj[`key with spaces`] = value',
+    },
+    {
+      name: 'allows assignment to ignored member expression',
+      code: 'myObj.MY_PROP = "Hello World"',
+      options: [ignoreUpperCaseName],
+    },
+
+    // ==================== Switch Cases ====================
+    {
+      name: 'allows string literals in switch cases',
+      code: 'switch(value) { case "hello": break; case `world`: break; default: break; }',
+    },
+
+    // ==================== Tagged Template Expressions ====================
+    {
+      name: 'allows literals in tagged template expressions',
+      code: 'styled.div`color: ${"red"};`',
+    },
+    {
+      name: 'allows template literals in tagged template expressions',
+      code: 'styled.div`color: ${`red`};`',
+    },
+
     // ==================== Ignored Functions ====================
     {
       name: 'allows whitelisted function calls',
