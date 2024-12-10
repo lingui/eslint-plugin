@@ -4,7 +4,9 @@ import { RuleTester } from '@typescript-eslint/rule-tester'
 const ruleTester = new RuleTester({
   languageOptions: {
     parserOptions: {
-      ecmaFeatures: { jsx: true },
+      ecmaFeatures: {
+        jsx: true,
+      },
       projectService: {
         allowDefaultProject: ['*.ts*'],
       },
@@ -15,13 +17,7 @@ const ruleTester = new RuleTester({
 const defaultError = [{ messageId: 'default' }]
 const jsxTextError = [{ messageId: 'forJsxText' }]
 const upperCaseRegex = '^[A-Z_-]+$'
-const ignoreUpperCaseName = {
-  ignoreNames: [
-    {
-      regex: { pattern: upperCaseRegex },
-    },
-  ],
-}
+const ignoreUpperCaseName = { ignoreNames: [{ regex: { pattern: upperCaseRegex } }] }
 
 ruleTester.run(name, rule, {
   valid: [
