@@ -341,6 +341,18 @@ ruleTester.run(name, rule, {
       code: 'const test = ("hello" as any as string)',
       errors: defaultError,
     },
+    {
+      name: 'detects unlocalized multiline template literal',
+      code: 'const message = `Hello \n World`;',
+      errors: defaultError,
+    },
+
+    // ==================== Member Expressions ====================
+    {
+      name: 'allows dynamic property key',
+      code: "const obj = { [keyName]: 'value' };",
+      errors: defaultError,
+    },
 
     // ==================== JSX Violations ====================
     {
@@ -357,6 +369,11 @@ ruleTester.run(name, rule, {
       name: 'detects unlocalized template literal in JSX expression container',
       code: '<div>{`Hello world`}</div>',
       errors: jsxTextError,
+    },
+    {
+      name: 'detects unlocalized string in nested JSX',
+      code: `<div><span>{"Hello World!"}</span></div>`,
+      errors: [{ messageId: 'forJsxText' }],
     },
 
     // ==================== Non-Latin Character Support ====================
