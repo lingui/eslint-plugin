@@ -241,6 +241,11 @@ ruleTester.run(name, rule, {
       name: 'allows enum with string values',
       code: "enum StepType { Address = 'Address' }",
     },
+    {
+      name: 'allows exact string match in ignored names',
+      code: 'const test = "Hello world"',
+      options: [{ ignoreNames: ['test'] }],
+    },
 
     // ==================== Acceptable Expressions with Ignored Names ====================
     {
@@ -326,6 +331,11 @@ ruleTester.run(name, rule, {
       code: 'const a = `Hello ${nice}`',
       errors: defaultError,
     },
+    {
+      name: 'handles nested TSAsExpression string literals',
+      code: 'const test = ("hello" as any as string)',
+      errors: defaultError,
+    },
 
     // ==================== JSX Violations ====================
     {
@@ -370,6 +380,11 @@ ruleTester.run(name, rule, {
     {
       name: 'detects unlocalized ARIA label',
       code: '<button aria-label="Close" type="button" />',
+      errors: defaultError,
+    },
+    {
+      name: 'handles JSX identifier attribute correctly',
+      code: '<div aria-label={`Hello World`} />',
       errors: defaultError,
     },
 
