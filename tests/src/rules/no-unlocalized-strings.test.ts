@@ -25,6 +25,35 @@ const ignoreUpperCaseName = {
 
 ruleTester.run(name, rule, {
   valid: [
+    // ==================== TypeScript Types with Ignored Methods ====================
+    {
+      name: 'allows Map methods with string literals',
+      code: 'const myMap = new Map(); myMap.get("foo with spaces"); myMap.has("bar with spaces");',
+      options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Map.get', 'Map.has'] }],
+    },
+    {
+      name: 'allows interface method with string literal when type matches',
+      code: 'interface Foo { get: (key: string) => string }; const foo: Foo; foo.get("string with spaces");',
+      options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
+    },
+    {
+      name: 'allows interface method as type assertion',
+      code: 'interface Foo {get: (key: string) => string}; (foo as Foo).get("string with spaces")',
+      options: [{ useTsTypes: true, ignoreMethodsOnTypes: ['Foo.get'] }],
+    },
+
+    // ==================== Assignment Pattern ====================
+    {
+      name: 'allows string literal in assignment pattern with ignored name',
+      code: 'function test({ MY_PARAM = "default value" }) {}',
+      options: [ignoreUpperCaseName],
+    },
+    {
+      name: 'allows template literal in assignment pattern with ignored name',
+      code: 'function test({ MY_PARAM = `default value` }) {}',
+      options: [ignoreUpperCaseName],
+    },
+
     // ==================== Basic i18n Usage ====================
     {
       name: 'allows i18n template literals with interpolation',
@@ -268,6 +297,10 @@ ruleTester.run(name, rule, {
     {
       name: 'allows string literals in exports',
       code: 'export * from "hello_export_all";',
+    },
+    {
+      name: 'allows string literals in named exports',
+      code: 'export { named } from "module-name";',
     },
   ],
 
