@@ -95,6 +95,11 @@ ruleTester.run(name, rule, {
       name: 'allows template literal with variables and spaces',
       code: 'const t = ` ${BRAND_NAME} ${BRAND_NAME} `',
     },
+    {
+      name: 'accepts standalone TemplateLiteral in uppercase variable',
+      code: 'const MY_TEMPLATE = `Hello world`',
+      options: [ignoreUpperCaseName],
+    },
 
     // ==================== Class Properties ====================
     {
@@ -331,6 +336,11 @@ ruleTester.run(name, rule, {
     {
       name: 'detects unlocalized JSX expression',
       code: '<div>{"Hello World!"}</div>',
+      errors: jsxTextError,
+    },
+    {
+      name: 'detects unlocalized template literal in JSX expression container',
+      code: '<div>{`Hello world`}</div>',
       errors: jsxTextError,
     },
 
