@@ -127,6 +127,11 @@ ruleTester.run(name, rule, {
       code: 'myObj.MY_PROP = "Hello World"',
       options: [ignoreUpperCaseName],
     },
+    {
+      name: 'ignores property key when name is in ignored list',
+      code: `const obj = { ignoredKey: "value" };`,
+      options: [{ ignoreNames: ['ignoredKey'] }],
+    },
 
     // ==================== Switch Cases ====================
     {
