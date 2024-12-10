@@ -288,10 +288,6 @@ export const rule = createRule<Option[], string>({
     function isStringLiteral(node: TSESTree.Node | null | undefined): boolean {
       if (!node) return false
 
-      if (node.type === TSESTree.AST_NODE_TYPES.TSAsExpression) {
-        return isStringLiteral(node.expression)
-      }
-
       switch (node.type) {
         case TSESTree.AST_NODE_TYPES.Literal:
           return typeof node.value === 'string'
@@ -355,6 +351,7 @@ export const rule = createRule<Option[], string>({
 
       const text = getText(node)
       if (!text || isIgnoredSymbol(text) || isTextWhiteListed(text)) {
+        /* istanbul ignore next */
         return
       }
 
