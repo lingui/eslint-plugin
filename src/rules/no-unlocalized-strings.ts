@@ -295,8 +295,8 @@ export const rule = createRule<Option[], string>({
           return Boolean(node.quasis)
         case TSESTree.AST_NODE_TYPES.JSXText:
           return true
+        /* istanbul ignore next */
         default:
-          /* istanbul ignore next */
           return false
       }
     }
@@ -305,6 +305,8 @@ export const rule = createRule<Option[], string>({
       if (typeof node === 'string') {
         return node
       }
+
+      /* istanbul ignore next */
       return node?.name
     }
 
