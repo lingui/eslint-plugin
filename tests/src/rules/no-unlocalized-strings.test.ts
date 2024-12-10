@@ -413,6 +413,12 @@ ruleTester.run(name, rule, {
       options: [ignoreUpperCaseName],
       errors: defaultError,
     },
+    {
+      name: 'handles type assertions with string literals',
+      code: "const test = ('hello' as unknown as string);",
+      options: [ignoreUpperCaseName],
+      errors: [{ messageId: 'default' }],
+    },
   ],
 })
 
