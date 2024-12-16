@@ -1,24 +1,26 @@
 # Change Log
 
-- fix: `no-unlocalized-strings` rule to ignore string literals in expressions assigned to variables specified in `ignoreNames` (#94) (df19c1c)
+- fix: no-unlocalized-strings corrected support for interface prop names (#95) (56eb2ee)
 
-* fix: no-unlocalized-strings rule to correctly handle as const assertions in property values with ignoreNames (#92) (4048c4d)
-* fix: no-unlocalized-strings rule to ignore default parameter values specified in ignoreNames (#91) (68b9052)
+* fix: `no-unlocalized-strings` rule to ignore string literals in expressions assigned to variables specified in `ignoreNames` (#94) (df19c1c)
 
-- fix(no-unlocalized-strings): ignore more cases (#84) (061ef0d)
+- fix: no-unlocalized-strings rule to correctly handle as const assertions in property values with ignoreNames (#92) (4048c4d)
+- fix: no-unlocalized-strings rule to ignore default parameter values specified in ignoreNames (#91) (68b9052)
 
-* chore(deps): bump cross-spawn from 7.0.3 to 7.0.5 (#83) (f10feb9)
-* chore(deps): bump @eslint/plugin-kit from 0.2.0 to 0.2.3 (#81) (297bcdd)
-* feat(no-unlocalized-strings): remove default configuration (#78) (32c823c)
-* feat(no-unlocalized-strings): add patterns for ignore functions (#77) (e249254)
-* feat(no-unlocalized-strings): add ignoreVariable option + refactor options (#76) (a407d3d)
+* fix(no-unlocalized-strings): ignore more cases (#84) (061ef0d)
 
-- fix: not listed dependency `@typescript-eslint/scope-manager` (#75) (0ded72c)
-- feat(recommended-config): add lingui/no-expression-in-message (#74) (5430625)
+- chore(deps): bump cross-spawn from 7.0.3 to 7.0.5 (#83) (f10feb9)
+- chore(deps): bump @eslint/plugin-kit from 0.2.0 to 0.2.3 (#81) (297bcdd)
+- feat(no-unlocalized-strings): remove default configuration (#78) (32c823c)
+- feat(no-unlocalized-strings): add patterns for ignore functions (#77) (e249254)
+- feat(no-unlocalized-strings): add ignoreVariable option + refactor options (#76) (a407d3d)
 
-* feat(no-unlocalized-strings): add regex patterns support (#70) (1c248a2)
-* fix: no-single-variables-to-translate renamed to no-single-variable... (#69) (b048305)
-* feat(no-expression-in-message): correctly handle {' '} in JSX, report for each found expression (#68) (e935e01)
+* fix: not listed dependency `@typescript-eslint/scope-manager` (#75) (0ded72c)
+* feat(recommended-config): add lingui/no-expression-in-message (#74) (5430625)
+
+- feat(no-unlocalized-strings): add regex patterns support (#70) (1c248a2)
+- fix: no-single-variables-to-translate renamed to no-single-variable... (#69) (b048305)
+- feat(no-expression-in-message): correctly handle {' '} in JSX, report for each found expression (#68) (e935e01)
 
 ## 0.5.0 (2024-10-15)
 
