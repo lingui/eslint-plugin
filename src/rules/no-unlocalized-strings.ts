@@ -75,8 +75,6 @@ function createMatcher(patterns: MatcherDef[]) {
 
 function isAcceptableExpression(node: TSESTree.Node): boolean {
   switch (node.type) {
-    case TSESTree.AST_NODE_TYPES.Literal:
-    case TSESTree.AST_NODE_TYPES.TemplateLiteral:
     case TSESTree.AST_NODE_TYPES.LogicalExpression:
     case TSESTree.AST_NODE_TYPES.BinaryExpression:
     case TSESTree.AST_NODE_TYPES.ConditionalExpression:
@@ -290,10 +288,6 @@ export const rule = createRule<Option[], string>({
     function isStringLiteral(node: TSESTree.Node | null | undefined): boolean {
       if (!node) return false
 
-      if (node.type === TSESTree.AST_NODE_TYPES.TSAsExpression) {
-        return isStringLiteral(node.expression)
-      }
-
       switch (node.type) {
         case TSESTree.AST_NODE_TYPES.Literal:
           return typeof node.value === 'string'
@@ -301,8 +295,8 @@ export const rule = createRule<Option[], string>({
           return Boolean(node.quasis)
         case TSESTree.AST_NODE_TYPES.JSXText:
           return true
+        /* istanbul ignore next */
         default:
-          /* istanbul ignore next */
           return false
       }
     }
@@ -311,6 +305,8 @@ export const rule = createRule<Option[], string>({
       if (typeof node === 'string') {
         return node
       }
+
+      /* istanbul ignore next */
       return node?.name
     }
 
@@ -332,6 +328,24 @@ export const rule = createRule<Option[], string>({
       return false
     }
 
+    function isInsideTypeContext(node: TSESTree.Node): boolean {
+      let parent = node.parent
+
+      while (parent) {
+        switch (parent.type) {
+          case TSESTree.AST_NODE_TYPES.TSPropertySignature:
+          case TSESTree.AST_NODE_TYPES.TSIndexSignature:
+          case TSESTree.AST_NODE_TYPES.TSTypeAnnotation:
+          case TSESTree.AST_NODE_TYPES.TSTypeLiteral:
+          case TSESTree.AST_NODE_TYPES.TSLiteralType:
+            return true
+        }
+        parent = parent.parent
+      }
+
+      return false
+    }
+
     const processTextNode = (
       node: TSESTree.Literal | TSESTree.TemplateLiteral | TSESTree.JSXText,
     ) => {
@@ -339,6 +353,7 @@ export const rule = createRule<Option[], string>({
 
       const text = getText(node)
       if (!text || isIgnoredSymbol(text) || isTextWhiteListed(text)) {
+        /* istanbul ignore next */
         return
       }
 
@@ -384,10 +399,6 @@ export const rule = createRule<Option[], string>({
         node,
       ) {
         visited.add(node)
-      },
-
-      'JSXElement > Literal'(node: TSESTree.Literal) {
-        processTextNode(node)
       },
 
       'JSXElement > JSXExpressionContainer > Literal'(node: TSESTree.Literal) {
@@ -550,14 +561,20 @@ export const rule = createRule<Option[], string>({
         const trimmed = `${node.value}`.trim()
         if (!trimmed) return
 
-        if (isTextWhiteListed(trimmed)) return
-
-        if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
-          return // Do not report this literal
+        if (isTextWhiteListed(trimmed)) {
+          return
         }
 
-        // New check: if the literal is inside an ignored property, do not report
+        if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
+          return
+        }
+
         if (isInsideIgnoredProperty(node)) {
+          return
+        }
+
+        // Only ignore type context for property keys
+        if (isInsideTypeContext(node)) {
           return
         }
 
@@ -574,7 +591,6 @@ export const rule = createRule<Option[], string>({
           return // Do not report this template literal
         }
 
-        // New check: if the template literal is inside an ignored property, do not report
         if (isInsideIgnoredProperty(node)) {
           return
         }
