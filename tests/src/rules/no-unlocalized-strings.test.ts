@@ -131,6 +131,21 @@ ruleTester.run(name, rule, {
       code: 'obj[`key with spaces`] = value',
     },
     {
+      name: 'allow union types with string literals',
+      code: `type Action = "add" | "remove"; function doAction(action: Action) {} doAction("add");`,
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allow inline union types with string literals',
+      code: `function doAction(action: "add" | "remove") {} doAction("add");`,
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allow union types with optional string literals',
+      code: `type Action = "add" | "remove" | undefined; function doAction(action: Action) {} doAction("add");`,
+      options: [{ useTsTypes: true }],
+    },
+    {
       name: 'allows assignment to ignored member expression',
       code: 'myObj.MY_PROP = "Hello World"',
       options: [ignoreUpperCaseName],

@@ -18,6 +18,7 @@ import {
 } from '../helpers'
 import { createRule } from '../create-rule'
 import * as micromatch from 'micromatch'
+import { TypeFlags, UnionType } from 'typescript'
 
 type MatcherDef = string | { regex: { pattern: string; flags?: string } }
 
@@ -130,6 +131,51 @@ function isAsConstAssertion(node: TSESTree.Node): boolean {
     )
   }
   return false
+}
+
+function isStringLiteralFromUnionType(
+  node: TSESTree.Node,
+  tsService: ParserServicesWithTypeInformation,
+): boolean {
+  try {
+    const tsNode = tsService.esTreeNodeToTSNodeMap.get(node)
+    const checker = tsService.program.getTypeChecker()
+
+    // For arguments, check the parameter type
+    if (node.parent?.type === TSESTree.AST_NODE_TYPES.CallExpression) {
+      const callNode = node.parent
+      const tsCallNode = tsService.esTreeNodeToTSNodeMap.get(callNode)
+
+      const args = callNode.arguments as TSESTree.CallExpressionArgument[]
+      const argIndex = args.findIndex((arg) => arg === node)
+
+      if (argIndex >= 0) {
+        const signature = checker.getResolvedSignature(tsCallNode)
+        if (signature) {
+          const param = signature.parameters[argIndex]
+          const paramType = checker.getTypeAtLocation(param.valueDeclaration)
+
+          // Check if it's a union type
+          if (paramType.flags & TypeFlags.Union) {
+            const unionType = paramType as UnionType
+            return unionType.types.every((type) => type.flags & TypeFlags.StringLiteral)
+          }
+        }
+      }
+    }
+
+    // For direct types
+    const nodeType = checker.getTypeAtLocation(tsNode)
+    if (nodeType.flags & TypeFlags.Union) {
+      const unionType = nodeType as UnionType
+      return unionType.types.every((type) => type.flags & TypeFlags.StringLiteral)
+    }
+
+    return false
+  } catch (error) {
+    // If anything goes wrong with type checking, return false to be safe
+    return false
+  }
 }
 
 export const name = 'no-unlocalized-strings'
@@ -587,6 +633,17 @@ export const rule = createRule<Option[], string>({
         const parent = node.parent
         if (parent?.type === TSESTree.AST_NODE_TYPES.Property && parent.key === node) {
           return
+        }
+
+        // More thorough type checking when enabled
+        if (option?.useTsTypes && tsService) {
+          try {
+            if (isStringLiteralFromUnionType(node, tsService)) {
+              return
+            }
+          } catch (error) {
+            // Ignore type checking errors
+          }
         }
 
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
