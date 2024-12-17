@@ -118,6 +118,20 @@ function isAssignedToIgnoredVariable(
   return false
 }
 
+// Add this helper function alongside other helpers
+function isAsConstAssertion(node: TSESTree.Node): boolean {
+  const parent = node.parent
+  if (parent?.type === TSESTree.AST_NODE_TYPES.TSAsExpression) {
+    const typeAnnotation = parent.typeAnnotation
+    return (
+      typeAnnotation.type === TSESTree.AST_NODE_TYPES.TSTypeReference &&
+      isIdentifier(typeAnnotation.typeName) &&
+      typeAnnotation.typeName.name === 'const'
+    )
+  }
+  return false
+}
+
 export const name = 'no-unlocalized-strings'
 export const rule = createRule<Option[], string>({
   name,
@@ -565,6 +579,10 @@ export const rule = createRule<Option[], string>({
           return
         }
 
+        if (isAsConstAssertion(node)) {
+          return
+        }
+
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
           return
         }
@@ -586,6 +604,10 @@ export const rule = createRule<Option[], string>({
         const text = getText(node)
 
         if (!text || isTextWhiteListed(text)) return
+
+        if (isAsConstAssertion(node)) {
+          return
+        }
 
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
           return // Do not report this template literal

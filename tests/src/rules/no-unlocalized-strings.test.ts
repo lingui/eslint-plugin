@@ -75,7 +75,15 @@ ruleTester.run(name, rule, {
     },
     {
       name: 'ignores special character strings',
-      code: 'const a = `0123456789!@#$%^&*()_+|~-=\\`[]{};\':",./<>?`;',
+      code: 'const special = `0123456789!@#$%^&*()_+|~-=\\`[]{};\':",./<>?`;',
+    },
+    {
+      name: 'accepts TSAsExpression assignment',
+      code: 'const unique = "this-is-unique" as const;',
+    },
+    {
+      name: 'accepts TSAsExpression in array',
+      code: 'const names = ["name" as const, "city" as const];',
     },
 
     // ==================== Template Literals with Variables ====================
@@ -276,12 +284,12 @@ ruleTester.run(name, rule, {
     },
     {
       name: 'accepts TSAsExpression in uppercase',
-      code: 'const MY_AS = ("Hello" as string)',
+      code: 'const MY_AS = "Hello" as string',
       options: [ignoreUpperCaseName],
     },
     {
       name: 'accepts complex expressions in uppercase',
-      code: 'const MY_COMPLEX = !("Hello" as string) || `World ${name}`',
+      code: 'const MY_COMPLEX = !("Hello") || `World ${name}`',
       options: [ignoreUpperCaseName],
     },
     {
