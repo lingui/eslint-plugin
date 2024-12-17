@@ -548,6 +548,16 @@ ruleTester.run(name, rule, {
       options: [{ useTsTypes: true }],
       errors: defaultError,
     },
+    {
+      name: 'requires translation for non-union string parameters',
+      code: `
+        function test(first: string, second: "yes" | "no") {
+          test("needs translation", "yes");
+        }
+      `,
+      options: [{ useTsTypes: true }],
+      errors: [{ messageId: 'default' }],
+    },
   ],
 })
 
