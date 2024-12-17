@@ -183,10 +183,11 @@ ruleTester.run(name, rule, {
       options: [{ useTsTypes: true }],
     },
     {
-      name: 'handles function with multiple parameters including union type',
+      name: 'allows string literal union in multi-parameter function',
       code: `
-        function test(first: string, second: "yes" | "no") {}
-        test("translate me", "yes");
+        function test(first: string, second: "yes" | "no") {
+          test(first, "yes"); // second argument should be fine
+        }
       `,
       options: [{ useTsTypes: true }],
     },
@@ -508,6 +509,44 @@ ruleTester.run(name, rule, {
       code: "const test = ('hello' as unknown as string);",
       options: [ignoreUpperCaseName],
       errors: [{ messageId: 'default' }],
+    },
+
+    // ==================== TypeScript Function Parameters ====================
+    {
+      name: 'handles function call with no parameters',
+      code: `
+        function noParams() {}
+        noParams("this should error");
+      `,
+      options: [{ useTsTypes: true }],
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'handles function call with wrong number of arguments',
+      code: `
+        function oneParam(p: "a" | "b") {}
+        oneParam("a", "this should error");
+      `,
+      options: [{ useTsTypes: true }],
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'handles function call where parameter is not a string literal type',
+      code: `
+        function stringParam(param: string) {}
+        stringParam("should report error");
+      `,
+      options: [{ useTsTypes: true }],
+      errors: defaultError,
+    },
+    {
+      name: 'handles method call where signature cannot be resolved',
+      code: `
+        const obj = { method: (x: any) => {} };
+        obj["method"]("should report error");
+      `,
+      options: [{ useTsTypes: true }],
+      errors: defaultError,
     },
   ],
 })

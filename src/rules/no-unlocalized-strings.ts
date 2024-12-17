@@ -146,8 +146,31 @@ function isStringLiteralFromUnionType(
         const unionType = type as UnionType
         return unionType.types.every((t) => t.flags & TypeFlags.StringLiteral)
       }
-      // Consider any string literal type as valid
       return !!(type.flags & TypeFlags.StringLiteral)
+    }
+
+    // For arguments, check parameter type first
+    if (node.parent?.type === TSESTree.AST_NODE_TYPES.CallExpression) {
+      const callNode = node.parent
+      const tsCallNode = tsService.esTreeNodeToTSNodeMap.get(callNode)
+
+      const args = callNode.arguments as TSESTree.CallExpressionArgument[]
+      const argIndex = args.findIndex((arg) => arg === node)
+
+      const signature = checker.getResolvedSignature(tsCallNode)
+      // Only proceed if we have a valid signature and the argument index is valid
+      if (signature?.parameters && argIndex >= 0 && argIndex < signature.parameters.length) {
+        const param = signature.parameters[argIndex]
+        const paramType = checker.getTypeAtLocation(param.valueDeclaration)
+
+        // For function parameters, we ONLY accept union types of string literals
+        if (paramType.flags & TypeFlags.Union) {
+          const unionType = paramType as UnionType
+          return unionType.types.every((t) => t.flags & TypeFlags.StringLiteral)
+        }
+      }
+      // If we're here, it's a function call argument that didn't match our criteria
+      return false
     }
 
     // Try to get the contextual type first
@@ -156,30 +179,10 @@ function isStringLiteralFromUnionType(
       return true
     }
 
-    // If no contextual type or it's 'never', check the node's own type
+    // If no contextual type, get the type from the location
     const nodeType = checker.getTypeAtLocation(nodeTsNode)
     if (isStringLiteralType(nodeType)) {
       return true
-    }
-
-    // For arguments, check parameter type
-    if (node.parent?.type === TSESTree.AST_NODE_TYPES.CallExpression) {
-      const callNode = node.parent
-      const tsCallNode = tsService.esTreeNodeToTSNodeMap.get(callNode)
-
-      const args = callNode.arguments as TSESTree.CallExpressionArgument[]
-      const argIndex = args.findIndex((arg) => arg === node)
-
-      if (argIndex >= 0) {
-        const signature = checker.getResolvedSignature(tsCallNode)
-        if (signature) {
-          const param = signature.parameters[argIndex]
-          const paramType = checker.getTypeAtLocation(param.valueDeclaration)
-          if (isStringLiteralType(paramType)) {
-            return true
-          }
-        }
-      }
     }
 
     return false
