@@ -119,7 +119,6 @@ function isAssignedToIgnoredVariable(
   return false
 }
 
-// Add this helper function alongside other helpers
 function isAsConstAssertion(node: TSESTree.Node): boolean {
   const parent = node.parent
   if (parent?.type === TSESTree.AST_NODE_TYPES.TSAsExpression) {
@@ -186,6 +185,7 @@ function isStringLiteralFromUnionType(
     }
   } catch (error) {}
 
+  /* istanbul ignore next */
   return false
 }
 
