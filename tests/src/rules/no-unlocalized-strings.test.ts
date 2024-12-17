@@ -558,6 +558,15 @@ ruleTester.run(name, rule, {
       options: [{ useTsTypes: true }],
       errors: [{ messageId: 'default' }],
     },
+    {
+      name: 'handles type system error gracefully',
+      code: `
+        // This should cause type system issues but not crash
+        const x = (unknown as any).nonexistent("test");
+      `,
+      options: [{ useTsTypes: true }],
+      errors: [{ messageId: 'default' }],
+    },
   ],
 })
 

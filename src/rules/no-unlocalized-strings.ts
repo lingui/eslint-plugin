@@ -184,11 +184,9 @@ function isStringLiteralFromUnionType(
     if (isStringLiteralType(nodeType)) {
       return true
     }
+  } catch (error) {}
 
-    return false
-  } catch (error) {
-    return false
-  }
+  return false
 }
 
 export const name = 'no-unlocalized-strings'
