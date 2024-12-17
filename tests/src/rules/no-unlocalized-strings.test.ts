@@ -123,6 +123,10 @@ ruleTester.run(name, rule, {
       code: 'obj["key with spaces"] = value',
     },
     {
+      name: 'allows declaring object keys in quotes',
+      code: 'const styles = { ":hover" : { color: theme.brand } }',
+    },
+    {
       name: 'allows computed member expression with template literal',
       code: 'obj[`key with spaces`] = value',
     },

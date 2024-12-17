@@ -583,6 +583,12 @@ export const rule = createRule<Option[], string>({
           return
         }
 
+        // Add check for object property key
+        const parent = node.parent
+        if (parent?.type === TSESTree.AST_NODE_TYPES.Property && parent.key === node) {
+          return
+        }
+
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
           return
         }
@@ -591,7 +597,6 @@ export const rule = createRule<Option[], string>({
           return
         }
 
-        // Only ignore type context for property keys
         if (isInsideTypeContext(node)) {
           return
         }
