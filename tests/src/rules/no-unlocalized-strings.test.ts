@@ -132,17 +132,36 @@ ruleTester.run(name, rule, {
     },
     {
       name: 'allow union types with string literals',
-      code: `type Action = "add" | "remove"; function doAction(action: Action) {} doAction("add");`,
+      code: 'type Action = "add" | "remove"; function doAction(action: Action) {} doAction("add");',
       options: [{ useTsTypes: true }],
     },
     {
       name: 'allow inline union types with string literals',
-      code: `function doAction(action: "add" | "remove") {} doAction("add");`,
+      code: 'function doAction(action: "add" | "remove") {} doAction("add");',
       options: [{ useTsTypes: true }],
     },
     {
       name: 'allow union types with optional string literals',
-      code: `type Action = "add" | "remove" | undefined; function doAction(action: Action) {} doAction("add");`,
+      code: 'type Action = "add" | "remove" | undefined; function doAction(action: Action) {} doAction("add");',
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allows direct union type variable assignment',
+      code: 'let value: "a" | "b"; value = "a";',
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allows direct union type in object',
+      code: 'type Options = { mode: "light" | "dark" }; const options: Options = { mode: "light" };',
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'handles complex type scenarios gracefully',
+      code: `
+        type Complex<T> = T extends string ? "yes" | "no" : never;
+        let value: Complex<unknown>;
+        value = "yes";
+      `,
       options: [{ useTsTypes: true }],
     },
     {

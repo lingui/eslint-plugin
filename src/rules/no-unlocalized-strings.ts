@@ -18,7 +18,7 @@ import {
 } from '../helpers'
 import { createRule } from '../create-rule'
 import * as micromatch from 'micromatch'
-import { TypeFlags, UnionType } from 'typescript'
+import { TypeFlags, UnionType, Type, Expression } from 'typescript'
 
 type MatcherDef = string | { regex: { pattern: string; flags?: string } }
 
@@ -138,10 +138,31 @@ function isStringLiteralFromUnionType(
   tsService: ParserServicesWithTypeInformation,
 ): boolean {
   try {
-    const tsNode = tsService.esTreeNodeToTSNodeMap.get(node)
     const checker = tsService.program.getTypeChecker()
+    const nodeTsNode = tsService.esTreeNodeToTSNodeMap.get(node)
 
-    // For arguments, check the parameter type
+    const isStringLiteralType = (type: Type): boolean => {
+      if (type.flags & TypeFlags.Union) {
+        const unionType = type as UnionType
+        return unionType.types.every((t) => t.flags & TypeFlags.StringLiteral)
+      }
+      // Consider any string literal type as valid
+      return !!(type.flags & TypeFlags.StringLiteral)
+    }
+
+    // Try to get the contextual type first
+    const contextualType = checker.getContextualType(nodeTsNode as Expression)
+    if (contextualType && isStringLiteralType(contextualType)) {
+      return true
+    }
+
+    // If no contextual type or it's 'never', check the node's own type
+    const nodeType = checker.getTypeAtLocation(nodeTsNode)
+    if (isStringLiteralType(nodeType)) {
+      return true
+    }
+
+    // For arguments, check parameter type
     if (node.parent?.type === TSESTree.AST_NODE_TYPES.CallExpression) {
       const callNode = node.parent
       const tsCallNode = tsService.esTreeNodeToTSNodeMap.get(callNode)
@@ -154,26 +175,15 @@ function isStringLiteralFromUnionType(
         if (signature) {
           const param = signature.parameters[argIndex]
           const paramType = checker.getTypeAtLocation(param.valueDeclaration)
-
-          // Check if it's a union type
-          if (paramType.flags & TypeFlags.Union) {
-            const unionType = paramType as UnionType
-            return unionType.types.every((type) => type.flags & TypeFlags.StringLiteral)
+          if (isStringLiteralType(paramType)) {
+            return true
           }
         }
       }
     }
 
-    // For direct types
-    const nodeType = checker.getTypeAtLocation(tsNode)
-    if (nodeType.flags & TypeFlags.Union) {
-      const unionType = nodeType as UnionType
-      return unionType.types.every((type) => type.flags & TypeFlags.StringLiteral)
-    }
-
     return false
   } catch (error) {
-    // If anything goes wrong with type checking, return false to be safe
     return false
   }
 }
