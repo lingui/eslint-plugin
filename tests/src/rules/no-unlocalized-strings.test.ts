@@ -82,6 +82,10 @@ ruleTester.run(name, rule, {
       code: 'const unique = "this-is-unique" as const;',
     },
     {
+      name: 'accepts TSAsExpression assignment template literal',
+      code: 'const unique = `this-is-unique` as const;',
+    },
+    {
       name: 'accepts TSAsExpression in array',
       code: 'const names = ["name" as const, "city" as const];',
     },
