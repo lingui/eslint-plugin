@@ -165,6 +165,32 @@ ruleTester.run(name, rule, {
       options: [{ useTsTypes: true }],
     },
     {
+      name: 'allows string literal in function parameter with union type',
+      code: `
+        function test(param: "a" | "b") {}
+        test("a");
+      `,
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allows string literal in method parameter with union type',
+      code: `
+        class Test {
+          method(param: "x" | "y") {}
+        }
+        new Test().method("x");
+      `,
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'handles function with multiple parameters including union type',
+      code: `
+        function test(first: string, second: "yes" | "no") {}
+        test("translate me", "yes");
+      `,
+      options: [{ useTsTypes: true }],
+    },
+    {
       name: 'allows assignment to ignored member expression',
       code: 'myObj.MY_PROP = "Hello World"',
       options: [ignoreUpperCaseName],
