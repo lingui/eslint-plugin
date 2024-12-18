@@ -164,15 +164,6 @@ ruleTester.run(name, rule, {
       options: [{ useTsTypes: true }],
     },
     {
-      name: 'handles complex type scenarios gracefully',
-      code: `
-        type Complex<T> = T extends string ? "yes" | "no" : never;
-        let value: Complex<unknown>;
-        value = "yes";
-      `,
-      options: [{ useTsTypes: true }],
-    },
-    {
       name: 'allows string literal in function parameter with union type',
       code: `
         function test(param: "a" | "b") {}
@@ -401,6 +392,12 @@ ruleTester.run(name, rule, {
     {
       name: 'detects unlocalized string literal',
       code: 'const message = "Select tax code"',
+      errors: defaultError,
+    },
+    {
+      name: 'detects unlocalized string literal with types active',
+      code: 'const message = "Select tax code"',
+      options: [{ useTsTypes: true }],
       errors: defaultError,
     },
     {

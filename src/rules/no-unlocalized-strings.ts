@@ -177,12 +177,6 @@ function isStringLiteralFromUnionType(
     if (contextualType && isStringLiteralType(contextualType)) {
       return true
     }
-
-    // If no contextual type, get the type from the location
-    const nodeType = checker.getTypeAtLocation(nodeTsNode)
-    if (isStringLiteralType(nodeType)) {
-      return true
-    }
   } catch (error) {}
 
   /* istanbul ignore next */
