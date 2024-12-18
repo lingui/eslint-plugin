@@ -89,6 +89,10 @@ ruleTester.run(name, rule, {
       name: 'accepts TSAsExpression in array',
       code: 'const names = ["name" as const, "city" as const];',
     },
+    {
+      name: 'accepts TSAsExpression in object',
+      code: 'const paramsByDropSide = { top: "above" as const, bottom: "below" as const };',
+    },
 
     // ==================== Template Literals with Variables ====================
     {
@@ -513,6 +517,11 @@ ruleTester.run(name, rule, {
       code: "const test = ('hello' as unknown as string);",
       options: [ignoreUpperCaseName],
       errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'reports constants when missing TSASExpression in object',
+      code: 'const paramsByDropSide = { top: "above", bottom: "below" };',
+      errors: [{ messageId: 'default' }, { messageId: 'default' }],
     },
 
     // ==================== TypeScript Function Parameters ====================
