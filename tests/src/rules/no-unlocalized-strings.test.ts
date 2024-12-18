@@ -75,7 +75,23 @@ ruleTester.run(name, rule, {
     },
     {
       name: 'ignores special character strings',
-      code: 'const a = `0123456789!@#$%^&*()_+|~-=\\`[]{};\':",./<>?`;',
+      code: 'const special = `0123456789!@#$%^&*()_+|~-=\\`[]{};\':",./<>?`;',
+    },
+    {
+      name: 'accepts TSAsExpression assignment',
+      code: 'const unique = "this-is-unique" as const;',
+    },
+    {
+      name: 'accepts TSAsExpression assignment template literal',
+      code: 'const unique = `this-is-unique` as const;',
+    },
+    {
+      name: 'accepts TSAsExpression in array',
+      code: 'const names = ["name" as const, "city" as const];',
+    },
+    {
+      name: 'accepts TSAsExpression in object',
+      code: 'const paramsByDropSide = { top: "above" as const, bottom: "below" as const };',
     },
 
     // ==================== Template Literals with Variables ====================
@@ -115,8 +131,64 @@ ruleTester.run(name, rule, {
       code: 'obj["key with spaces"] = value',
     },
     {
+      name: 'allows declaring object keys in quotes',
+      code: 'const styles = { ":hover" : { color: theme.brand } }',
+    },
+    {
       name: 'allows computed member expression with template literal',
       code: 'obj[`key with spaces`] = value',
+    },
+    {
+      name: 'allow union types with string literals',
+      code: 'type Action = "add" | "remove"; function doAction(action: Action) {} doAction("add");',
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allow inline union types with string literals',
+      code: 'function doAction(action: "add" | "remove") {} doAction("add");',
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allow union types with optional string literals',
+      code: 'type Action = "add" | "remove" | undefined; function doAction(action: Action) {} doAction("add");',
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allows direct union type variable assignment',
+      code: 'let value: "a" | "b"; value = "a";',
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allows direct union type in object',
+      code: 'type Options = { mode: "light" | "dark" }; const options: Options = { mode: "light" };',
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allows string literal in function parameter with union type',
+      code: `
+        function test(param: "a" | "b") {}
+        test("a");
+      `,
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allows string literal in method parameter with union type',
+      code: `
+        class Test {
+          method(param: "x" | "y") {}
+        }
+        new Test().method("x");
+      `,
+      options: [{ useTsTypes: true }],
+    },
+    {
+      name: 'allows string literal union in multi-parameter function',
+      code: `
+        function test(first: string, second: "yes" | "no") {
+          test(first, "yes"); // second argument should be fine
+        }
+      `,
+      options: [{ useTsTypes: true }],
     },
     {
       name: 'allows assignment to ignored member expression',
@@ -276,12 +348,12 @@ ruleTester.run(name, rule, {
     },
     {
       name: 'accepts TSAsExpression in uppercase',
-      code: 'const MY_AS = ("Hello" as string)',
+      code: 'const MY_AS = "Hello" as string',
       options: [ignoreUpperCaseName],
     },
     {
       name: 'accepts complex expressions in uppercase',
-      code: 'const MY_COMPLEX = !("Hello" as string) || `World ${name}`',
+      code: 'const MY_COMPLEX = !("Hello") || `World ${name}`',
       options: [ignoreUpperCaseName],
     },
     {
@@ -320,6 +392,12 @@ ruleTester.run(name, rule, {
     {
       name: 'detects unlocalized string literal',
       code: 'const message = "Select tax code"',
+      errors: defaultError,
+    },
+    {
+      name: 'detects unlocalized string literal with types active',
+      code: 'const message = "Select tax code"',
+      options: [{ useTsTypes: true }],
       errors: defaultError,
     },
     {
@@ -435,6 +513,68 @@ ruleTester.run(name, rule, {
       name: 'handles type assertions with string literals',
       code: "const test = ('hello' as unknown as string);",
       options: [ignoreUpperCaseName],
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'reports constants when missing TSASExpression in object',
+      code: 'const paramsByDropSide = { top: "above", bottom: "below" };',
+      errors: [{ messageId: 'default' }, { messageId: 'default' }],
+    },
+
+    // ==================== TypeScript Function Parameters ====================
+    {
+      name: 'handles function call with no parameters',
+      code: `
+        function noParams() {}
+        noParams("this should error");
+      `,
+      options: [{ useTsTypes: true }],
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'handles function call with wrong number of arguments',
+      code: `
+        function oneParam(p: "a" | "b") {}
+        oneParam("a", "this should error");
+      `,
+      options: [{ useTsTypes: true }],
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'handles function call where parameter is not a string literal type',
+      code: `
+        function stringParam(param: string) {}
+        stringParam("should report error");
+      `,
+      options: [{ useTsTypes: true }],
+      errors: defaultError,
+    },
+    {
+      name: 'handles method call where signature cannot be resolved',
+      code: `
+        const obj = { method: (x: any) => {} };
+        obj["method"]("should report error");
+      `,
+      options: [{ useTsTypes: true }],
+      errors: defaultError,
+    },
+    {
+      name: 'requires translation for non-union string parameters',
+      code: `
+        function test(first: string, second: "yes" | "no") {
+          test("needs translation", "yes");
+        }
+      `,
+      options: [{ useTsTypes: true }],
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'handles type system error gracefully',
+      code: `
+        // This should cause type system issues but not crash
+        const x = (unknown as any).nonexistent("test");
+      `,
+      options: [{ useTsTypes: true }],
       errors: [{ messageId: 'default' }],
     },
   ],
