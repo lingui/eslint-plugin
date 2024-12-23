@@ -18,6 +18,7 @@ import {
 } from '../helpers'
 import { createRule } from '../create-rule'
 import * as micromatch from 'micromatch'
+import { TypeFlags, UnionType, Type, Expression } from 'typescript'
 
 type MatcherDef = string | { regex: { pattern: string; flags?: string } }
 
@@ -115,6 +116,70 @@ function isAssignedToIgnoredVariable(
     }
   }
 
+  return false
+}
+
+function isAsConstAssertion(node: TSESTree.Node): boolean {
+  const parent = node.parent
+  if (parent?.type === TSESTree.AST_NODE_TYPES.TSAsExpression) {
+    const typeAnnotation = parent.typeAnnotation
+    return (
+      typeAnnotation.type === TSESTree.AST_NODE_TYPES.TSTypeReference &&
+      isIdentifier(typeAnnotation.typeName) &&
+      typeAnnotation.typeName.name === 'const'
+    )
+  }
+  return false
+}
+
+function isStringLiteralFromUnionType(
+  node: TSESTree.Node,
+  tsService: ParserServicesWithTypeInformation,
+): boolean {
+  try {
+    const checker = tsService.program.getTypeChecker()
+    const nodeTsNode = tsService.esTreeNodeToTSNodeMap.get(node)
+
+    const isStringLiteralType = (type: Type): boolean => {
+      if (type.flags & TypeFlags.Union) {
+        const unionType = type as UnionType
+        return unionType.types.every((t) => t.flags & TypeFlags.StringLiteral)
+      }
+      return !!(type.flags & TypeFlags.StringLiteral)
+    }
+
+    // For arguments, check parameter type first
+    if (node.parent?.type === TSESTree.AST_NODE_TYPES.CallExpression) {
+      const callNode = node.parent
+      const tsCallNode = tsService.esTreeNodeToTSNodeMap.get(callNode)
+
+      const args = callNode.arguments as TSESTree.CallExpressionArgument[]
+      const argIndex = args.findIndex((arg) => arg === node)
+
+      const signature = checker.getResolvedSignature(tsCallNode)
+      // Only proceed if we have a valid signature and the argument index is valid
+      if (signature?.parameters && argIndex >= 0 && argIndex < signature.parameters.length) {
+        const param = signature.parameters[argIndex]
+        const paramType = checker.getTypeAtLocation(param.valueDeclaration)
+
+        // For function parameters, we ONLY accept union types of string literals
+        if (paramType.flags & TypeFlags.Union) {
+          const unionType = paramType as UnionType
+          return unionType.types.every((t) => t.flags & TypeFlags.StringLiteral)
+        }
+      }
+      // If we're here, it's a function call argument that didn't match our criteria
+      return false
+    }
+
+    // Try to get the contextual type first
+    const contextualType = checker.getContextualType(nodeTsNode as Expression)
+    if (contextualType && isStringLiteralType(contextualType)) {
+      return true
+    }
+  } catch (error) {}
+
+  /* istanbul ignore next */
   return false
 }
 
@@ -565,6 +630,27 @@ export const rule = createRule<Option[], string>({
           return
         }
 
+        if (isAsConstAssertion(node)) {
+          return
+        }
+
+        // Add check for object property key
+        const parent = node.parent
+        if (parent?.type === TSESTree.AST_NODE_TYPES.Property && parent.key === node) {
+          return
+        }
+
+        // More thorough type checking when enabled
+        if (option?.useTsTypes && tsService) {
+          try {
+            if (isStringLiteralFromUnionType(node, tsService)) {
+              return
+            }
+          } catch (error) {
+            // Ignore type checking errors
+          }
+        }
+
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
           return
         }
@@ -573,7 +659,6 @@ export const rule = createRule<Option[], string>({
           return
         }
 
-        // Only ignore type context for property keys
         if (isInsideTypeContext(node)) {
           return
         }
@@ -586,6 +671,10 @@ export const rule = createRule<Option[], string>({
         const text = getText(node)
 
         if (!text || isTextWhiteListed(text)) return
+
+        if (isAsConstAssertion(node)) {
+          return
+        }
 
         if (isAssignedToIgnoredVariable(node, isIgnoredName)) {
           return // Do not report this template literal
