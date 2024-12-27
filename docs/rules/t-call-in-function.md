@@ -17,4 +17,4 @@ function getGreeting() {
 }
 ```
 
-Check the [Lingui Docs](https://lingui.dev/tutorials/react-patterns#translations-outside-react-components) for more info.
+Check the [Lingui Docs](https://lingui.dev/ref/macro#using-macros) for more info.
