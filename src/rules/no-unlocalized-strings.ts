@@ -18,7 +18,8 @@ import {
 } from '../helpers'
 import { createRule } from '../create-rule'
 import * as micromatch from 'micromatch'
-import { TypeFlags, UnionType, Type, Expression } from 'typescript'
+import type { UnionType, Type, Expression } from 'typescript'
+import { TypeFlags } from 'typescript'
 
 type MatcherDef = string | { regex: { pattern: string; flags?: string } }
 
