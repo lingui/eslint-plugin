@@ -144,7 +144,9 @@ function isStringLiteralFromUnionType(
     const isStringLiteralType = (type: Type): boolean => {
       if (type.flags & TypeFlags.Union) {
         const unionType = type as UnionType
-        return unionType.types.every((t) => t.flags & TypeFlags.StringLiteral)
+        return unionType.types.every(
+          (t) => t.flags & TypeFlags.StringLiteral || t.flags & TypeFlags.NumberLike,
+        )
       }
       return !!(type.flags & TypeFlags.StringLiteral)
     }
