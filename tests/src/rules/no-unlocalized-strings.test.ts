@@ -188,6 +188,14 @@ ruleTester.run(name, rule, {
       options: [{ useTsTypes: true }],
     },
     {
+      name: 'allows string literal in function parameter with union type with booleans',
+      code: `
+        function test(param: "a" | "b" | false) {}
+        test("a");
+      `,
+      options: [{ useTsTypes: true }],
+    },
+    {
       name: 'allows string literal in method parameter with union type',
       code: `
         class Test {
