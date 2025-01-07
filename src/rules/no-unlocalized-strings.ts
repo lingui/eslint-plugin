@@ -163,11 +163,7 @@ function isStringLiteralFromUnionType(
         const param = signature.parameters[argIndex]
         const paramType = checker.getTypeAtLocation(param.valueDeclaration)
 
-        // For function parameters, we ONLY accept union types of string literals
-        if (paramType.flags & TypeFlags.Union) {
-          const unionType = paramType as UnionType
-          return unionType.types.every((t) => t.flags & TypeFlags.StringLiteral)
-        }
+        return isStringLiteralType(paramType)
       }
       // If we're here, it's a function call argument that didn't match our criteria
       return false
