@@ -19,7 +19,14 @@ import {
 import { createRule } from '../create-rule'
 import * as micromatch from 'micromatch'
 import type { UnionType, Type, Expression } from 'typescript'
-import { TypeFlags } from 'typescript'
+import type { default as TypeScriptModule } from 'typescript'
+
+let optionalTypeScript: typeof TypeScriptModule
+try {
+  optionalTypeScript = require('typescript')
+} catch (err) {
+  optionalTypeScript = null
+}
 
 type MatcherDef = string | { regex: { pattern: string; flags?: string } }
 
@@ -140,6 +147,7 @@ function isStringLiteralFromUnionType(
   try {
     const checker = tsService.program.getTypeChecker()
     const nodeTsNode = tsService.esTreeNodeToTSNodeMap.get(node)
+    const TypeFlags = optionalTypeScript.TypeFlags
 
     const isStringLiteralType = (type: Type): boolean => {
       if (type.flags & TypeFlags.Union) {
