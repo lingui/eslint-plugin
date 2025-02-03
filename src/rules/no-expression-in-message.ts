@@ -16,6 +16,8 @@ export const rule = createRule({
     },
     messages: {
       default: 'Should be ${variable}, not ${object.property} or ${myFunction()}',
+      multiplePlaceholders:
+        'Invalid placeholder: Expected an object with a single key-value pair, but found multiple keys',
     },
     schema: [
       {
@@ -49,11 +51,17 @@ export const rule = createRule({
         return
       }
 
-      const isExplicitLabel =
-        expression.type === TSESTree.AST_NODE_TYPES.ObjectExpression &&
-        expression.properties.length === 1
+      const isExplicitLabel = expression.type === TSESTree.AST_NODE_TYPES.ObjectExpression
 
       if (isExplicitLabel) {
+        // there can be only one key in the object
+        if (expression.properties.length === 1) {
+          return
+        }
+        context.report({
+          node: expression,
+          messageId: 'multiplePlaceholders',
+        })
         return
       }
 

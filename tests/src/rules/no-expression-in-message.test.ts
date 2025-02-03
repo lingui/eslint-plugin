@@ -145,7 +145,7 @@ ruleTester.run(name, rule, {
     },
     {
       code: 't`hello ${{name: obj.foo, surname: obj.bar}}`',
-      errors: [{ messageId: 'default' }],
+      errors: [{ messageId: 'multiplePlaceholders' }],
     },
     {
       code: 't`hello ${greeting({name: obj.prop})}`',
@@ -153,7 +153,7 @@ ruleTester.run(name, rule, {
     },
     {
       code: '<Trans>hello {{name: obj.foo, surname: obj.bar}}</Trans>',
-      errors: [{ messageId: 'default' }],
+      errors: [{ messageId: 'multiplePlaceholders' }],
     },
     {
       code: '<Trans>hello {greeting({name: obj.prop})}</Trans>',
