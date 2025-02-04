@@ -87,6 +87,18 @@ ruleTester.run(name, rule, {
       name: 'Strings as children are preserved',
       code: '<Trans>{"hello {count, plural, one {world} other {worlds}}"}</Trans>',
     },
+    {
+      code: 't`hello ${{name: obj.prop}}`',
+    },
+    {
+      code: 't`hello ${ph({name: obj.prop})}`',
+    },
+    {
+      code: '<Trans>hello {{name: obj.prop}}</Trans>',
+    },
+    {
+      code: '<Trans>hello {ph({name: obj.prop})}</Trans>',
+    },
   ],
   invalid: [
     {
@@ -129,6 +141,22 @@ ruleTester.run(name, rule, {
     },
     {
       code: 't`hello ${func()}?`',
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      code: 't`hello ${{name: obj.foo, surname: obj.bar}}`',
+      errors: [{ messageId: 'multiplePlaceholders' }],
+    },
+    {
+      code: 't`hello ${greeting({name: obj.prop})}`',
+      errors: [{ messageId: 'default' }],
+    },
+    {
+      code: '<Trans>hello {{name: obj.foo, surname: obj.bar}}</Trans>',
+      errors: [{ messageId: 'multiplePlaceholders' }],
+    },
+    {
+      code: '<Trans>hello {greeting({name: obj.prop})}</Trans>',
       errors: [{ messageId: 'default' }],
     },
   ],

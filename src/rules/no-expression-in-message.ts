@@ -16,6 +16,8 @@ export const rule = createRule({
     },
     messages: {
       default: 'Should be ${variable}, not ${object.property} or ${myFunction()}',
+      multiplePlaceholders:
+        'Invalid placeholder: Expected an object with a single key-value pair, but found multiple keys',
     },
     schema: [
       {
@@ -29,27 +31,43 @@ export const rule = createRule({
 
   defaultOptions: [],
   create: function (context) {
-    const linguiMacroFunctionNames = ['plural', 'select', 'selectOrdinal']
+    const linguiMacroFunctionNames = ['plural', 'select', 'selectOrdinal', 'ph']
 
     function checkExpressionsInTplLiteral(node: TSESTree.TemplateLiteral) {
-      node.expressions.forEach((expression) => {
-        if (expression.type === TSESTree.AST_NODE_TYPES.Identifier) {
+      node.expressions.forEach((expression) => checkExpression(expression))
+    }
+
+    function checkExpression(expression: TSESTree.Expression) {
+      if (expression.type === TSESTree.AST_NODE_TYPES.Identifier) {
+        return
+      }
+
+      const isCallToLinguiMacro =
+        expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
+        expression.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
+        linguiMacroFunctionNames.includes(expression.callee.name)
+
+      if (isCallToLinguiMacro) {
+        return
+      }
+
+      const isExplicitLabel = expression.type === TSESTree.AST_NODE_TYPES.ObjectExpression
+
+      if (isExplicitLabel) {
+        // there can be only one key in the object
+        if (expression.properties.length === 1) {
           return
         }
-
-        const isCallToLinguiMacro =
-          expression.type === TSESTree.AST_NODE_TYPES.CallExpression &&
-          expression.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
-          linguiMacroFunctionNames.includes(expression.callee.name)
-
-        if (isCallToLinguiMacro) {
-          return
-        }
-
         context.report({
           node: expression,
-          messageId: 'default',
+          messageId: 'multiplePlaceholders',
         })
+        return
+      }
+
+      context.report({
+        node: expression,
+        messageId: 'default',
       })
     }
 
@@ -74,6 +92,16 @@ export const rule = createRule({
         if (node.type === TSESTree.AST_NODE_TYPES.TemplateLiteral) {
           // <Trans>{`How much is ${obj.prop}?`}</Trans>
           return checkExpressionsInTplLiteral(node)
+        }
+
+        if (node.type === TSESTree.AST_NODE_TYPES.ObjectExpression) {
+          // <Trans>Hello {{name: obj.prop}}</Trans>
+          return checkExpression(node)
+        }
+
+        if (node.type === TSESTree.AST_NODE_TYPES.CallExpression) {
+          // <Trans>Hello {ph({name: obj.prop})}</Trans>
+          return checkExpression(node)
         }
 
         if (node.type !== TSESTree.AST_NODE_TYPES.Identifier) {
