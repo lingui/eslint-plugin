@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-lingui",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "ESLint plugin for Lingui",
   "keywords": [
     "eslint",
