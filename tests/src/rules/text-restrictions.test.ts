@@ -20,6 +20,11 @@ const wordRule: RestrictionRule = {
   flags: 'i',
 }
 
+const lineBreakRule: RestrictionRule = {
+  patterns: ['\n', '\r\n'],
+  message: `No line breaks`,
+}
+
 const ruleTester = new RuleTester({
   languageOptions: {
     parserOptions: {
@@ -85,6 +90,18 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       options: [
         {
           rules: [wordRule],
+        },
+      ],
+    },
+    {
+      code: `
+        <Trans>
+          hello
+        </Trans>
+      `,
+      options: [
+        {
+          rules: [lineBreakRule],
         },
       ],
     },
@@ -204,6 +221,19 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
         },
       ],
       errors: [{ messageId: 'default', data: { message: wordRule.message } }],
+    },
+    {
+      code: `
+        t\`
+          hello
+        \`
+      `,
+      options: [
+        {
+          rules: [lineBreakRule],
+        },
+      ],
+      errors: [{ messageId: 'default', data: { message: lineBreakRule.message } }],
     },
     {
       code: '<Trans>&lt;email</Trans>',

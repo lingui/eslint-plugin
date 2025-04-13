@@ -87,9 +87,9 @@ export const rule = createRule<Option[], string>({
 
     return {
       [`${LinguiTaggedTemplateExpressionMessageQuery}, ${LinguiCallExpressionMessageQuery}, ${LinguiTransQuery} JSXText`](
-        node: TSESTree.TemplateLiteral | TSESTree.Literal,
+        node: TSESTree.TemplateLiteral | TSESTree.Literal | TSESTree.JSXText,
       ) {
-        const text = getText(node)
+        const text = getText(node, node.type === TSESTree.AST_NODE_TYPES.JSXText)
 
         rulePatterns.forEach(({ patterns, message }: RegexRule) => {
           if (patterns.some((item: RegExp) => item.test(text))) {
