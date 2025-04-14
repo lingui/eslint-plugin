@@ -60,15 +60,16 @@ export function getNearestAncestor<Type>(node: any, type: string): Type | null {
 
 export const getText = (
   node: TSESTree.TemplateLiteral | TSESTree.Literal | TSESTree.JSXText,
+  trimmed = true,
 ): string => {
+  let result = ''
   if (node.type === TSESTree.AST_NODE_TYPES.TemplateLiteral) {
-    return node.quasis
-      .map((quasis) => quasis.value.cooked)
-      .join('')
-      .trim()
+    result = node.quasis.map((quasis) => quasis.value.cooked).join('')
+  } else {
+    result = node.value.toString()
   }
 
-  return node.value.toString().trim()
+  return trimmed ? result.trim() : result
 }
 
 export function getIdentifierName(jsxTagNameExpression: TSESTree.JSXTagNameExpression) {
