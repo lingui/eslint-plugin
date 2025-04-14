@@ -21,7 +21,7 @@ const wordRule: RestrictionRule = {
 }
 
 const lineBreakRule: RestrictionRule = {
-  patterns: ['\n', '\r\n'],
+  patterns: ['^\n', '\n$', '^\r\n', '\r\n$'],
   message: `No line breaks`,
 }
 
@@ -97,6 +97,19 @@ ruleTester.run<string, Option[]>('text-restrictions (ts)', rule, {
       code: `
         <Trans>
           hello
+        </Trans>
+      `,
+      options: [
+        {
+          rules: [lineBreakRule],
+        },
+      ],
+    },
+    {
+      code: `
+        <Trans>
+          hello
+          world
         </Trans>
       `,
       options: [
