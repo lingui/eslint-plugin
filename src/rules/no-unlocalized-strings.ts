@@ -474,7 +474,7 @@ export const rule = createRule<Option[], string>({
         processTextNode(node)
       },
 
-      'JSXAttribute :matches(Literal,TemplateLiteral)'(
+      'JSXAttribute > :matches(Literal,TemplateLiteral)'(
         node: TSESTree.Literal | TSESTree.TemplateLiteral,
       ) {
         const parent = getNearestAncestor<TSESTree.JSXAttribute>(
