@@ -54,6 +54,22 @@ ruleTester.run(name, rule, {
     {
       code: `plural(numBooks, someVariable)`,
     },
+    // React Plural component - hash format (default)
+    {
+      code: `<Plural value={messagesCount} one="There's # message in your inbox" other="There are # messages in your inbox" />`,
+    },
+    {
+      code: `<Plural value={count} zero="# items" one="# item" other="# items" />`,
+    },
+    // React Plural component - template format when configured
+    {
+      code: `<Plural value={messagesCount} one={\`There's \${messagesCount} message in your inbox\`} other={\`There are \${messagesCount} messages in your inbox\`} />`,
+      options: [{ style: 'template' }],
+    },
+    {
+      code: `<Plural value={count} zero={\`\${count} items\`} one={\`\${count} item\`} other={\`\${count} items\`} />`,
+      options: [{ style: 'template' }],
+    },
   ],
   invalid: [
     // Hash style preferred (default), but template literals used
@@ -110,6 +126,38 @@ ruleTester.run(name, rule, {
       })`,
       errors: [
         { messageId: 'hashRequired' },
+      ],
+    },
+    // React Plural component - template literals when hash preferred (default)
+    {
+      code: `<Plural value={messagesCount} one={\`There's \${messagesCount} message in your inbox\`} other={\`There are \${messagesCount} messages in your inbox\`} />`,
+      errors: [
+        { messageId: 'hashRequired' },
+        { messageId: 'hashRequired' },
+      ],
+    },
+    {
+      code: `<Plural value={count} zero={\`\${count} items\`} one="# item" other={\`\${count} items\`} />`,
+      errors: [
+        { messageId: 'hashRequired' },
+        { messageId: 'hashRequired' },
+      ],
+    },
+    // React Plural component - hash format when template preferred
+    {
+      code: `<Plural value={messagesCount} one="There's # message in your inbox" other="There are # messages in your inbox" />`,
+      options: [{ style: 'template' }],
+      errors: [
+        { messageId: 'templateRequired' },
+        { messageId: 'templateRequired' },
+      ],
+    },
+    {
+      code: `<Plural value={count} zero="# items" one={\`\${count} item\`} other="# items" />`,
+      options: [{ style: 'template' }],
+      errors: [
+        { messageId: 'templateRequired' },
+        { messageId: 'templateRequired' },
       ],
     },
   ],

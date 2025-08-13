@@ -4,10 +4,14 @@ Enforce consistent format for plural definitions in Lingui i18n library.
 
 ## Rule Details
 
-This rule enforces a consistent format for plural definitions when using the `plural()` function from Lingui. There are two supported formats:
+This rule enforces a consistent format for plural definitions when using the `plural()` function or `<Plural>` component from Lingui. There are two supported formats:
 
 1. **Hash format** (default): Uses `#` as a placeholder for the count
 2. **Template format**: Uses template literals with explicit variable interpolation
+
+The rule works with both:
+- `plural()` function calls
+- `<Plural>` React component attributes
 
 ## Options
 
@@ -42,6 +46,12 @@ plural(numBooks, {
   one: "${numBooks} book",
   other: "# books",
 });
+
+<Plural
+  value={messagesCount}
+  one={`There's ${messagesCount} message in your inbox`}
+  other={`There are ${messagesCount} messages in your inbox`}
+/>
 ```
 
 ### ✅ Correct (when `style` is `"hash"` - default)
@@ -57,6 +67,12 @@ plural(count, {
   one: "# item",
   other: "# items",
 });
+
+<Plural
+  value={messagesCount}
+  one="There's # message in your inbox"
+  other="There are # messages in your inbox"
+/>
 ```
 
 ### ❌ Incorrect (when `style` is `"template"`)
@@ -72,6 +88,12 @@ plural(count, {
   one: `${count} item`,
   other: "# items",
 });
+
+<Plural
+  value={messagesCount}
+  one="There's # message in your inbox"
+  other="There are # messages in your inbox"
+/>
 ```
 
 ### ✅ Correct (when `style` is `"template"`)
@@ -87,6 +109,12 @@ plural(count, {
   one: `${count} item`,
   other: `${count} items`,
 });
+
+<Plural
+  value={messagesCount}
+  one={`There's ${messagesCount} message in your inbox`}
+  other={`There are ${messagesCount} messages in your inbox`}
+/>
 ```
 
 ## When Not To Use It
