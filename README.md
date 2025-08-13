@@ -105,3 +105,4 @@ Alternatively, add `lingui` to the plugins section, and configure the rules you 
 - ✅ [t-call-in-function](docs/rules/t-call-in-function.md)
 - [no-unlocalized-strings](docs/rules/no-unlocalized-strings.md)
 - [text-restrictions](docs/rules/text-restrictions.md)
+- [consistent-plural-format](docs/rules/consistent-plural-format.md)
