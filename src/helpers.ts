@@ -29,6 +29,16 @@ export const LinguiCallExpressionMessageQuery =
  */
 export const LinguiTransQuery = 'JSXElement[openingElement.name.name=Trans]'
 
+/**
+ * Queries for plural CallExpression expressions and JSX elements
+ *
+ * CallExpression: plural(numBooks, { one: "# book", other: "# books" });
+ * Component/JSX: <Plural value={messagesCount} one="There's # message in your inbox" other="There are # messages in your inbox" />
+ */
+export const LinguiCallExpressionPluralQuery = 'CallExpression[callee.name=plural]'
+
+export const LinguiPluralComponentQuery = 'JSXElement[openingElement.name.name=Plural]'
+
 export function isNativeDOMTag(str: string) {
   return DOM_TAGS.includes(str)
 }

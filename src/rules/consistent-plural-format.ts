@@ -1,5 +1,6 @@
 import { TSESTree } from '@typescript-eslint/utils'
 import { createRule } from '../create-rule'
+import { LinguiCallExpressionPluralQuery, LinguiPluralComponentQuery } from "../helpers"
 
 export const name = 'consistent-plural-format'
 
@@ -39,20 +40,6 @@ export const rule = createRule<Options, 'hashRequired' | 'templateRequired'>({
   create: function (context) {
     const options = context.options[0] || {}
     const preferredStyle = options.style || 'hash'
-
-    function isPluralCall(node: TSESTree.CallExpression): boolean {
-      return (
-        node.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
-        node.callee.name === 'plural'
-      )
-    }
-
-    function isPluralComponent(node: TSESTree.JSXElement): boolean {
-      return (
-        node.openingElement.name.type === TSESTree.AST_NODE_TYPES.JSXIdentifier &&
-        node.openingElement.name.name === 'Plural'
-      )
-    }
 
     function checkStringValue(value: string, node: TSESTree.Node) {
       const hasHashFormat = value.includes('#')
@@ -100,46 +87,8 @@ export const rule = createRule<Options, 'hashRequired' | 'templateRequired'>({
       })
     }
 
-    function checkPluralComponentAttributes(node: TSESTree.JSXElement) {
-      const attributes = node.openingElement.attributes
-
-      attributes.forEach((attr) => {
-        if (
-          attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute &&
-          attr.name.type === TSESTree.AST_NODE_TYPES.JSXIdentifier &&
-          (attr.name.name === 'one' || attr.name.name === 'other' || attr.name.name === 'zero' || attr.name.name === 'few' || attr.name.name === 'many')
-        ) {
-          if (attr.value) {
-            // Handle string literals
-            if (
-              attr.value.type === TSESTree.AST_NODE_TYPES.Literal &&
-              typeof attr.value.value === 'string'
-            ) {
-              checkStringValue(attr.value.value, attr.value)
-            }
-            // Handle JSX expressions with template literals
-            else if (
-              attr.value.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer &&
-              attr.value.expression.type === TSESTree.AST_NODE_TYPES.TemplateLiteral
-            ) {
-              if (preferredStyle === 'hash') {
-                context.report({
-                  node: attr.value.expression,
-                  messageId: 'hashRequired',
-                })
-              }
-            }
-          }
-        }
-      })
-    }
-
     return {
-      CallExpression(node: TSESTree.CallExpression) {
-        if (!isPluralCall(node)) {
-          return
-        }
-
+      [LinguiCallExpressionPluralQuery](node: TSESTree.CallExpression) {
         // Check if the second argument is an object expression
         if (
           node.arguments.length >= 2 &&
@@ -148,12 +97,38 @@ export const rule = createRule<Options, 'hashRequired' | 'templateRequired'>({
           checkPluralObject(node.arguments[1])
         }
       },
-      JSXElement(node: TSESTree.JSXElement) {
-        if (!isPluralComponent(node)) {
-          return
-        }
+      [LinguiPluralComponentQuery](node: TSESTree.JSXElement) {
+        const attributes = node.openingElement.attributes
 
-        checkPluralComponentAttributes(node)
+        attributes.forEach((attr) => {
+          if (
+            attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute &&
+            attr.name.type === TSESTree.AST_NODE_TYPES.JSXIdentifier &&
+            (attr.name.name === 'one' || attr.name.name === 'other' || attr.name.name === 'zero' || attr.name.name === 'few' || attr.name.name === 'many')
+          ) {
+            if (attr.value) {
+              // Handle string literals
+              if (
+                attr.value.type === TSESTree.AST_NODE_TYPES.Literal &&
+                typeof attr.value.value === 'string'
+              ) {
+                checkStringValue(attr.value.value, attr.value)
+              }
+              // Handle JSX expressions with template literals
+              else if (
+                attr.value.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer &&
+                attr.value.expression.type === TSESTree.AST_NODE_TYPES.TemplateLiteral
+              ) {
+                if (preferredStyle === 'hash') {
+                  context.report({
+                    node: attr.value.expression,
+                    messageId: 'hashRequired',
+                  })
+                }
+              }
+            }
+          }
+        })
       },
     }
   },

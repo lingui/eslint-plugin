@@ -116,28 +116,3 @@ plural(count, {
   other={`There are ${messagesCount} messages in your inbox`}
 />
 ```
-
-## When Not To Use It
-
-If you don't want to enforce a consistent format for plural definitions, or if your project uses both formats intentionally in different contexts, you can disable this rule.
-
-## Configuration
-
-### Hash format (default)
-
-```json
-{
-  "rules": {
-    "lingui/consistent-plural-format": "error"
-  }
-}
-```
-
-### Template format
-
-```json
-{
-  "rules": {
-    "lingui/consistent-plural-format": ["error", { "style": "template" }]
-  }
-}
