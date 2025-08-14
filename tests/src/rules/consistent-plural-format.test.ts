@@ -78,10 +78,7 @@ ruleTester.run(name, rule, {
         one: \`\${numBooks} book\`,
         other: \`\${numBooks} books\`,
       })`,
-      errors: [
-        { messageId: 'hashRequired' },
-        { messageId: 'hashRequired' },
-      ],
+      errors: [{ messageId: 'hashRequired' }, { messageId: 'hashRequired' }],
     },
     {
       code: `plural(count, {
@@ -89,10 +86,7 @@ ruleTester.run(name, rule, {
         one: "# item",
         other: \`\${count} items\`,
       })`,
-      errors: [
-        { messageId: 'hashRequired' },
-        { messageId: 'hashRequired' },
-      ],
+      errors: [{ messageId: 'hashRequired' }, { messageId: 'hashRequired' }],
     },
     // Template style preferred, but hash format used
     {
@@ -101,10 +95,7 @@ ruleTester.run(name, rule, {
         other: "# books",
       })`,
       options: [{ style: 'template' }],
-      errors: [
-        { messageId: 'templateRequired' },
-        { messageId: 'templateRequired' },
-      ],
+      errors: [{ messageId: 'templateRequired' }, { messageId: 'templateRequired' }],
     },
     {
       code: `plural(count, {
@@ -113,10 +104,7 @@ ruleTester.run(name, rule, {
         other: "# items",
       })`,
       options: [{ style: 'template' }],
-      errors: [
-        { messageId: 'templateRequired' },
-        { messageId: 'templateRequired' },
-      ],
+      errors: [{ messageId: 'templateRequired' }, { messageId: 'templateRequired' }],
     },
     // Mixed hash and template literal patterns in strings (hash preferred)
     {
@@ -124,41 +112,27 @@ ruleTester.run(name, rule, {
         one: "\${numBooks} book",
         other: "# books",
       })`,
-      errors: [
-        { messageId: 'hashRequired' },
-      ],
+      errors: [{ messageId: 'hashRequired' }],
     },
     // React Plural component - template literals when hash preferred (default)
     {
       code: `<Plural value={messagesCount} one={\`There's \${messagesCount} message in your inbox\`} other={\`There are \${messagesCount} messages in your inbox\`} />`,
-      errors: [
-        { messageId: 'hashRequired' },
-        { messageId: 'hashRequired' },
-      ],
+      errors: [{ messageId: 'hashRequired' }, { messageId: 'hashRequired' }],
     },
     {
       code: `<Plural value={count} zero={\`\${count} items\`} one="# item" other={\`\${count} items\`} />`,
-      errors: [
-        { messageId: 'hashRequired' },
-        { messageId: 'hashRequired' },
-      ],
+      errors: [{ messageId: 'hashRequired' }, { messageId: 'hashRequired' }],
     },
     // React Plural component - hash format when template preferred
     {
       code: `<Plural value={messagesCount} one="There's # message in your inbox" other="There are # messages in your inbox" />`,
       options: [{ style: 'template' }],
-      errors: [
-        { messageId: 'templateRequired' },
-        { messageId: 'templateRequired' },
-      ],
+      errors: [{ messageId: 'templateRequired' }, { messageId: 'templateRequired' }],
     },
     {
       code: `<Plural value={count} zero="# items" one={\`\${count} item\`} other="# items" />`,
       options: [{ style: 'template' }],
-      errors: [
-        { messageId: 'templateRequired' },
-        { messageId: 'templateRequired' },
-      ],
+      errors: [{ messageId: 'templateRequired' }, { messageId: 'templateRequired' }],
     },
   ],
 })

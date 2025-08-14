@@ -1,13 +1,13 @@
 import { TSESTree } from '@typescript-eslint/utils'
 import { createRule } from '../create-rule'
-import { LinguiCallExpressionPluralQuery, LinguiPluralComponentQuery } from "../helpers"
+import { LinguiCallExpressionPluralQuery, LinguiPluralComponentQuery } from '../helpers'
 
 export const name = 'consistent-plural-format'
 
 type Options = [
   {
     style?: 'hash' | 'template'
-  }
+  },
 ]
 
 export const rule = createRule<Options, 'hashRequired' | 'templateRequired'>({
@@ -18,8 +18,10 @@ export const rule = createRule<Options, 'hashRequired' | 'templateRequired'>({
       recommended: 'error',
     },
     messages: {
-      hashRequired: 'Use hash format (e.g., "# book") instead of template literals in plural definitions',
-      templateRequired: 'Use template literal format (e.g., `${variable} book`) instead of hash format in plural definitions',
+      hashRequired:
+        'Use hash format (e.g., "# book") instead of template literals in plural definitions',
+      templateRequired:
+        'Use template literal format (e.g., `${variable} book`) instead of hash format in plural definitions',
     },
     schema: [
       {
@@ -104,7 +106,11 @@ export const rule = createRule<Options, 'hashRequired' | 'templateRequired'>({
           if (
             attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute &&
             attr.name.type === TSESTree.AST_NODE_TYPES.JSXIdentifier &&
-            (attr.name.name === 'one' || attr.name.name === 'other' || attr.name.name === 'zero' || attr.name.name === 'few' || attr.name.name === 'many')
+            (attr.name.name === 'one' ||
+              attr.name.name === 'other' ||
+              attr.name.name === 'zero' ||
+              attr.name.name === 'few' ||
+              attr.name.name === 'many')
           ) {
             if (attr.value) {
               // Handle string literals
