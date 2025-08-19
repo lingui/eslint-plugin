@@ -71,11 +71,25 @@ export const rule = createRule<Options, 'hashRequired' | 'templateRequired'>({
         if (property.type === TSESTree.AST_NODE_TYPES.Property) {
           // Handle template literals
           if (property.value.type === TSESTree.AST_NODE_TYPES.TemplateLiteral) {
+            const templateValue = property.value.quasis.map((q) => q.value.raw).join('${...}')
+            const hasVariables = property.value.expressions.length > 0
+
             if (preferredStyle === 'hash') {
-              context.report({
-                node: property.value,
-                messageId: 'hashRequired',
-              })
+              // Only flag template literals that have variables (expressions)
+              if (hasVariables) {
+                context.report({
+                  node: property.value,
+                  messageId: 'hashRequired',
+                })
+              }
+            } else if (preferredStyle === 'template') {
+              // Check if template literal contains hash format
+              if (templateValue.includes('#')) {
+                context.report({
+                  node: property.value,
+                  messageId: 'templateRequired',
+                })
+              }
             }
           }
           // Handle string literals
@@ -125,11 +139,27 @@ export const rule = createRule<Options, 'hashRequired' | 'templateRequired'>({
                 attr.value.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer &&
                 attr.value.expression.type === TSESTree.AST_NODE_TYPES.TemplateLiteral
               ) {
+                const templateValue = attr.value.expression.quasis
+                  .map((q) => q.value.raw)
+                  .join('${...}')
+                const hasVariables = attr.value.expression.expressions.length > 0
+
                 if (preferredStyle === 'hash') {
-                  context.report({
-                    node: attr.value.expression,
-                    messageId: 'hashRequired',
-                  })
+                  // Only flag template literals that have variables (expressions)
+                  if (hasVariables) {
+                    context.report({
+                      node: attr.value.expression,
+                      messageId: 'hashRequired',
+                    })
+                  }
+                } else if (preferredStyle === 'template') {
+                  // Check if template literal contains hash format
+                  if (templateValue.includes('#')) {
+                    context.report({
+                      node: attr.value.expression,
+                      messageId: 'templateRequired',
+                    })
+                  }
                 }
               }
             }

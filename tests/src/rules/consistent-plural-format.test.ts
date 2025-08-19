@@ -27,6 +27,14 @@ ruleTester.run(name, rule, {
         other: "# items",
       })`,
     },
+    // Hash style OK with template string as long as variable isnt used
+    {
+      code: `plural(count, {
+        zero: \`# items\`,
+        one: \`# item\`,
+        other: \`# items\`,
+      })`,
+    },
     // Template style - valid cases when configured
     {
       code: `plural(numBooks, {
@@ -110,6 +118,16 @@ ruleTester.run(name, rule, {
         zero: "# items",
         one: \`\${count} item\`,
         other: "# items",
+      })`,
+      options: [{ style: 'template' }],
+      errors: [{ messageId: 'templateRequired' }, { messageId: 'templateRequired' }],
+    },
+    // hash style uses template strings, but still not allowed
+    {
+      code: `plural(count, {
+        zero: \`# items\`,
+        one: \`\${count} item\`,
+        other: \`# items\`,
       })`,
       options: [{ style: 'template' }],
       errors: [{ messageId: 'templateRequired' }, { messageId: 'templateRequired' }],
