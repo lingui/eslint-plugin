@@ -70,6 +70,14 @@ ruleTester.run(name, rule, {
       code: `<Plural value={count} zero={\`\${count} items\`} one={\`\${count} item\`} other={\`\${count} items\`} />`,
       options: [{ style: 'template' }],
     },
+    // No variables in some fields
+    {
+      code: `plural(count, {zero: "You have no items", one: "You have one item", other: '# items'})`,
+    },
+    {
+      code: `plural(count, {zero: "You have no items", one: "You have one item", other: \`\${count} items\`})`,
+      options: [{ style: 'template' }],
+    },
   ],
   invalid: [
     // Hash style preferred (default), but template literals used
@@ -133,6 +141,16 @@ ruleTester.run(name, rule, {
       code: `<Plural value={count} zero="# items" one={\`\${count} item\`} other="# items" />`,
       options: [{ style: 'template' }],
       errors: [{ messageId: 'templateRequired' }, { messageId: 'templateRequired' }],
+    },
+    // Errors in plural calls with variable in only one field
+    {
+      code: `plural(count, {zero: "You have no items", one: "You have one item", other: "# items"})`,
+      options: [{ style: 'template' }],
+      errors: [{ messageId: 'templateRequired' }],
+    },
+    {
+      code: `plural(count, {zero: "You have no items", one: "# item", other: \`\${count} items\`})`,
+      errors: [{ messageId: 'hashRequired' }],
     },
   ],
 })
