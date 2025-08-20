@@ -45,3 +45,4 @@ jobs:
         run: npx release-it --increment
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_DEBUG: release-it:*
