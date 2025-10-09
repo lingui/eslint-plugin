@@ -106,3 +106,4 @@ Alternatively, add `lingui` to the plugins section, and configure the rules you 
 - [no-unlocalized-strings](docs/rules/no-unlocalized-strings.md)
 - [text-restrictions](docs/rules/text-restrictions.md)
 - [consistent-plural-format](docs/rules/consistent-plural-format.md)
+- [no-plural-inside-trans](docs/rules/no-plural-inside-trans.md)
