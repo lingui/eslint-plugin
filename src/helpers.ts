@@ -39,6 +39,27 @@ export const LinguiCallExpressionPluralQuery = 'CallExpression[callee.name=plura
 
 export const LinguiPluralComponentQuery = 'JSXElement[openingElement.name.name=Plural]'
 
+/**
+ * Queries for select and selectOrdinal CallExpression expressions
+ *
+ * CallExpression: select(value, { one: "# item", other: "# items" });
+ * CallExpression: selectOrdinal(value, { one: "1st", other: "#th" });
+ */
+export const LinguiCallExpressionSelectQuery = 'CallExpression[callee.name=select]'
+
+export const LinguiCallExpressionSelectOrdinalQuery = 'CallExpression[callee.name=selectOrdinal]'
+
+/**
+ * Queries for Select and SelectOrdinal JSX components
+ *
+ * <Select value={value} one="# item" other="# items" />
+ * <SelectOrdinal value={value} one="1st" other="#th" />
+ */
+export const LinguiSelectComponentQuery = 'JSXElement[openingElement.name.name=Select]'
+
+export const LinguiSelectOrdinalComponentQuery =
+  'JSXElement[openingElement.name.name=SelectOrdinal]'
+
 export function isNativeDOMTag(str: string) {
   return DOM_TAGS.includes(str)
 }
