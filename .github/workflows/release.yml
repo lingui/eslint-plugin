@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +29,11 @@ jobs:
           yarn install
           yarn build
 
+      - name: Install latest npm CLI
+        run: |
+          npm install -g npm@latest
+          npm --version
+
       - name: Install release-it globally
         run: |
           npm i -g release-it@17.8.2
@@ -37,9 +43,6 @@ jobs:
         run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-
-      - name: npm config
-        run: npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
 
       - name: Bump version
         run: npx release-it --increment
