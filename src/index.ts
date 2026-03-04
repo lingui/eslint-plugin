@@ -44,7 +44,6 @@ const recommendedRules: { [K in RuleKey as `lingui/${K}`]?: FlatConfig.RuleLevel
   'lingui/no-single-tag-to-translate': 'warn',
   'lingui/no-single-variables-to-translate': 'warn',
   'lingui/no-trans-inside-trans': 'warn',
-  'lingui/no-expression-in-message': 'warn',
 }
 
 // Assign configs here so we can reference `plugin`
