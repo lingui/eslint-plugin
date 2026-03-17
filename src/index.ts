@@ -6,7 +6,7 @@ import * as tCallInFunctionRule from './rules/t-call-in-function'
 import * as textRestrictionsRule from './rules/text-restrictions'
 import * as noTransInsideTransRule from './rules/no-trans-inside-trans'
 import * as consistentPluralFormatRule from './rules/consistent-plural-format'
-import * as requireTransIdRule from './rules/require-trans-id'
+import * as requireExplicitIdRule from './rules/require-explicit-id'
 
 import { ESLint, Linter } from 'eslint'
 import { FlatConfig, RuleModule } from '@typescript-eslint/utils/ts-eslint'
@@ -20,7 +20,7 @@ const rules = {
   [textRestrictionsRule.name]: textRestrictionsRule.rule,
   [noTransInsideTransRule.name]: noTransInsideTransRule.rule,
   [consistentPluralFormatRule.name]: consistentPluralFormatRule.rule,
-  [requireTransIdRule.name]: requireTransIdRule.rule,
+  [requireExplicitIdRule.name]: requireExplicitIdRule.rule,
 }
 
 type RuleKey = keyof typeof rules

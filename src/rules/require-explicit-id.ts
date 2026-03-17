@@ -11,7 +11,7 @@ export type Option = {
   flags?: string
 }
 
-export const name = 'require-trans-id'
+export const name = 'require-explicit-id'
 export const rule = createRule<Option[], string>({
   name,
   meta: {

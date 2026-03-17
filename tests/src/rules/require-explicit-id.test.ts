@@ -1,4 +1,4 @@
-import { rule, name } from '../../../src/rules/require-trans-id'
+import { rule, name } from '../../../src/rules/require-explicit-id'
 import { RuleTester } from '@typescript-eslint/rule-tester'
 
 describe('', () => {})

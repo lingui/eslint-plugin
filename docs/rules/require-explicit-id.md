@@ -1,4 +1,4 @@
-# require-trans-id
+# require-explicit-id
 
 Enforce that `<Trans>` components and Lingui macro function calls (`t`, `msg`, `defineMessage`) have an explicit `id`.
 
@@ -39,16 +39,16 @@ Optional flags passed to the `RegExp` constructor together with each pattern.
 
 ```jsonc
 // Only require id to be present (default behavior)
-"lingui/require-trans-id": "error"
+"lingui/require-explicit-id": "error"
 
 // Require id to match a specific pattern
-"lingui/require-trans-id": ["error", { "patterns": ["^[\\w-]+$"] }]
+"lingui/require-explicit-id": ["error", { "patterns": ["^[\\w-]+$"] }]
 
 // Require id to start with "msg." or "err."
-"lingui/require-trans-id": ["error", { "patterns": ["^msg\\.", "^err\\."] }]
+"lingui/require-explicit-id": ["error", { "patterns": ["^msg\\.", "^err\\."] }]
 
 // Require id to start with "msg." (case-insensitive)
-"lingui/require-trans-id": ["error", { "patterns": ["^msg\\."], "flags": "i" }]
+"lingui/require-explicit-id": ["error", { "patterns": ["^msg\\."], "flags": "i" }]
 ```
 
 ### Examples with `patterns: ["^msg\\."]`
