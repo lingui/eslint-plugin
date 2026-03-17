@@ -23,6 +23,19 @@ export const LinguiCallExpressionMessageQuery =
   ':matches(CallExpression[callee.name=t], CallExpression[callee.name=msg], CallExpression[callee.name=defineMessage]) :matches(TemplateLiteral, Literal)'
 
 /**
+ * Queries for the CallExpression node itself, unlike {@link LinguiCallExpressionMessageQuery}
+ * which matches descendant TemplateLiteral | Literal nodes (the message content).
+ * This query is needed when inspecting the call's arguments (e.g. checking for an `id` property)
+ * rather than the message value, and avoids firing multiple times per call.
+ *
+ * t({...})
+ * msg({...})
+ * defineMessage({...})
+ */
+export const LinguiCallExpressionQuery =
+  ':matches(CallExpression[callee.name=t], CallExpression[callee.name=msg], CallExpression[callee.name=defineMessage])'
+
+/**
  * Queries for Trans
  *
  * <Trans></Trans>

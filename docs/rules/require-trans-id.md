@@ -1,15 +1,20 @@
 # require-trans-id
 
-Enforce that `<Trans>` components have an explicit `id` attribute.
+Enforce that `<Trans>` components and Lingui macro function calls (`t`, `msg`, `defineMessage`) have an explicit `id`.
 
 Providing an explicit `id` gives translators a stable, human-readable key and prevents auto-generated IDs from changing unexpectedly when the default message is updated.
 
+Tagged template literals (`` t`Hello` ``) don't support `id` — use the function call form instead.
+
 ```jsx
 // nope ⛔️
-<Trans>Read the <a href="https://lingui.dev">documentation</a> for more info.</Trans>
+<Trans>Read the docs for more info.</Trans>
+t`Hello`
+t({ message: "Hello" })
 
 // ok ✅
-<Trans id="msg.docs">Read the <a href="https://lingui.dev">documentation</a> for more info.</Trans>
+<Trans id="msg.docs">Read the docs for more info.</Trans>
+t({ id: "msg.hello", message: "Hello" })
 ```
 
 ## Options
@@ -21,7 +26,7 @@ Default: _none_
 
 When provided, the rule additionally validates that the `id` value matches at least one of the given regular expressions. If the option is omitted, any `id` value is accepted.
 
-Non-string `id` values (e.g. JSX expressions like `id={someVar}`) are silently ignored during pattern validation.
+Non-string `id` values (e.g. JSX expressions like `id={someVar}` or `id: someVar`) are silently ignored during pattern validation.
 
 ### `flags`
 
@@ -51,7 +56,9 @@ Optional flags passed to the `RegExp` constructor together with each pattern.
 ```jsx
 // nope ⛔️
 <Trans id="hello">Hello</Trans>
+t({ id: "hello", message: "Hello" })
 
 // ok ✅
 <Trans id="msg.hello">Hello</Trans>
+t({ id: "msg.hello", message: "Hello" })
 ```

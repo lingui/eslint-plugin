@@ -15,6 +15,7 @@ const ruleTester = new RuleTester({
 
 ruleTester.run(name, rule, {
   valid: [
+    // Trans component
     {
       code: '<Trans id="msg.hello">Hello</Trans>',
     },
@@ -24,7 +25,7 @@ ruleTester.run(name, rule, {
     {
       code: '<Trans id="msg.greeting" render="span">Hello World</Trans>',
     },
-    // with patterns option — id matches
+    // Trans with patterns option — id matches
     {
       code: '<Trans id="msg.hello">Hello</Trans>',
       options: [{ patterns: ['^msg\\.'] }],
@@ -48,8 +49,35 @@ ruleTester.run(name, rule, {
       code: '<Trans id="err.notFound">Not Found</Trans>',
       options: [{ patterns: ['^msg\\.', '^err\\.'] }],
     },
+
+    // Call expressions with id
+    {
+      code: 't({ id: "msg.hello", message: "Hello" })',
+    },
+    {
+      code: 'msg({ id: "msg.hello", message: "Hello" })',
+    },
+    {
+      code: 'defineMessage({ id: "msg.hello", message: "Hello" })',
+    },
+    // Call expression with patterns — id matches
+    {
+      code: 't({ id: "msg.hello", message: "Hello" })',
+      options: [{ patterns: ['^msg\\.'] }],
+    },
+    // Call expression with expression id — silently skipped
+    {
+      code: 't({ id: someVar, message: "Hello" })',
+      options: [{ patterns: ['^msg\\.'] }],
+    },
+    // Call expression id matches one of multiple patterns
+    {
+      code: 't({ id: "err.notFound", message: "Not Found" })',
+      options: [{ patterns: ['^msg\\.', '^err\\.'] }],
+    },
   ],
   invalid: [
+    // Trans — missing id
     {
       code: '<Trans>Hello</Trans>',
       errors: [{ messageId: 'default' }],
@@ -65,13 +93,13 @@ ruleTester.run(name, rule, {
       </Trans>`,
       errors: [{ messageId: 'default' }],
     },
-    // missing id with patterns option still reports 'default'
+    // Trans — missing id with patterns option still reports 'default'
     {
       code: '<Trans>Hello</Trans>',
       options: [{ patterns: ['^msg\\.'] }],
       errors: [{ messageId: 'default' }],
     },
-    // id present but doesn't match any pattern
+    // Trans — id present but doesn't match any pattern
     {
       code: '<Trans id="hello">Hello</Trans>',
       options: [{ patterns: ['^msg\\.'] }],
@@ -91,6 +119,46 @@ ruleTester.run(name, rule, {
     // id doesn't match any of multiple patterns
     {
       code: '<Trans id="greeting.hello">Hello</Trans>',
+      options: [{ patterns: ['^msg\\.', '^err\\.'] }],
+      errors: [{ messageId: 'invalidPattern' }],
+    },
+
+    // Tagged template literals — always invalid (can't provide id)
+    {
+      code: 't`Hello`',
+      errors: [{ messageId: 'noIdInTaggedTemplate' }],
+    },
+    {
+      code: 'msg`Hello`',
+      errors: [{ messageId: 'noIdInTaggedTemplate' }],
+    },
+    {
+      code: 'defineMessage`Hello`',
+      errors: [{ messageId: 'noIdInTaggedTemplate' }],
+    },
+
+    // Call expressions — missing id
+    {
+      code: 't({ message: "Hello" })',
+      errors: [{ messageId: 'missingIdCall' }],
+    },
+    {
+      code: 'msg({ message: "Hello" })',
+      errors: [{ messageId: 'missingIdCall' }],
+    },
+    {
+      code: 'defineMessage({ message: "Hello" })',
+      errors: [{ messageId: 'missingIdCall' }],
+    },
+    // Call expression — id doesn't match pattern
+    {
+      code: 't({ id: "hello", message: "Hello" })',
+      options: [{ patterns: ['^msg\\.'] }],
+      errors: [{ messageId: 'invalidPattern' }],
+    },
+    // Call expression — id doesn't match any of multiple patterns
+    {
+      code: 't({ id: "greeting.hello", message: "Hello" })',
       options: [{ patterns: ['^msg\\.', '^err\\.'] }],
       errors: [{ messageId: 'invalidPattern' }],
     },
