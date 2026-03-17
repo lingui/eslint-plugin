@@ -11,4 +11,3 @@ Providing an explicit `id` gives translators a stable, human-readable key and pr
 // ok ✅
 <Trans id="msg.docs">Read the <a href="https://lingui.dev">documentation</a> for more info.</Trans>
 ```
-

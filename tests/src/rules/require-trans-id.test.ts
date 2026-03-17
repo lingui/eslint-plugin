@@ -43,4 +43,3 @@ ruleTester.run(name, rule, {
     },
   ],
 })
-
