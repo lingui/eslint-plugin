@@ -460,6 +460,11 @@ export const rule = createRule<Option[], string>({
         visited.add(node)
       },
 
+      'ImportExpression > Literal'(node: TSESTree.Literal) {
+        // allow import('mod')
+        visited.add(node)
+      },
+
       [`:matches(${['Trans', 'Plural', 'Select', 'SelectOrdinal'].map((name) => `JSXElement[openingElement.name.name=${name}]`)}) :matches(TemplateLiteral, Literal, JSXText)`](
         node,
       ) {
