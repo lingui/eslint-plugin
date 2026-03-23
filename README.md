@@ -98,11 +98,12 @@ Alternatively, add `lingui` to the plugins section, and configure the rules you 
 
 ✅ - Recommended
 
-- ✅ [no-expression-in-message](docs/rules/no-expression-in-message.md)
 - ✅ [no-single-tag-to-translate](docs/rules/no-single-tag-to-translate.md)
 - ✅ [no-single-variables-to-translate](docs/rules/no-single-variables-to-translate.md)
 - ✅ [no-trans-inside-trans](docs/rules/no-trans-inside-trans.md)
 - ✅ [t-call-in-function](docs/rules/t-call-in-function.md)
+
+- [consistent-plural-format](docs/rules/consistent-plural-format.md)
+- [no-expression-in-message](docs/rules/no-expression-in-message.md)
 - [no-unlocalized-strings](docs/rules/no-unlocalized-strings.md)
 - [text-restrictions](docs/rules/text-restrictions.md)
-- [consistent-plural-format](docs/rules/consistent-plural-format.md)
