@@ -75,6 +75,14 @@ ruleTester.run(name, rule, {
       code: 't({ id: "err.notFound", message: "Not Found" })',
       options: [{ patterns: ['^msg\\.', '^err\\.'] }],
     },
+    // Call expression with no arguments — early return, no error
+    {
+      code: 't()',
+    },
+    // Call expression with non-object argument — early return, no error
+    {
+      code: 't("Hello")',
+    },
   ],
   invalid: [
     // Trans — missing id
