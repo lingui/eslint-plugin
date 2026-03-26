@@ -11,14 +11,14 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Enable Corepack
         run: corepack enable
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: yarn
@@ -36,8 +36,8 @@ jobs:
 
       - name: Install release-it globally
         run: |
-          npm i -g release-it@17.8.2
-          npm i -g @release-it/conventional-changelog@8.0.2
+          npm i -g release-it@19.2.4
+          npm i -g @release-it/conventional-changelog@10.0.6
 
       - name: git config
         run: |
