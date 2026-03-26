@@ -88,16 +88,29 @@ export const rule = createRule<Option[], string>({
           return
         }
 
-        // Only validate string literal values; skip expressions silently
+        // Only validate string literal values; skip complex expressions silently
+        let idValue: string | null = null
         if (
-          !idAttr.value ||
-          idAttr.value.type !== TSESTree.AST_NODE_TYPES.Literal ||
-          typeof idAttr.value.value !== 'string'
+          idAttr.value &&
+          idAttr.value.type === TSESTree.AST_NODE_TYPES.Literal &&
+          typeof idAttr.value.value === 'string'
         ) {
+          idValue = idAttr.value.value
+        } else if (
+          idAttr.value &&
+          idAttr.value.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer &&
+          idAttr.value.expression.type === TSESTree.AST_NODE_TYPES.Literal &&
+          typeof idAttr.value.expression.value === 'string'
+        ) {
+          // Handle id={"msg.hello"} the same as id="msg.hello"
+          idValue = idAttr.value.expression.value
+        }
+
+        if (idValue == null) {
           return
         }
 
-        validatePattern(idAttr, idAttr.value.value)
+        validatePattern(idAttr, idValue)
       },
 
       [LinguiTaggedTemplateExpressionMessageQuery](node: TSESTree.TemplateLiteral) {
@@ -122,8 +135,8 @@ export const rule = createRule<Option[], string>({
         const idProp = arg.properties.find(
           (prop): prop is TSESTree.Property =>
             prop.type === TSESTree.AST_NODE_TYPES.Property &&
-            prop.key.type === TSESTree.AST_NODE_TYPES.Identifier &&
-            prop.key.name === 'id',
+            ((prop.key.type === TSESTree.AST_NODE_TYPES.Identifier && prop.key.name === 'id') ||
+              (prop.key.type === TSESTree.AST_NODE_TYPES.Literal && prop.key.value === 'id')),
         )
 
         if (!idProp) {

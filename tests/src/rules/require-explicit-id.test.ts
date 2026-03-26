@@ -34,6 +34,14 @@ ruleTester.run(name, rule, {
       code: '<Trans id="msg.docs">Docs</Trans>',
       options: [{ patterns: ['^msg\\.'] }],
     },
+    // JSXExpressionContainer with string literal — treated like plain string
+    {
+      code: '<Trans id={"msg.hello"}>Hello</Trans>',
+    },
+    {
+      code: '<Trans id={"msg.hello"}>Hello</Trans>',
+      options: [{ patterns: ['^msg\\.'] }],
+    },
     // expression id with patterns — silently skipped
     {
       code: '<Trans id={someVar}>Hello</Trans>',
@@ -83,6 +91,14 @@ ruleTester.run(name, rule, {
     {
       code: 't("Hello")',
     },
+    // Call expression with string literal key 'id' — treated like identifier key
+    {
+      code: "t({ 'id': 'msg.hello', message: 'Hello' })",
+    },
+    {
+      code: "t({ 'id': 'msg.hello', message: 'Hello' })",
+      options: [{ patterns: ['^msg\\.'] }],
+    },
   ],
   invalid: [
     // Trans — missing id
@@ -130,6 +146,17 @@ ruleTester.run(name, rule, {
       options: [{ patterns: ['^msg\\.', '^err\\.'] }],
       errors: [{ messageId: 'invalidPattern' }],
     },
+    // JSXExpressionContainer string literal — id doesn't match pattern
+    {
+      code: '<Trans id={"hello"}>Hello</Trans>',
+      options: [{ patterns: ['^msg\\.'] }],
+      errors: [{ messageId: 'invalidPattern' }],
+    },
+    {
+      code: '<Trans id={"greeting.hello"}>Hello</Trans>',
+      options: [{ patterns: ['^msg\\.', '^err\\.'] }],
+      errors: [{ messageId: 'invalidPattern' }],
+    },
 
     // Tagged template literals — always invalid (can't provide id)
     {
@@ -168,6 +195,12 @@ ruleTester.run(name, rule, {
     {
       code: 't({ id: "greeting.hello", message: "Hello" })',
       options: [{ patterns: ['^msg\\.', '^err\\.'] }],
+      errors: [{ messageId: 'invalidPattern' }],
+    },
+    // Call expression with string literal key 'id' — doesn't match pattern
+    {
+      code: "t({ 'id': 'hello', message: 'Hello' })",
+      options: [{ patterns: ['^msg\\.'] }],
       errors: [{ messageId: 'invalidPattern' }],
     },
   ],
