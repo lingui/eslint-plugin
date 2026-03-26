@@ -1,33 +1,67 @@
 # Change Log
 
+## 0.12.0 (2026-03-26)
+
+- feat: no Plural inside Trans (#110)
+- fix: Dynamic imports marked as unlocalized strings (#118)
+- fix: Add TypeScript as peer dependency (#117)
+- ci: NPM trusted publishing (#112)
+- build(deps): bump minor and patch dependencies (#121)
+- chore: update GitHub Actions to latest versions (#122)
+
+## 0.11.0 (2025-08-20)
+
+- feat: Consistent plural messages (#108) (d422f1d)
+- chore(text-restrictions): update line breaks test cases (#103) (4706a4c)
+
+## 0.10.1 (2025-04-14)
+
 - fix(text-restrictions): trim text in JSXText only (#102) (c3ef70c)
 
-* feat(no-expression-in-message): add support for ph and explicit labels (#100) (c33e2d5)
-* docs(t-call-in-function): fix documentation link (fec90fe)
+## 0.10.0 (2025-02-04)
+
+- feat(no-expression-in-message): add support for ph and explicit labels (#100) (c33e2d5)
+- docs(t-call-in-function): fix documentation link (fec90fe)
+
+## 0.9.0 (2024-12-23)
 
 - feat: add support for `as const` assertions, string literal union types, and quoted object keys (#96) (04b198e)
 
-* fix: no-unlocalized-strings corrected support for interface prop names (#95) (56eb2ee)
+## 0.8.4 (2024-12-16)
+
+- fix: no-unlocalized-strings corrected support for interface prop names (#95) (56eb2ee)
+
+## 0.8.3 (2024-12-09)
 
 - fix: `no-unlocalized-strings` rule to ignore string literals in expressions assigned to variables specified in `ignoreNames` (#94) (df19c1c)
 
-* fix: no-unlocalized-strings rule to correctly handle as const assertions in property values with ignoreNames (#92) (4048c4d)
-* fix: no-unlocalized-strings rule to ignore default parameter values specified in ignoreNames (#91) (68b9052)
+## 0.8.2 (2024-12-05)
+
+- fix: no-unlocalized-strings rule to correctly handle as const assertions in property values with ignoreNames (#92) (4048c4d)
+- fix: no-unlocalized-strings rule to ignore default parameter values specified in ignoreNames (#91) (68b9052)
+
+## 0.8.1 (2024-11-26)
 
 - fix(no-unlocalized-strings): ignore more cases (#84) (061ef0d)
 
-* chore(deps): bump cross-spawn from 7.0.3 to 7.0.5 (#83) (f10feb9)
-* chore(deps): bump @eslint/plugin-kit from 0.2.0 to 0.2.3 (#81) (297bcdd)
-* feat(no-unlocalized-strings): remove default configuration (#78) (32c823c)
-* feat(no-unlocalized-strings): add patterns for ignore functions (#77) (e249254)
-* feat(no-unlocalized-strings): add ignoreVariable option + refactor options (#76) (a407d3d)
+## 0.8.0 (2024-11-19)
+
+- chore(deps): bump cross-spawn from 7.0.3 to 7.0.5 (#83) (f10feb9)
+- chore(deps): bump @eslint/plugin-kit from 0.2.0 to 0.2.3 (#81) (297bcdd)
+- feat(no-unlocalized-strings): remove default configuration (#78) (32c823c)
+- feat(no-unlocalized-strings): add patterns for ignore functions (#77) (e249254)
+- feat(no-unlocalized-strings): add ignoreVariable option + refactor options (#76) (a407d3d)
+
+## 0.7.0 (2024-11-04)
 
 - fix: not listed dependency `@typescript-eslint/scope-manager` (#75) (0ded72c)
 - feat(recommended-config): add lingui/no-expression-in-message (#74) (5430625)
 
-* feat(no-unlocalized-strings): add regex patterns support (#70) (1c248a2)
-* fix: no-single-variables-to-translate renamed to no-single-variable... (#69) (b048305)
-* feat(no-expression-in-message): correctly handle {' '} in JSX, report for each found expression (#68) (e935e01)
+## 0.6.0 (2024-10-18)
+
+- feat(no-unlocalized-strings): add regex patterns support (#70) (1c248a2)
+- fix: no-single-variables-to-translate renamed to no-single-variable... (#69) (b048305)
+- feat(no-expression-in-message): correctly handle {' '} in JSX, report for each found expression (#68) (e935e01)
 
 ## 0.5.0 (2024-10-15)
 
