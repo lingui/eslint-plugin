@@ -385,6 +385,10 @@ ruleTester.run(name, rule, {
       name: 'allows string literals in named exports',
       code: 'export { named } from "module-name";',
     },
+    {
+      name: 'allows string literals in dynamic imports',
+      code: 'import("hello")',
+    },
   ],
 
   invalid: [
