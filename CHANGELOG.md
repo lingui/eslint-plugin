@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.13.0 (2026-04-02)
+
+- feat: Add require-explicit-id rule for components and macros (#119)
+
 ## 0.12.0 (2026-03-26)
 
 - feat: no Plural inside Trans (#110)
