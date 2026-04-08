@@ -311,6 +311,14 @@ ruleTester.run(name, rule, {
       code: "type ButtonVariant = 'primary' | 'secondary' | 'tertiary';",
     },
     {
+      name: 'allows ambient declare module with string literal',
+      code: "declare module 'my-module';",
+    },
+    {
+      name: 'allows declare module with block and string specifier',
+      code: "declare module 'my-module' {}",
+    },
+    {
       name: 'allows enum with string values',
       code: "enum StepType { Address = 'Address' }",
     },
@@ -580,6 +588,21 @@ ruleTester.run(name, rule, {
       `,
       options: [{ useTsTypes: true }],
       errors: [{ messageId: 'default' }],
+    },
+    {
+      name: 'detects unlocalized string in non-ambient namespace',
+      code: "namespace Foo { const x = 'Hello' }",
+      errors: defaultError,
+    },
+    {
+      name: 'detects unlocalized string inside declare module body',
+      code: "declare module 'pkg' { const msg = 'Hello world' }",
+      errors: defaultError,
+    },
+    {
+      name: 'detects unlocalized string inside declare namespace body',
+      code: "declare namespace App { const title = 'Welcome' }",
+      errors: defaultError,
     },
   ],
 })

@@ -402,8 +402,15 @@ export const rule = createRule<Option[], string>({
           case TSESTree.AST_NODE_TYPES.TSIndexSignature:
           case TSESTree.AST_NODE_TYPES.TSTypeAnnotation:
           case TSESTree.AST_NODE_TYPES.TSTypeLiteral:
-          case TSESTree.AST_NODE_TYPES.TSLiteralType:
+          case TSESTree.AST_NODE_TYPES.TSLiteralType: {
             return true
+          }
+          case TSESTree.AST_NODE_TYPES.TSModuleDeclaration: {
+            if ((parent as TSESTree.TSModuleDeclaration).declare === true && parent.id === node) {
+              return true
+            }
+            break
+          }
         }
         parent = parent.parent
       }
