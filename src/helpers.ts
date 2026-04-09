@@ -52,6 +52,11 @@ export const LinguiCallExpressionPluralQuery = 'CallExpression[callee.name=plura
 
 export const LinguiPluralComponentQuery = 'JSXElement[openingElement.name.name=Plural]'
 
+export const LinguiSelectComponentQuery = 'JSXElement[openingElement.name.name=Select]'
+
+export const LinguiSelectOrdinalComponentQuery =
+  'JSXElement[openingElement.name.name=SelectOrdinal]'
+
 export function isNativeDOMTag(str: string) {
   return DOM_TAGS.includes(str)
 }

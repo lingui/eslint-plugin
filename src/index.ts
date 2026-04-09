@@ -8,6 +8,7 @@ import * as noTransInsideTransRule from './rules/no-trans-inside-trans'
 import * as consistentPluralFormatRule from './rules/consistent-plural-format'
 import * as noPluralInsideTransRule from './rules/no-plural-inside-trans'
 import * as requireExplicitIdRule from './rules/require-explicit-id'
+import * as requireExplicitCommentRule from './rules/require-explicit-comment'
 
 import { ESLint, Linter } from 'eslint'
 import { FlatConfig, RuleModule } from '@typescript-eslint/utils/ts-eslint'
@@ -23,6 +24,7 @@ const rules = {
   [consistentPluralFormatRule.name]: consistentPluralFormatRule.rule,
   [noPluralInsideTransRule.name]: noPluralInsideTransRule.rule,
   [requireExplicitIdRule.name]: requireExplicitIdRule.rule,
+  [requireExplicitCommentRule.name]: requireExplicitCommentRule.rule,
 }
 
 type RuleKey = keyof typeof rules
