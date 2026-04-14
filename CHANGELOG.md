@@ -1,5 +1,11 @@
 # Change Log
 
+## [](https://github.com/lingui/eslint-plugin/compare/0.13.0...null) (2026-04-14)
+
+### Bug Fixes
+
+- **no-unlocalized-strings:** ignore strings in declare module statements ([#127](https://github.com/lingui/eslint-plugin/issues/127)) ([490054a](https://github.com/lingui/eslint-plugin/commit/490054ab0289e560cc6e2ed38a4e8ef65f34ea63))
+
 ## 0.13.0 (2026-04-02)
 
 - feat: Add require-explicit-id rule for components and macros (#119)
