@@ -1,6 +1,8 @@
 import { TSESTree } from '@typescript-eslint/utils'
 import { createRule } from '../create-rule'
 import {
+  findJSXAttribute,
+  findObjectProperty,
   LinguiCallExpressionQuery,
   LinguiTaggedTemplateExpressionMessageQuery,
   LinguiTransQuery,
@@ -73,12 +75,7 @@ export const rule = createRule<Option[], string>({
 
     return {
       [LinguiTransQuery](node: TSESTree.JSXElement) {
-        const idAttr = node.openingElement.attributes.find(
-          (attr): attr is TSESTree.JSXAttribute =>
-            attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute &&
-            attr.name.type === TSESTree.AST_NODE_TYPES.JSXIdentifier &&
-            attr.name.name === 'id',
-        )
+        const idAttr = findJSXAttribute(node, 'id')
 
         if (!idAttr) {
           context.report({
@@ -90,6 +87,7 @@ export const rule = createRule<Option[], string>({
 
         // Only validate string literal values; skip complex expressions silently
         let idValue: string | null = null
+        const attVal = idAttr.value;
         if (
           idAttr.value &&
           idAttr.value.type === TSESTree.AST_NODE_TYPES.Literal &&
@@ -132,12 +130,7 @@ export const rule = createRule<Option[], string>({
           return
         }
 
-        const idProp = arg.properties.find(
-          (prop): prop is TSESTree.Property =>
-            prop.type === TSESTree.AST_NODE_TYPES.Property &&
-            ((prop.key.type === TSESTree.AST_NODE_TYPES.Identifier && prop.key.name === 'id') ||
-              (prop.key.type === TSESTree.AST_NODE_TYPES.Literal && prop.key.value === 'id')),
-        )
+        const idProp = findObjectProperty(arg, 'id')
 
         if (!idProp) {
           context.report({
