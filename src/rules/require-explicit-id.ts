@@ -55,9 +55,8 @@ export const rule = createRule<Option[], string>({
       options: [option],
     } = context
 
-    const rulePatterns = option?.patterns?.map(
-      (pattern: string) => new RegExp(pattern, option?.flags),
-    )
+    const flags = option?.flags
+    const rulePatterns = option?.patterns?.map((pattern: string) => new RegExp(pattern, flags))
 
     function validatePattern(node: TSESTree.Node, idValue: string) {
       if (!rulePatterns?.length) {
@@ -87,21 +86,21 @@ export const rule = createRule<Option[], string>({
 
         // Only validate string literal values; skip complex expressions silently
         let idValue: string | null = null
-        const attVal = idAttr.value;
+        const attrVal = idAttr.value
+
+        // id="msg.hello" — plain string literal
         if (
-          idAttr.value &&
-          idAttr.value.type === TSESTree.AST_NODE_TYPES.Literal &&
-          typeof idAttr.value.value === 'string'
+          attrVal?.type === TSESTree.AST_NODE_TYPES.Literal &&
+          typeof attrVal.value === 'string'
         ) {
-          idValue = idAttr.value.value
-        } else if (
-          idAttr.value &&
-          idAttr.value.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer &&
-          idAttr.value.expression.type === TSESTree.AST_NODE_TYPES.Literal &&
-          typeof idAttr.value.expression.value === 'string'
-        ) {
-          // Handle id={"msg.hello"} the same as id="msg.hello"
-          idValue = idAttr.value.expression.value
+          idValue = attrVal.value
+
+          // id={"msg.hello"} — string literal wrapped in a JSX expression container
+        } else if (attrVal?.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer) {
+          const expr = attrVal.expression
+          if (expr.type === TSESTree.AST_NODE_TYPES.Literal && typeof expr.value === 'string') {
+            idValue = expr.value
+          }
         }
 
         if (idValue == null) {
@@ -113,8 +112,8 @@ export const rule = createRule<Option[], string>({
 
       [LinguiTaggedTemplateExpressionMessageQuery](node: TSESTree.TemplateLiteral) {
         const parent = node.parent as TSESTree.TaggedTemplateExpression
-        const fn =
-          parent.tag.type === TSESTree.AST_NODE_TYPES.Identifier ? parent.tag.name : 'function'
+        // The AST query guarantees tag is an Identifier (t, msg, defineMessage)
+        const fn = (parent.tag as TSESTree.Identifier).name
 
         context.report({
           node: parent,

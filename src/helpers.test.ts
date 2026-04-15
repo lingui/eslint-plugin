@@ -68,7 +68,9 @@ describe('findObjectProperty', () => {
   })
 
   it('should find the correct property among several', () => {
-    const obj = buildObjectExpression('({ id: "msg.hello", message: "Hello", context: "greeting" })')
+    const obj = buildObjectExpression(
+      '({ id: "msg.hello", message: "Hello", context: "greeting" })',
+    )
 
     expect(findObjectProperty(obj, 'id')).toBeDefined()
     expect(findObjectProperty(obj, 'message')).toBeDefined()

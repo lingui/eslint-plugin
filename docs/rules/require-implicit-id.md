@@ -59,13 +59,12 @@ This is particularly useful for ambiguous terms:
 // "right" as a direction
 const ex1 = msg({
   message: `right`,
-  context: "direction",
-});
+  context: 'direction',
+})
 
 // "right" as correctness
 const ex2 = msg({
   message: `right`,
-  context: "correctness",
-});
+  context: 'correctness',
+})
 ```
-

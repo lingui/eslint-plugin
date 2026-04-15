@@ -15,8 +15,6 @@ const ruleTester = new RuleTester({
 
 ruleTester.run(name, rule, {
   valid: [
-    // ─── Base rule (no options) ───────────────────────────────────────
-
     // Trans without id — valid
     {
       code: '<Trans>Hello</Trans>',
@@ -60,8 +58,6 @@ ruleTester.run(name, rule, {
     {
       code: 'defineMessage`Hello`',
     },
-
-    // ─── requireContext: true ─────────────────────────────────────────
 
     // Trans with context — valid
     {
@@ -107,8 +103,6 @@ ruleTester.run(name, rule, {
     },
   ],
   invalid: [
-    // ─── Base rule (no options) — id is forbidden ─────────────────────
-
     // Trans with id — forbidden
     {
       code: '<Trans id="msg.hello">Hello</Trans>',
@@ -150,8 +144,6 @@ ruleTester.run(name, rule, {
       code: 't({ id: someVar, message: "Hello" })',
       errors: [{ messageId: 'forbiddenIdCall' }],
     },
-
-    // ─── requireContext: true — missing context ───────────────────────
 
     // Trans missing context
     {
@@ -199,8 +191,6 @@ ruleTester.run(name, rule, {
       errors: [{ messageId: 'noContextInTaggedTemplate' }],
     },
 
-    // ─── requireContext: true — both id forbidden AND context missing ─
-
     // Trans with id but no context — two errors
     {
       code: '<Trans id="msg.hello">Hello</Trans>',
@@ -223,6 +213,3 @@ ruleTester.run(name, rule, {
     },
   ],
 })
-
-
-

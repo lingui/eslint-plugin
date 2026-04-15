@@ -14,7 +14,6 @@ export type Option = {
 
 export const name = 'require-implicit-id'
 
-
 export const rule = createRule<Option[], string>({
   name,
   meta: {
@@ -28,8 +27,7 @@ export const rule = createRule<Option[], string>({
         "<Trans> must not have an explicit 'id' attribute; use auto-generated IDs instead",
       forbiddenIdCall:
         "Macro function call must not have an explicit 'id' property; use auto-generated IDs instead",
-      missingContextTrans:
-        "<Trans> requires a 'context' attribute to disambiguate translations",
+      missingContextTrans: "<Trans> requires a 'context' attribute to disambiguate translations",
       missingContextCall:
         "Macro function call requires a 'context' property to disambiguate translations",
       noContextInTaggedTemplate:
@@ -97,4 +95,3 @@ export const rule = createRule<Option[], string>({
     }
   },
 })
-

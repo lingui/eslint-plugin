@@ -47,6 +47,16 @@ ruleTester.run(name, rule, {
       code: '<Trans id={someVar}>Hello</Trans>',
       options: [{ patterns: ['^msg\\.'] }],
     },
+    // boolean id attribute — silently skipped (no string value to validate)
+    {
+      code: '<Trans id>Hello</Trans>',
+      options: [{ patterns: ['^msg\\.'] }],
+    },
+    // non-string expression — silently skipped
+    {
+      code: '<Trans id={42}>Hello</Trans>',
+      options: [{ patterns: ['^msg\\.'] }],
+    },
     // flags option — case-insensitive match
     {
       code: '<Trans id="MSG.hello">Hello</Trans>',
