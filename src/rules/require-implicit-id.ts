@@ -4,6 +4,7 @@ import {
   findJSXAttribute,
   findObjectProperty,
   LinguiCallExpressionQuery,
+  LinguiIcuComponentQuery,
   LinguiTransQuery,
 } from '../helpers'
 
@@ -19,6 +20,8 @@ export const rule = createRule<[], string>({
     messages: {
       forbiddenIdTrans:
         "<Trans> must not have an explicit 'id' attribute; use auto-generated IDs instead",
+      forbiddenIdIcu:
+        "Lingui ICU component must not have an explicit 'id' attribute; use auto-generated IDs instead",
       forbiddenIdCall:
         "Macro function call must not have an explicit 'id' property; use auto-generated IDs instead",
     },
@@ -33,6 +36,12 @@ export const rule = createRule<[], string>({
       [LinguiTransQuery](node: TSESTree.JSXElement) {
         if (findJSXAttribute(node, 'id')) {
           context.report({ node: findJSXAttribute(node, 'id')!, messageId: 'forbiddenIdTrans' })
+        }
+      },
+
+      [LinguiIcuComponentQuery](node: TSESTree.JSXElement) {
+        if (findJSXAttribute(node, 'id')) {
+          context.report({ node: findJSXAttribute(node, 'id')!, messageId: 'forbiddenIdIcu' })
         }
       },
 

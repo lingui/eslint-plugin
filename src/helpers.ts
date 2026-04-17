@@ -43,6 +43,13 @@ export const LinguiCallExpressionQuery =
 export const LinguiTransQuery = 'JSXElement[openingElement.name.name=Trans]'
 
 /**
+ * Queries for Lingui ICU components
+ * <Plural>, <SelectOrdinal>, <Select>
+ */
+export const LinguiIcuComponentQuery =
+  ':matches(JSXElement[openingElement.name.name=Plural], JSXElement[openingElement.name.name=SelectOrdinal], JSXElement[openingElement.name.name=Select])'
+
+/**
  * Queries for plural CallExpression expressions and JSX elements
  *
  * CallExpression: plural(numBooks, { one: "# book", other: "# books" });

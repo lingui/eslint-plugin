@@ -58,6 +58,17 @@ ruleTester.run(name, rule, {
     {
       code: 'defineMessage`Hello`',
     },
+
+    // ICU components without id — valid
+    {
+      code: '<Plural value={count} one="# book" other="# books" />',
+    },
+    {
+      code: '<SelectOrdinal value={order} one="#st" two="#nd" few="#rd" other="#th" />',
+    },
+    {
+      code: '<Select value={gender} male="He" female="She" other="They" />',
+    },
   ],
   invalid: [
     // Trans with id — forbidden
@@ -100,6 +111,20 @@ ruleTester.run(name, rule, {
     {
       code: 't({ id: someVar, message: "Hello" })',
       errors: [{ messageId: 'forbiddenIdCall' }],
+    },
+
+    // ICU components with id — forbidden
+    {
+      code: '<Plural id="msg.books" value={count} one="# book" other="# books" />',
+      errors: [{ messageId: 'forbiddenIdIcu' }],
+    },
+    {
+      code: '<SelectOrdinal id="msg.order" value={order} one="#st" two="#nd" few="#rd" other="#th" />',
+      errors: [{ messageId: 'forbiddenIdIcu' }],
+    },
+    {
+      code: '<Select id="msg.gender" value={gender} male="He" female="She" other="They" />',
+      errors: [{ messageId: 'forbiddenIdIcu' }],
     },
   ],
 })

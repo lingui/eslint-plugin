@@ -4,6 +4,7 @@ import {
   findJSXAttribute,
   findObjectProperty,
   LinguiCallExpressionQuery,
+  LinguiIcuComponentQuery,
   LinguiTaggedTemplateExpressionMessageQuery,
   LinguiTransQuery,
 } from '../helpers'
@@ -23,6 +24,7 @@ export const rule = createRule<Option[], string>({
     },
     messages: {
       default: "Trans component requires an explicit 'id' attribute",
+      missingIdIcu: "Lingui ICU component requires an explicit 'id' attribute",
       missingIdCall: "Macro function call requires an explicit 'id' property",
       noIdInTaggedTemplate:
         "Tagged template literal doesn't support 'id'. Use {{ fn }}({ id: '...', message: '...' }) instead",
@@ -72,42 +74,40 @@ export const rule = createRule<Option[], string>({
       }
     }
 
+    function checkJSXId(node: TSESTree.JSXElement, missingMessageId: string) {
+      const idAttr = findJSXAttribute(node, 'id')
+
+      if (!idAttr) {
+        context.report({ node, messageId: missingMessageId })
+        return
+      }
+
+      let idValue: string | null = null
+      const attrVal = idAttr.value
+
+      if (attrVal?.type === TSESTree.AST_NODE_TYPES.Literal && typeof attrVal.value === 'string') {
+        idValue = attrVal.value
+      } else if (attrVal?.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer) {
+        const expr = attrVal.expression
+        if (expr.type === TSESTree.AST_NODE_TYPES.Literal && typeof expr.value === 'string') {
+          idValue = expr.value
+        }
+      }
+
+      if (idValue == null) {
+        return
+      }
+
+      validatePattern(idAttr, idValue)
+    }
+
     return {
       [LinguiTransQuery](node: TSESTree.JSXElement) {
-        const idAttr = findJSXAttribute(node, 'id')
+        checkJSXId(node, 'default')
+      },
 
-        if (!idAttr) {
-          context.report({
-            node,
-            messageId: 'default',
-          })
-          return
-        }
-
-        // Only validate string literal values; skip complex expressions silently
-        let idValue: string | null = null
-        const attrVal = idAttr.value
-
-        // id="msg.hello" — plain string literal
-        if (
-          attrVal?.type === TSESTree.AST_NODE_TYPES.Literal &&
-          typeof attrVal.value === 'string'
-        ) {
-          idValue = attrVal.value
-
-          // id={"msg.hello"} — string literal wrapped in a JSX expression container
-        } else if (attrVal?.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer) {
-          const expr = attrVal.expression
-          if (expr.type === TSESTree.AST_NODE_TYPES.Literal && typeof expr.value === 'string') {
-            idValue = expr.value
-          }
-        }
-
-        if (idValue == null) {
-          return
-        }
-
-        validatePattern(idAttr, idValue)
+      [LinguiIcuComponentQuery](node: TSESTree.JSXElement) {
+        checkJSXId(node, 'missingIdIcu')
       },
 
       [LinguiTaggedTemplateExpressionMessageQuery](node: TSESTree.TemplateLiteral) {
