@@ -19,7 +19,7 @@ export const rule = createRule<Option[], string>({
   name,
   meta: {
     docs: {
-      description: "enforce 'id' property or attribute for Lingui macros",
+      description: "enforce 'id' property or attribute for Lingui macros and components",
       recommended: 'error',
     },
     messages: {

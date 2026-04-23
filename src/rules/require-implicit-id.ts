@@ -14,7 +14,7 @@ export const rule = createRule<[], string>({
   name,
   meta: {
     docs: {
-      description: "forbid explicit 'id' for Lingui macros",
+      description: "forbid explicit 'id' for Lingui macros and components",
       recommended: 'error',
     },
     messages: {
@@ -34,14 +34,16 @@ export const rule = createRule<[], string>({
   create: function (context) {
     return {
       [LinguiTransQuery](node: TSESTree.JSXElement) {
-        if (findJSXAttribute(node, 'id')) {
-          context.report({ node: findJSXAttribute(node, 'id')!, messageId: 'forbiddenIdTrans' })
+        const idAttr = findJSXAttribute(node, 'id')
+        if (idAttr) {
+          context.report({ node: idAttr, messageId: 'forbiddenIdTrans' })
         }
       },
 
       [LinguiIcuComponentQuery](node: TSESTree.JSXElement) {
-        if (findJSXAttribute(node, 'id')) {
-          context.report({ node: findJSXAttribute(node, 'id')!, messageId: 'forbiddenIdIcu' })
+        const idAttr = findJSXAttribute(node, 'id')
+        if (idAttr) {
+          context.report({ node: idAttr, messageId: 'forbiddenIdIcu' })
         }
       },
 
@@ -52,8 +54,9 @@ export const rule = createRule<[], string>({
           return
         }
 
-        if (findObjectProperty(arg, 'id')) {
-          context.report({ node: findObjectProperty(arg, 'id')!, messageId: 'forbiddenIdCall' })
+        const idProperty = findObjectProperty(arg, 'id')
+        if (idProperty) {
+          context.report({ node: idProperty, messageId: 'forbiddenIdCall' })
         }
       },
     }
