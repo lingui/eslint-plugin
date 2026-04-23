@@ -1,19 +1,23 @@
 # require-explicit-id
 
-Enforce that `<Trans>` components and Lingui macro function calls (`t`, `msg`, `defineMessage`) have an explicit `id`.
+Enforce that `<Trans>`, `<Plural>`, `<SelectOrdinal>`, `<Select>` components and Lingui macro function calls (`t`, `msg`, `defineMessage`) have an explicit `id`.
 
-Providing an explicit `id` gives translators a stable, human-readable key and prevents auto-generated IDs from changing unexpectedly when the default message is updated.
+Providing an explicit `id` gives translators a stable, human-readable key and prevents auto-generated IDs from changing unexpectedly when the default message is updated. See [Benefits of Explicit IDs](https://lingui.dev/guides/explicit-vs-generated-ids#benefits-of-explicit-ids) in the Lingui docs for more details.
 
 Tagged template literals (`` t`Hello` ``) don't support `id` — use the function call form instead.
+
+> **⚠️ Conflicts:** This rule directly conflicts with [`require-implicit-id`](./require-implicit-id.md). Do **not** enable both rules at the same time — they are mutually exclusive.
 
 ```jsx
 // nope ⛔️
 <Trans>Read the docs for more info.</Trans>
+<Plural value={count} one="# book" other="# books" />
 t`Hello`
 t({ message: "Hello" })
 
 // ok ✅
 <Trans id="msg.docs">Read the docs for more info.</Trans>
+<Plural id="msg.books" value={count} one="# book" other="# books" />
 t({ id: "msg.hello", message: "Hello" })
 ```
 

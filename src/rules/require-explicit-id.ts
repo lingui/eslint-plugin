@@ -1,7 +1,10 @@
 import { TSESTree } from '@typescript-eslint/utils'
 import { createRule } from '../create-rule'
 import {
+  findJSXAttribute,
+  findObjectProperty,
   LinguiCallExpressionQuery,
+  LinguiIcuComponentQuery,
   LinguiTaggedTemplateExpressionMessageQuery,
   LinguiTransQuery,
 } from '../helpers'
@@ -16,11 +19,12 @@ export const rule = createRule<Option[], string>({
   name,
   meta: {
     docs: {
-      description: "enforce 'id' property or attribute for Lingui macros",
+      description: "enforce 'id' property or attribute for Lingui macros and components",
       recommended: 'error',
     },
     messages: {
       default: "Trans component requires an explicit 'id' attribute",
+      missingIdIcu: "Lingui ICU component requires an explicit 'id' attribute",
       missingIdCall: "Macro function call requires an explicit 'id' property",
       noIdInTaggedTemplate:
         "Tagged template literal doesn't support 'id'. Use {{ fn }}({ id: '...', message: '...' }) instead",
@@ -53,9 +57,8 @@ export const rule = createRule<Option[], string>({
       options: [option],
     } = context
 
-    const rulePatterns = option?.patterns?.map(
-      (pattern: string) => new RegExp(pattern, option?.flags),
-    )
+    const flags = option?.flags
+    const rulePatterns = option?.patterns?.map((pattern: string) => new RegExp(pattern, flags))
 
     function validatePattern(node: TSESTree.Node, idValue: string) {
       if (!rulePatterns?.length) {
@@ -71,52 +74,46 @@ export const rule = createRule<Option[], string>({
       }
     }
 
+    function checkJSXId(node: TSESTree.JSXElement, missingMessageId: string) {
+      const idAttr = findJSXAttribute(node, 'id')
+
+      if (!idAttr) {
+        context.report({ node, messageId: missingMessageId })
+        return
+      }
+
+      let idValue: string | null = null
+      const attrVal = idAttr.value
+
+      if (attrVal?.type === TSESTree.AST_NODE_TYPES.Literal && typeof attrVal.value === 'string') {
+        idValue = attrVal.value
+      } else if (attrVal?.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer) {
+        const expr = attrVal.expression
+        if (expr.type === TSESTree.AST_NODE_TYPES.Literal && typeof expr.value === 'string') {
+          idValue = expr.value
+        }
+      }
+
+      if (idValue == null) {
+        return
+      }
+
+      validatePattern(idAttr, idValue)
+    }
+
     return {
       [LinguiTransQuery](node: TSESTree.JSXElement) {
-        const idAttr = node.openingElement.attributes.find(
-          (attr): attr is TSESTree.JSXAttribute =>
-            attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute &&
-            attr.name.type === TSESTree.AST_NODE_TYPES.JSXIdentifier &&
-            attr.name.name === 'id',
-        )
+        checkJSXId(node, 'default')
+      },
 
-        if (!idAttr) {
-          context.report({
-            node,
-            messageId: 'default',
-          })
-          return
-        }
-
-        // Only validate string literal values; skip complex expressions silently
-        let idValue: string | null = null
-        if (
-          idAttr.value &&
-          idAttr.value.type === TSESTree.AST_NODE_TYPES.Literal &&
-          typeof idAttr.value.value === 'string'
-        ) {
-          idValue = idAttr.value.value
-        } else if (
-          idAttr.value &&
-          idAttr.value.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer &&
-          idAttr.value.expression.type === TSESTree.AST_NODE_TYPES.Literal &&
-          typeof idAttr.value.expression.value === 'string'
-        ) {
-          // Handle id={"msg.hello"} the same as id="msg.hello"
-          idValue = idAttr.value.expression.value
-        }
-
-        if (idValue == null) {
-          return
-        }
-
-        validatePattern(idAttr, idValue)
+      [LinguiIcuComponentQuery](node: TSESTree.JSXElement) {
+        checkJSXId(node, 'missingIdIcu')
       },
 
       [LinguiTaggedTemplateExpressionMessageQuery](node: TSESTree.TemplateLiteral) {
         const parent = node.parent as TSESTree.TaggedTemplateExpression
-        const fn =
-          parent.tag.type === TSESTree.AST_NODE_TYPES.Identifier ? parent.tag.name : 'function'
+        // The AST query guarantees tag is an Identifier (t, msg, defineMessage)
+        const fn = (parent.tag as TSESTree.Identifier).name
 
         context.report({
           node: parent,
@@ -132,12 +129,7 @@ export const rule = createRule<Option[], string>({
           return
         }
 
-        const idProp = arg.properties.find(
-          (prop): prop is TSESTree.Property =>
-            prop.type === TSESTree.AST_NODE_TYPES.Property &&
-            ((prop.key.type === TSESTree.AST_NODE_TYPES.Identifier && prop.key.name === 'id') ||
-              (prop.key.type === TSESTree.AST_NODE_TYPES.Literal && prop.key.value === 'id')),
-        )
+        const idProp = findObjectProperty(arg, 'id')
 
         if (!idProp) {
           context.report({

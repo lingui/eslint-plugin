@@ -47,6 +47,16 @@ ruleTester.run(name, rule, {
       code: '<Trans id={someVar}>Hello</Trans>',
       options: [{ patterns: ['^msg\\.'] }],
     },
+    // boolean id attribute — silently skipped (no string value to validate)
+    {
+      code: '<Trans id>Hello</Trans>',
+      options: [{ patterns: ['^msg\\.'] }],
+    },
+    // non-string expression — silently skipped
+    {
+      code: '<Trans id={42}>Hello</Trans>',
+      options: [{ patterns: ['^msg\\.'] }],
+    },
     // flags option — case-insensitive match
     {
       code: '<Trans id="MSG.hello">Hello</Trans>',
@@ -97,6 +107,27 @@ ruleTester.run(name, rule, {
     },
     {
       code: "t({ 'id': 'msg.hello', message: 'Hello' })",
+      options: [{ patterns: ['^msg\\.'] }],
+    },
+
+    // ICU components with id — valid
+    {
+      code: '<Plural id="msg.books" value={count} one="# book" other="# books" />',
+    },
+    {
+      code: '<SelectOrdinal id="msg.order" value={order} one="#st" two="#nd" few="#rd" other="#th" />',
+    },
+    {
+      code: '<Select id="msg.gender" value={gender} male="He" female="She" other="They" />',
+    },
+    // ICU component with patterns — id matches
+    {
+      code: '<Plural id="msg.books" value={count} one="# book" other="# books" />',
+      options: [{ patterns: ['^msg\\.'] }],
+    },
+    // ICU component with expression id and patterns — silently skipped
+    {
+      code: '<Plural id={someVar} value={count} one="# book" other="# books" />',
       options: [{ patterns: ['^msg\\.'] }],
     },
   ],
@@ -200,6 +231,26 @@ ruleTester.run(name, rule, {
     // Call expression with string literal key 'id' — doesn't match pattern
     {
       code: "t({ 'id': 'hello', message: 'Hello' })",
+      options: [{ patterns: ['^msg\\.'] }],
+      errors: [{ messageId: 'invalidPattern' }],
+    },
+
+    // ICU components — missing id
+    {
+      code: '<Plural value={count} one="# book" other="# books" />',
+      errors: [{ messageId: 'missingIdIcu' }],
+    },
+    {
+      code: '<SelectOrdinal value={order} one="#st" two="#nd" few="#rd" other="#th" />',
+      errors: [{ messageId: 'missingIdIcu' }],
+    },
+    {
+      code: '<Select value={gender} male="He" female="She" other="They" />',
+      errors: [{ messageId: 'missingIdIcu' }],
+    },
+    // ICU component — id doesn't match pattern
+    {
+      code: '<Plural id="hello" value={count} one="# book" other="# books" />',
       options: [{ patterns: ['^msg\\.'] }],
       errors: [{ messageId: 'invalidPattern' }],
     },
