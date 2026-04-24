@@ -99,6 +99,41 @@ ruleTester.run(name, rule, {
     {
       code: '<Trans>hello {ph({name: obj.prop})}</Trans>',
     },
+    // Nested Lingui macros inside a message macro template are handled by
+    // `no-macro-inside-macro` with a targeted message — this rule must not
+    // also fire on them or users would see duplicate diagnostics.
+    {
+      name: 'Nested t`` in t`` template: deferred to no-macro-inside-macro',
+      code: 't`Hello ${t`world`}`',
+    },
+    {
+      name: 'Nested msg`` in t`` template: deferred to no-macro-inside-macro',
+      code: 't`Hello ${msg`world`}`',
+    },
+    {
+      name: 'Nested defineMessage`` in t`` template: deferred to no-macro-inside-macro',
+      code: 't`Hello ${defineMessage`world`}`',
+    },
+    {
+      name: 'Nested t() call in t`` template: deferred to no-macro-inside-macro',
+      code: 't`Hello ${t({ message: "world" })}`',
+    },
+    {
+      name: 'JSX <Trans/> interpolated in t`` template: deferred to no-macro-inside-macro',
+      code: 't`Hello ${<Trans>world</Trans>}`',
+    },
+    {
+      name: 'JSX <Plural/> interpolated in t`` template: deferred to no-macro-inside-macro',
+      code: 't`Hello ${<Plural value={n} one="a" other="b" />}`',
+    },
+    {
+      name: 'Nested t`` in msg`` template: deferred to no-macro-inside-macro',
+      code: 'msg`Hello ${t`world`}`',
+    },
+    {
+      name: 'Nested t`` in t() message option template: deferred to no-macro-inside-macro',
+      code: 't({ message: `Hello ${t`world`}` })',
+    },
   ],
   invalid: [
     {

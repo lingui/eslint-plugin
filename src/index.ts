@@ -8,6 +8,7 @@ import * as noTransInsideTransRule from './rules/no-trans-inside-trans'
 import * as consistentPluralFormatRule from './rules/consistent-plural-format'
 import * as noPluralInsideTransRule from './rules/no-plural-inside-trans'
 import * as requireExplicitIdRule from './rules/require-explicit-id'
+import * as noMacroInsideMacroRule from './rules/no-macro-inside-macro'
 
 import { ESLint, Linter } from 'eslint'
 import { FlatConfig, RuleModule } from '@typescript-eslint/utils/ts-eslint'
@@ -23,6 +24,7 @@ const rules = {
   [consistentPluralFormatRule.name]: consistentPluralFormatRule.rule,
   [noPluralInsideTransRule.name]: noPluralInsideTransRule.rule,
   [requireExplicitIdRule.name]: requireExplicitIdRule.rule,
+  [noMacroInsideMacroRule.name]: noMacroInsideMacroRule.rule,
 }
 
 type RuleKey = keyof typeof rules
@@ -49,6 +51,7 @@ const recommendedRules: { [K in RuleKey as `lingui/${K}`]?: FlatConfig.RuleLevel
   'lingui/no-single-variables-to-translate': 'warn',
   'lingui/no-trans-inside-trans': 'warn',
   'lingui/no-expression-in-message': 'warn',
+  'lingui/no-macro-inside-macro': 'warn',
 }
 
 // Assign configs here so we can reference `plugin`

@@ -32,6 +32,34 @@ export const rule = createRule({
   defaultOptions: [],
   create: function (context) {
     const linguiMacroFunctionNames = ['plural', 'select', 'selectOrdinal', 'ph']
+    const nestedMessageMacroNames = ['t', 'msg', 'defineMessage']
+    const nestedComponentMacroNames = ['Trans', 'Plural', 'Select', 'SelectOrdinal']
+
+    // Nested Lingui macros (message macros or JSX component macros) are the
+    // domain of `no-macro-inside-macro`, which reports them with a targeted
+    // message. Skip them here so users get one clear diagnostic instead of two.
+    function isNestedLinguiMacro(expression: TSESTree.Expression): boolean {
+      if (expression.type === TSESTree.AST_NODE_TYPES.TaggedTemplateExpression) {
+        return (
+          expression.tag.type === TSESTree.AST_NODE_TYPES.Identifier &&
+          nestedMessageMacroNames.includes(expression.tag.name)
+        )
+      }
+      if (expression.type === TSESTree.AST_NODE_TYPES.CallExpression) {
+        return (
+          expression.callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
+          nestedMessageMacroNames.includes(expression.callee.name)
+        )
+      }
+      if (expression.type === TSESTree.AST_NODE_TYPES.JSXElement) {
+        const tag = expression.openingElement.name
+        return (
+          tag.type === TSESTree.AST_NODE_TYPES.JSXIdentifier &&
+          nestedComponentMacroNames.includes(tag.name)
+        )
+      }
+      return false
+    }
 
     function checkExpressionsInTplLiteral(node: TSESTree.TemplateLiteral) {
       node.expressions.forEach((expression) => checkExpression(expression))
@@ -79,7 +107,10 @@ export const rule = createRule({
           return
         }
 
-        checkExpressionsInTplLiteral(node)
+        node.expressions.forEach((expression) => {
+          if (isNestedLinguiMacro(expression)) return
+          checkExpression(expression)
+        })
       },
       [`${LinguiTransQuery} JSXExpressionContainer:not([parent.type=JSXAttribute]) > :expression`](
         node: TSESTree.Expression,

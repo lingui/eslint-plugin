@@ -24,3 +24,7 @@ t`Hello ${userName}` // => 'Hello {userName}'
 msg`Hello ${userName}` // => 'Hello {userName}'
 defineMessage`Hello ${userName}` // => 'Hello {userName}'
 ```
+
+## Scope
+
+This rule flags member expressions (`${obj.prop}`) and non-Lingui function calls (`${func()}`) interpolated into a message macro template. It does **not** flag nested Lingui macros — those are covered by [`no-macro-inside-macro`](./no-macro-inside-macro.md), which produces a targeted diagnostic. Enable both rules to get full coverage.

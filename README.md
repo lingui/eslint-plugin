@@ -99,6 +99,7 @@ Alternatively, add `lingui` to the plugins section, and configure the rules you 
 ✅ - Recommended
 
 - ✅ [no-expression-in-message](docs/rules/no-expression-in-message.md)
+- ✅ [no-macro-inside-macro](docs/rules/no-macro-inside-macro.md)
 - ✅ [no-single-tag-to-translate](docs/rules/no-single-tag-to-translate.md)
 - ✅ [no-single-variables-to-translate](docs/rules/no-single-variables-to-translate.md)
 - ✅ [no-trans-inside-trans](docs/rules/no-trans-inside-trans.md)
