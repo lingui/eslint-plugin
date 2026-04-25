@@ -25,6 +25,24 @@ ruleTester.run(name, rule, {
       code: 't`Hello ${hello}`',
     },
     {
+      code: 't`${plural(count, { one: "# item", other: "# items" })}`',
+    },
+    {
+      code: 't`${select(gender, { male: "he", female: "she", other: "they" })}`',
+    },
+    {
+      code: 't`${selectOrdinal(count, { one: "#st", two: "#nd", few: "#rd", other: "#th" })}`',
+    },
+    {
+      code: 't({ message: `${plural(count, { one: "# item", other: "# items" })}` })',
+    },
+    {
+      code: 't({ message: `${select(gender, { male: "he", female: "she", other: "they" })}` })',
+    },
+    {
+      code: 't({ message: `${selectOrdinal(count, { one: "#st", two: "#nd", few: "#rd", other: "#th" })}` })',
+    },
+    {
       code: 'msg`Hello ${hello}`',
     },
     {
@@ -123,6 +141,11 @@ ruleTester.run(name, rule, {
     },
     {
       code: 't`${hello}`',
+
+      errors: errorsForT,
+    },
+    {
+      code: 't`${hello()}`',
 
       errors: errorsForT,
     },
