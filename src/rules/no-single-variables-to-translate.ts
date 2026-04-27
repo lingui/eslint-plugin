@@ -63,14 +63,24 @@ export const rule = createRule({
       [`${LinguiTaggedTemplateExpressionMessageQuery}, ${LinguiCallExpressionMessageQuery}`](
         node: TSESTree.TemplateLiteral | TSESTree.Literal,
       ) {
-        if (!getText(node)) {
-          context.report({
-            node,
-            messageId: 'asFunction',
-          })
+        if (getText(node)) {
+          return
         }
 
-        return
+        if (
+          node.type === TSESTree.AST_NODE_TYPES.TemplateLiteral &&
+          node.expressions.length === 1 &&
+          node.expressions[0].type === TSESTree.AST_NODE_TYPES.CallExpression &&
+          node.expressions[0].callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
+          ['plural', 'select', 'selectOrdinal'].includes(node.expressions[0].callee.name)
+        ) {
+          return
+        }
+
+        context.report({
+          node,
+          messageId: 'asFunction',
+        })
       },
     }
   },
