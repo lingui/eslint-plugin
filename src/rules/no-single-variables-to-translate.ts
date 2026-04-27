@@ -69,7 +69,7 @@ export const rule = createRule({
 
         if (
           node.type === TSESTree.AST_NODE_TYPES.TemplateLiteral &&
-          node.expressions.length >= 1 &&
+          node.expressions.length === 1 &&
           node.expressions[0].type === TSESTree.AST_NODE_TYPES.CallExpression &&
           node.expressions[0].callee.type === TSESTree.AST_NODE_TYPES.Identifier &&
           ['plural', 'select', 'selectOrdinal'].includes(node.expressions[0].callee.name)
