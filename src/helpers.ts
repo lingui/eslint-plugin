@@ -43,6 +43,13 @@ export const LinguiCallExpressionQuery =
 export const LinguiTransQuery = 'JSXElement[openingElement.name.name=Trans]'
 
 /**
+ * Queries for Lingui ICU components
+ * <Plural>, <SelectOrdinal>, <Select>
+ */
+export const LinguiIcuComponentQuery =
+  ':matches(JSXElement[openingElement.name.name=Plural], JSXElement[openingElement.name.name=SelectOrdinal], JSXElement[openingElement.name.name=Select])'
+
+/**
  * Queries for plural CallExpression expressions and JSX elements
  *
  * CallExpression: plural(numBooks, { one: "# book", other: "# books" });
@@ -126,6 +133,43 @@ export function isMemberExpression(
 
 export function isJSXAttribute(node: TSESTree.Node | undefined): node is TSESTree.JSXAttribute {
   return (node as TSESTree.Node)?.type === TSESTree.AST_NODE_TYPES.JSXAttribute
+}
+
+/**
+ * Find a JSX attribute by name on a JSX element's opening tag.
+ *
+ * @example
+ * // Given `<Trans id="msg.hello" context="greeting">Hello</Trans>`
+ * findJSXAttribute(node, 'id')      // → JSXAttribute node for `id="msg.hello"`
+ * findJSXAttribute(node, 'context') // → JSXAttribute node for `context="greeting"`
+ * findJSXAttribute(node, 'missing') // → undefined
+ */
+export function findJSXAttribute(node: TSESTree.JSXElement, attrName: string) {
+  return node.openingElement.attributes.find(
+    (attr): attr is TSESTree.JSXAttribute =>
+      attr.type === TSESTree.AST_NODE_TYPES.JSXAttribute &&
+      attr.name.type === TSESTree.AST_NODE_TYPES.JSXIdentifier &&
+      attr.name.name === attrName,
+  )
+}
+
+/**
+ * Find a property by name in an object expression.
+ * Handles both identifier keys (`{ id: '...' }`) and string-literal keys (`{ 'id': '...' }`).
+ *
+ * @example
+ * // Given `t({ id: "msg.hello", message: "Hello" })`
+ * findObjectProperty(objectNode, 'id')      // → Property node for `id: "msg.hello"`
+ * findObjectProperty(objectNode, 'message') // → Property node for `message: "Hello"`
+ * findObjectProperty(objectNode, 'missing') // → undefined
+ */
+export function findObjectProperty(object: TSESTree.ObjectExpression, propName: string) {
+  return object.properties.find(
+    (prop): prop is TSESTree.Property =>
+      prop.type === TSESTree.AST_NODE_TYPES.Property &&
+      ((prop.key.type === TSESTree.AST_NODE_TYPES.Identifier && prop.key.name === propName) ||
+        (prop.key.type === TSESTree.AST_NODE_TYPES.Literal && prop.key.value === propName)),
+  )
 }
 
 export function buildCalleePath(node: TSESTree.Expression) {
