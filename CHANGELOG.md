@@ -1,5 +1,15 @@
 # Change Log
 
+## [](https://github.com/lingui/eslint-plugin/compare/0.13.1...null) (2026-06-05)
+
+### Features
+
+- **require-implicit-id:** Add rule to enforce implicit IDs ([#131](https://github.com/lingui/eslint-plugin/issues/131)) ([81006cb](https://github.com/lingui/eslint-plugin/commit/81006cbf6a0ea6f53a72fd433cdc07ab2cb97b95))
+
+### Bug Fixes
+
+- **no-single-variables-to-translate:** allow top-level calls to plural/select/selectOrdinal ([#133](https://github.com/lingui/eslint-plugin/issues/133)) ([8577e5c](https://github.com/lingui/eslint-plugin/commit/8577e5ce134afcb1f08fa6b0210e4e3ac7732c30))
+
 ## [](https://github.com/lingui/eslint-plugin/compare/0.13.0...null) (2026-04-14)
 
 ### Bug Fixes
