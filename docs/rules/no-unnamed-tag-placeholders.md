@@ -1,6 +1,7 @@
 # no-unnamed-tag-placeholders
 
-Enforce that JSX tags inside `<Trans>` use named placeholders (via `jsxPlaceholderDefaults` or `jsxPlaceholderAttribute`) to avoid generating numbered placeholders like `<0>`.
+Enforce that JSX tags inside `<Trans>` use named placeholders (via [`jsxPlaceholderDefaults`](https://lingui.dev/ref/conf#macrojsxplaceholderdefaults)
+or [`jsxPlaceholderAttribute`](https://lingui.dev/ref/conf#macrojsxplaceholderattribute)) to avoid generating numbered placeholders like `<0>`.
 
 Much like [`no-expression-in-message`](./no-expression-in-message.md) prevents numbered variable placeholders (`{0}`) by requiring named variables or explicit labels, this rule prevents numbered tag placeholders (`<0>`) by ensuring all JSX elements within `<Trans>` have a named placeholder assigned.
 
