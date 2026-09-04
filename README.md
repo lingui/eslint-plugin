@@ -103,6 +103,7 @@ Alternatively, add `lingui` to the plugins section, and configure the rules you 
 - ✅ [no-single-variables-to-translate](docs/rules/no-single-variables-to-translate.md)
 - ✅ [no-trans-inside-trans](docs/rules/no-trans-inside-trans.md)
 - ✅ [t-call-in-function](docs/rules/t-call-in-function.md)
+- [no-unnamed-tag-placeholders](docs/rules/no-unnamed-tag-placeholders.md)
 - [no-unlocalized-strings](docs/rules/no-unlocalized-strings.md)
 - [text-restrictions](docs/rules/text-restrictions.md)
 - [consistent-plural-format](docs/rules/consistent-plural-format.md)
