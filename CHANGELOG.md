@@ -1,5 +1,11 @@
 # Change Log
 
+## [](https://github.com/lingui/eslint-plugin/compare/0.14.0...null) (2026-09-04)
+
+### Features
+
+- **no-unnamed-tag-placeholders:** add rule to enforce named placeholders for tags inside LinguiJS macros ([#146](https://github.com/lingui/eslint-plugin/issues/146)) ([dbcee55](https://github.com/lingui/eslint-plugin/commit/dbcee5594c0dc47be264ab5d60250bfa47857c06))
+
 ## [](https://github.com/lingui/eslint-plugin/compare/0.13.1...null) (2026-06-05)
 
 ### Features
