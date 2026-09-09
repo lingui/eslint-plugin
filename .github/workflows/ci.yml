@@ -34,6 +34,12 @@ jobs:
       - name: Unit Testing
         run: yarn test:ci
 
+      - name: Build
+        run: yarn build
+
+      - name: Run rules under Oxlint
+        run: yarn test:oxlint
+
       - name: Check coverage
         uses: codecov/codecov-action@v5
         with:
