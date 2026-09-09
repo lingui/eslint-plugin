@@ -94,6 +94,25 @@ Alternatively, add `lingui` to the plugins section, and configure the rules you 
 }
 ```
 
+## Oxlint
+
+The plugin also works as an [Oxlint JS plugin](https://oxc.rs/docs/guide/usage/linter/js-plugins) without any changes. Add it to `jsPlugins` in your `.oxlintrc.json` and enable the rules you need. Oxlint doesn't read the plugin's `configs`, so the recommended rules have to be listed explicitly:
+
+```json
+{
+  "jsPlugins": ["eslint-plugin-lingui"],
+  "rules": {
+    "lingui/t-call-in-function": "error",
+    "lingui/no-single-tag-to-translate": "warn",
+    "lingui/no-single-variables-to-translate": "warn",
+    "lingui/no-trans-inside-trans": "warn",
+    "lingui/no-expression-in-message": "warn"
+  }
+}
+```
+
+Compatibility is verified in CI on every change. The only known limitation is the `useTsTypes` option of [no-unlocalized-strings](docs/rules/no-unlocalized-strings.md): it needs type information from `@typescript-eslint/parser`, which Oxlint doesn't provide.
+
 ## Rules
 
 ✅ - Recommended
