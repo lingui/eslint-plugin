@@ -22,6 +22,7 @@
   "scripts": {
     "test": "jest",
     "test:ci": "jest --ci --runInBand --coverage",
+    "test:oxlint": "node tests/oxlint/run.js",
     "build": "rm -rf lib && tsc --project tsconfig.build.json",
     "prettier:check": "prettier --check --ignore-unknown '**/*'",
     "prepare": "husky"
@@ -49,6 +50,7 @@
     "husky": "^9.1.7",
     "jest": "^30.5.1",
     "lint-staged": "^17.4.1",
+    "oxlint": "^1.82.0",
     "prettier": "3.9.6",
     "ts-jest": "^29.4.12",
     "ts-node": "^10.9.2",
