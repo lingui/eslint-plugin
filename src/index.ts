@@ -10,6 +10,8 @@ import * as noPluralInsideTransRule from './rules/no-plural-inside-trans'
 import * as requireExplicitIdRule from './rules/require-explicit-id'
 import * as requireImplicitIdRule from './rules/require-implicit-id'
 import * as noUnnamedTagPlaceholdersRule from './rules/no-unnamed-tag-placeholders'
+import * as requireCommentRule from './rules/require-comment'
+import * as requireDirectiveResetRule from './rules/require-directive-reset'
 
 import { ESLint, Linter } from 'eslint'
 import { FlatConfig, RuleModule } from '@typescript-eslint/utils/ts-eslint'
@@ -27,6 +29,8 @@ const rules = {
   [requireExplicitIdRule.name]: requireExplicitIdRule.rule,
   [requireImplicitIdRule.name]: requireImplicitIdRule.rule,
   [noUnnamedTagPlaceholdersRule.name]: noUnnamedTagPlaceholdersRule.rule,
+  [requireCommentRule.name]: requireCommentRule.rule,
+  [requireDirectiveResetRule.name]: requireDirectiveResetRule.rule,
 }
 
 type RuleKey = keyof typeof rules

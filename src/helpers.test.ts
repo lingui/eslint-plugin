@@ -1,6 +1,11 @@
 import { parse } from '@typescript-eslint/parser'
 import { TSESTree } from '@typescript-eslint/utils'
-import { buildCalleePath, findJSXAttribute, findObjectProperty } from './helpers'
+import {
+  buildCalleePath,
+  findJSXAttribute,
+  findObjectProperty,
+  getStaticStringValue,
+} from './helpers'
 
 describe('findJSXAttribute', () => {
   function buildJSXElement(code: string) {
@@ -109,5 +114,46 @@ describe('buildCalleePath', () => {
     const exp = buildCallExp('getData().two.three.four()')
 
     expect(buildCalleePath(exp.callee)).toBe('$.two.three.four')
+  })
+})
+
+describe('getStaticStringValue', () => {
+  function buildJSXAttributeValue(value: string) {
+    const t = parse(`<Trans comment=${value}>Hello</Trans>`, { jsx: true })
+    const element = (t.body[0] as TSESTree.ExpressionStatement).expression as TSESTree.JSXElement
+
+    return (element.openingElement.attributes[0] as TSESTree.JSXAttribute).value
+  }
+
+  it('should resolve a string literal', () => {
+    expect(getStaticStringValue(buildJSXAttributeValue('"Greeting"'))).toBe('Greeting')
+  })
+
+  it('should resolve a literal wrapped in an expression container', () => {
+    expect(getStaticStringValue(buildJSXAttributeValue('{"Greeting"}'))).toBe('Greeting')
+  })
+
+  it('should resolve a template literal without expressions', () => {
+    expect(getStaticStringValue(buildJSXAttributeValue('{`Greeting`}'))).toBe('Greeting')
+  })
+
+  it('should not resolve a template literal with expressions', () => {
+    expect(getStaticStringValue(buildJSXAttributeValue('{`Greeting ${name}`}'))).toBeNull()
+  })
+
+  it('should not resolve a value that is only known at runtime', () => {
+    expect(getStaticStringValue(buildJSXAttributeValue('{hint}'))).toBeNull()
+  })
+
+  it('should not resolve a non-string literal', () => {
+    expect(getStaticStringValue(buildJSXAttributeValue('{42}'))).toBeNull()
+  })
+
+  it('should not resolve an empty expression container', () => {
+    expect(getStaticStringValue(buildJSXAttributeValue('{/* nothing */}'))).toBeNull()
+  })
+
+  it('should not resolve a missing value', () => {
+    expect(getStaticStringValue(null)).toBeNull()
   })
 })
