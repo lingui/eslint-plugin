@@ -13,6 +13,19 @@ export const LinguiTaggedTemplateExpressionMessageQuery =
   ':matches(TaggedTemplateExpression[tag.name=t], TaggedTemplateExpression[tag.name=msg], TaggedTemplateExpression[tag.name=defineMessage]) TemplateLiteral'
 
 /**
+ * Queries for the TaggedTemplateExpression node itself, unlike
+ * {@link LinguiTaggedTemplateExpressionMessageQuery} which matches descendant TemplateLiteral
+ * nodes (the message content). This query is needed when inspecting the macro as a whole
+ * rather than its message, and avoids firing multiple times for nested template literals.
+ *
+ * t`Hello`
+ * msg`Hello`
+ * defineMessage`Hello`
+ */
+export const LinguiTaggedTemplateExpressionQuery =
+  ':matches(TaggedTemplateExpression[tag.name=t], TaggedTemplateExpression[tag.name=msg], TaggedTemplateExpression[tag.name=defineMessage])'
+
+/**
  * Queries for TemplateLiteral | StringLiteral in CallExpression expressions:
  *
  * t({message: ``}); t({message: ''})
@@ -133,6 +146,50 @@ export function isMemberExpression(
 
 export function isJSXAttribute(node: TSESTree.Node | undefined): node is TSESTree.JSXAttribute {
   return (node as TSESTree.Node)?.type === TSESTree.AST_NODE_TYPES.JSXAttribute
+}
+
+/**
+ * Resolve the string value of a node whose content is known statically.
+ *
+ * Handles the forms a message descriptor value can take: string literals, template literals
+ * without expressions, and JSX expression containers wrapping either of them.
+ *
+ * @example
+ * // Given `<Trans comment="Greeting">Hello</Trans>`
+ * getStaticStringValue(attr.value)  // → 'Greeting'
+ * // Given `<Trans comment={hint}>Hello</Trans>`
+ * getStaticStringValue(attr.value)  // → null
+ *
+ * @returns `null` when the node does not resolve to a static string.
+ */
+export function getStaticStringValue(node: TSESTree.Node | null | undefined): string | null {
+  if (!node) return null
+  if (isLiteral(node)) return typeof node.value === 'string' ? node.value : null
+  if (isTemplateLiteral(node)) return node.expressions.length ? null : getText(node, false)
+  if (node.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer) {
+    return getStaticStringValue(node.expression)
+  }
+  return null
+}
+
+/**
+ * Check whether a node's value is only known at runtime.
+ *
+ * Unwraps JSX expression containers. Returns `false` for missing values (such as a boolean
+ * JSX attribute `<Trans comment>`), empty expression containers (`{/* nothing *\/}`),
+ * literals (`"hello"`, `true`, `42`, `null`), `undefined`, and template literals without
+ * expressions.
+ */
+export function isRuntimeValue(node: TSESTree.Node | null | undefined): boolean {
+  if (!node) return false
+  if (isLiteral(node)) return false
+  if (isTemplateLiteral(node)) return node.expressions.length > 0
+  if (node.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer) {
+    return isRuntimeValue(node.expression)
+  }
+  if (node.type === TSESTree.AST_NODE_TYPES.JSXEmptyExpression) return false
+  if (isIdentifier(node) && node.name === 'undefined') return false
+  return true
 }
 
 /**
