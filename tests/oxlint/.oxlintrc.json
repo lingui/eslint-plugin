@@ -1,0 +1,22 @@
+{
+  "jsPlugins": ["../../lib/index.js"],
+  "rules": {
+    "lingui/consistent-plural-format": "error",
+    "lingui/no-expression-in-message": "error",
+    "lingui/no-plural-inside-trans": "error",
+    "lingui/no-single-tag-to-translate": "error",
+    "lingui/no-single-variables-to-translate": "error",
+    "lingui/no-trans-inside-trans": "error",
+    "lingui/no-unlocalized-strings": "error",
+    "lingui/no-unnamed-tag-placeholders": "error",
+    "lingui/require-comment": "error",
+    "lingui/require-directive-reset": "error",
+    "lingui/require-explicit-id": "error",
+    "lingui/require-implicit-id": "error",
+    "lingui/t-call-in-function": "error",
+    "lingui/text-restrictions": [
+      "error",
+      { "rules": [{ "patterns": ["“"], "message": "Use straight quotes" }] }
+    ]
+  }
+}
