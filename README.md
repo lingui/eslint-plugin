@@ -110,3 +110,5 @@ Alternatively, add `lingui` to the plugins section, and configure the rules you 
 - [no-plural-inside-trans](docs/rules/no-plural-inside-trans.md)
 - [require-explicit-id](docs/rules/require-explicit-id.md)
 - [require-implicit-id](docs/rules/require-implicit-id.md)
+- [require-comment](docs/rules/require-comment.md)
+- [require-directive-reset](docs/rules/require-directive-reset.md)
