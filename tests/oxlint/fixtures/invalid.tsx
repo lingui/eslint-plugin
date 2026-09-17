@@ -37,7 +37,7 @@ export function Component({ name, count }) {
       Click <a href="/docs">here</a>
     </Trans>
   )
-  // require-explicit-id
+  // require-explicit-id, require-comment
   const noId = <Trans>Hello</Trans>
   // require-implicit-id
   const withId = <Trans id="msg.hello">Hello</Trans>
@@ -48,3 +48,6 @@ export function Component({ name, count }) {
 
   return <div>{raw}</div>
 }
+
+// require-directive-reset (a directive that is never closed)
+// lingui-set context="fixtures"
