@@ -10,7 +10,10 @@
     "linguijs",
     "lingui-js"
   ],
-  "repository": "lingui/eslint-plugin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lingui/eslint-plugin.git"
+  },
   "bugs": "https://github.com/lingui/eslint-plugin/issues",
   "author": "Igor Dolzhenkov",
   "main": "lib/index.js",
