@@ -1,5 +1,11 @@
 # Change Log
 
+## [](https://github.com/lingui/eslint-plugin/compare/0.15.0...null) (2026-09-17)
+
+### Features
+
+- add require-comment and require-directive-reset rules ([#154](https://github.com/lingui/eslint-plugin/issues/154)) ([5bd66e6](https://github.com/lingui/eslint-plugin/commit/5bd66e6a31b5b566b6c7e03a0575fa5058d1f341))
+
 ## [](https://github.com/lingui/eslint-plugin/compare/0.14.0...null) (2026-09-04)
 
 ### Features
