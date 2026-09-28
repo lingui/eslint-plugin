@@ -103,7 +103,7 @@ ruleTester.run(name, rule, {
   invalid: [
     {
       code: 't`hello ${obj.prop}?`',
-      errors: [{ messageId: 'default' }],
+      errors: [{ messageId: 'default', data: { expression: 'obj.prop', label: 'prop' } }],
     },
     {
       code: 'msg`hello ${obj.prop}?`',
@@ -132,7 +132,7 @@ ruleTester.run(name, rule, {
     },
     {
       code: '<Trans>Hello {obj.prop}</Trans>',
-      errors: [{ messageId: 'default' }],
+      errors: [{ messageId: 'default', data: { expression: 'obj.prop', label: 'prop' } }],
     },
     {
       name: 'Template literals as children with expressions',
@@ -141,7 +141,22 @@ ruleTester.run(name, rule, {
     },
     {
       code: 't`hello ${func()}?`',
-      errors: [{ messageId: 'default' }],
+      errors: [{ messageId: 'default', data: { expression: 'func()', label: 'func' } }],
+    },
+    {
+      name: 'Suggests the last property name for a member call',
+      code: 't`hello ${user.getName()}?`',
+      errors: [{ messageId: 'default', data: { expression: 'user.getName()', label: 'getName' } }],
+    },
+    {
+      name: 'Falls back to a generic label for other expressions',
+      code: 't`hello ${a + b}?`',
+      errors: [{ messageId: 'default', data: { expression: 'a + b', label: 'value' } }],
+    },
+    {
+      name: 'Falls back to a generic label for computed member access',
+      code: 't`hello ${obj[key]}?`',
+      errors: [{ messageId: 'default', data: { expression: 'obj[key]', label: 'value' } }],
     },
     {
       code: 't`hello ${{name: obj.foo, surname: obj.bar}}`',

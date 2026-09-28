@@ -15,9 +15,10 @@ export const rule = createRule({
       recommended: 'error',
     },
     messages: {
-      default: 'Should be ${variable}, not ${object.property} or ${myFunction()}',
+      default:
+        'Expression `{{ expression }}` is extracted as a positional placeholder `{0}`, which gives translators no context. Wrap it in a named placeholder: `ph({ {{ label }}: {{ expression }} })`',
       multiplePlaceholders:
-        'Invalid placeholder: Expected an object with a single key-value pair, but found multiple keys',
+        'A named placeholder takes exactly one key-value pair, for example `ph({ name: value })`, but found multiple keys',
     },
     schema: [
       {
@@ -32,6 +33,40 @@ export const rule = createRule({
   defaultOptions: [],
   create: function (context) {
     const linguiMacroFunctionNames = ['plural', 'select', 'selectOrdinal', 'ph']
+    const sourceCode = context.sourceCode ?? context.getSourceCode()
+
+    /**
+     * Derive a placeholder label to show in the error message:
+     * `user.name` -> `name`, `getUserName()` -> `getUserName`, anything else -> `value`
+     */
+    function suggestLabel(expression: TSESTree.Expression): string {
+      let node: TSESTree.Node = expression
+
+      if (node.type === TSESTree.AST_NODE_TYPES.CallExpression) {
+        node = node.callee
+      }
+
+      if (node.type === TSESTree.AST_NODE_TYPES.MemberExpression && !node.computed) {
+        node = node.property
+      }
+
+      if (node.type === TSESTree.AST_NODE_TYPES.Identifier) {
+        return node.name
+      }
+
+      return 'value'
+    }
+
+    function reportExpression(expression: TSESTree.Expression) {
+      context.report({
+        node: expression,
+        messageId: 'default',
+        data: {
+          expression: sourceCode.getText(expression),
+          label: suggestLabel(expression),
+        },
+      })
+    }
 
     function checkExpressionsInTplLiteral(node: TSESTree.TemplateLiteral) {
       node.expressions.forEach((expression) => checkExpression(expression))
@@ -65,10 +100,7 @@ export const rule = createRule({
         return
       }
 
-      context.report({
-        node: expression,
-        messageId: 'default',
-      })
+      reportExpression(expression)
     }
 
     return {
@@ -105,10 +137,7 @@ export const rule = createRule({
         }
 
         if (node.type !== TSESTree.AST_NODE_TYPES.Identifier) {
-          context.report({
-            node,
-            messageId: 'default',
-          })
+          reportExpression(node)
         }
       },
     }
