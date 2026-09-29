@@ -7,8 +7,21 @@ import {
 import { createRule } from '../create-rule'
 
 export const name = 'no-expression-in-message'
-export const rule = createRule({
-  name: 'no-expression-in-message',
+
+export type NoExpressionInMessageOption = {
+  /**
+   * Whether a plain identifier such as `${name}` is accepted as a placeholder.
+   * When `false`, every placeholder has to be given an explicit label with `ph`.
+   */
+  allowIdentifiers?: boolean
+}
+
+export type Options = [NoExpressionInMessageOption]
+
+type MessageIds = 'default' | 'identifier' | 'multiplePlaceholders'
+
+export const rule = createRule<Options, MessageIds>({
+  name,
   meta: {
     docs: {
       description: "doesn't allow functions or member expressions in templates",
@@ -17,21 +30,30 @@ export const rule = createRule({
     messages: {
       default:
         'Expression `{{ expression }}` is extracted as a positional placeholder `{0}`, which gives translators no context. Wrap it in a named placeholder: `ph({ {{ label }}: {{ expression }} })`',
+      identifier:
+        'Placeholder `{{ expression }}` takes its name from the variable, so renaming the variable changes the message and breaks its translation. Wrap it in a named placeholder: `ph({ {{ expression }} })`',
       multiplePlaceholders:
         'A named placeholder takes exactly one key-value pair, for example `ph({ name: value })`, but found multiple keys',
     },
     schema: [
       {
         type: 'object',
-        properties: {},
+        properties: {
+          allowIdentifiers: {
+            type: 'boolean',
+          },
+        },
         additionalProperties: false,
       },
     ],
     type: 'problem' as const,
   },
 
-  defaultOptions: [],
+  defaultOptions: [{ allowIdentifiers: true }],
   create: function (context) {
+    const [option] = context.options
+    const allowIdentifiers = option?.allowIdentifiers ?? true
+
     const linguiMacroFunctionNames = ['plural', 'select', 'selectOrdinal', 'ph']
     const sourceCode = context.sourceCode ?? context.getSourceCode()
 
@@ -68,13 +90,27 @@ export const rule = createRule({
       })
     }
 
+    function checkIdentifier(identifier: TSESTree.Identifier) {
+      if (allowIdentifiers) {
+        return
+      }
+
+      context.report({
+        node: identifier,
+        messageId: 'identifier',
+        data: {
+          expression: identifier.name,
+        },
+      })
+    }
+
     function checkExpressionsInTplLiteral(node: TSESTree.TemplateLiteral) {
       node.expressions.forEach((expression) => checkExpression(expression))
     }
 
     function checkExpression(expression: TSESTree.Expression) {
       if (expression.type === TSESTree.AST_NODE_TYPES.Identifier) {
-        return
+        return checkIdentifier(expression)
       }
 
       const isCallToLinguiMacro =
@@ -136,9 +172,12 @@ export const rule = createRule({
           return checkExpression(node)
         }
 
-        if (node.type !== TSESTree.AST_NODE_TYPES.Identifier) {
-          reportExpression(node)
+        if (node.type === TSESTree.AST_NODE_TYPES.Identifier) {
+          // <Trans>Hello {name}</Trans>
+          return checkIdentifier(node)
         }
+
+        reportExpression(node)
       },
     }
   },
