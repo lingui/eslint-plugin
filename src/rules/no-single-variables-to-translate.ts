@@ -1,12 +1,17 @@
 import { TSESTree } from '@typescript-eslint/utils'
 
 import {
+  getIdentifierName,
   getText,
   isJSXAttribute,
+  isLiteral,
+  isTemplateLiteral,
   LinguiCallExpressionMessageQuery,
   LinguiTaggedTemplateExpressionMessageQuery,
 } from '../helpers'
 import { createRule } from '../create-rule'
+
+const ICU_MACROS = ['Plural', 'Select', 'SelectOrdinal']
 
 export const name = 'no-single-variables-to-translate'
 export const rule = createRule({
@@ -33,14 +38,66 @@ export const rule = createRule({
   defaultOptions: [],
 
   create: function (context) {
+    const hasIcuAttributeText = (value: TSESTree.JSXAttribute['value']): boolean => {
+      if (!value) {
+        return false
+      }
+
+      const node =
+        value.type === TSESTree.AST_NODE_TYPES.JSXExpressionContainer ? value.expression : value
+
+      if (isLiteral(node)) {
+        return typeof node.value === 'string' && node.value.trim().length > 0
+      }
+
+      if (isTemplateLiteral(node)) {
+        return getText(node).trim().length > 0
+      }
+
+      if (
+        node.type === TSESTree.AST_NODE_TYPES.JSXElement ||
+        node.type === TSESTree.AST_NODE_TYPES.JSXFragment
+      ) {
+        return hasSomeJSXTextWithContent([node])
+      }
+
+      return false
+    }
+
+    /**
+     * The text of a Lingui ICU macro lives in its choice props, not in JSX children:
+     * <Plural value={count} one="item" other="items" /> produces
+     * `{count, plural, one {item} other {items}}`.
+     */
+    const hasIcuTextWithContent = (element: TSESTree.JSXElement): boolean => {
+      const tagName = getIdentifierName(element.openingElement.name)
+
+      if (!tagName || !ICU_MACROS.includes(tagName)) {
+        return false
+      }
+
+      return element.openingElement.attributes.some(
+        (attr) =>
+          isJSXAttribute(attr) &&
+          attr.name.type === TSESTree.AST_NODE_TYPES.JSXIdentifier &&
+          /^(zero|one|two|few|many|other|_\w+)$/.test(attr.name.name) &&
+          hasIcuAttributeText(attr.value),
+      )
+    }
+
     const hasSomeJSXTextWithContent = (nodes: TSESTree.JSXChild[]): boolean => {
       return nodes.some((jsxChild) => {
         switch (jsxChild.type) {
           case TSESTree.AST_NODE_TYPES.JSXText:
             return jsxChild.value.trim().length > 0
           case TSESTree.AST_NODE_TYPES.JSXElement:
+            return ICU_MACROS.includes(getIdentifierName(jsxChild.openingElement.name) ?? '')
+              ? hasIcuTextWithContent(jsxChild)
+              : hasSomeJSXTextWithContent(jsxChild.children)
           case TSESTree.AST_NODE_TYPES.JSXFragment:
             return hasSomeJSXTextWithContent(jsxChild.children)
+          case TSESTree.AST_NODE_TYPES.JSXExpressionContainer:
+            return hasIcuAttributeText(jsxChild)
           default:
             return false
         }
