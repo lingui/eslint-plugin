@@ -210,6 +210,10 @@ ruleTester.run(name, rule, {
       errors: errorsForTrans,
     },
     {
+      code: '<Trans><Plural value={count} one other={variable} /></Trans>',
+      errors: errorsForTrans,
+    },
+    {
       code: '<Trans><Foo label="text" /></Trans>',
       errors: errorsForTrans,
     },

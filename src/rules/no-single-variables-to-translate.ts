@@ -70,12 +70,6 @@ export const rule = createRule({
      * `{count, plural, one {item} other {items}}`.
      */
     const hasIcuTextWithContent = (element: TSESTree.JSXElement): boolean => {
-      const tagName = getIdentifierName(element.openingElement.name)
-
-      if (!tagName || !ICU_MACROS.includes(tagName)) {
-        return false
-      }
-
       return element.openingElement.attributes.some(
         (attr) =>
           isJSXAttribute(attr) &&
