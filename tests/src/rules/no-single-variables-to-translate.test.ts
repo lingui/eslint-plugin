@@ -92,6 +92,36 @@ ruleTester.run(name, rule, {
     {
       code: '<Trans id={lazyTranslation.id} />',
     },
+    {
+      code: '<Trans><Plural value={count} one="item" other="items" /></Trans>',
+    },
+    {
+      code: '<Trans><Select value={gender} _male="he" _female="she" other={variable} /></Trans>',
+    },
+    {
+      code: '<Trans><SelectOrdinal value={count} one="#st" two="#nd" few="#rd" other="#th" /></Trans>',
+    },
+    {
+      code: `<Trans>
+                <span style={{ color: 'red' }}>{websiteCount}</span>{' '}
+                <Plural value={websiteCount} one="Website" other="Websites" />
+            </Trans>`,
+    },
+    {
+      code: '<Trans><b><Plural value={count} one="item" other="items" /></b></Trans>',
+    },
+    {
+      code: '<Trans><><Plural value={count} one="item" other="items" /></></Trans>',
+    },
+    {
+      code: '<Trans><Plural value={count} one={<b>{"item"}</b>} other={variable} /></Trans>',
+    },
+    {
+      code: '<Trans><Plural value={count} one={`item of ${name}`} other={variable} /></Trans>',
+    },
+    {
+      code: '<Trans>{<Plural value={count} one="item" other={variable} />}</Trans>',
+    },
   ],
 
   invalid: [
@@ -170,6 +200,38 @@ ruleTester.run(name, rule, {
     {
       code: 'defineMessage({message: `${user}`})',
       errors: errorsForT,
+    },
+    {
+      code: '<Trans><Plural value={count} /></Trans>',
+      errors: errorsForTrans,
+    },
+    {
+      code: '<Trans><Plural value={count} one={variable} other={variable} /></Trans>',
+      errors: errorsForTrans,
+    },
+    {
+      code: '<Trans><Plural value={count} one other={variable} /></Trans>',
+      errors: errorsForTrans,
+    },
+    {
+      code: '<Trans><Foo label="text" /></Trans>',
+      errors: errorsForTrans,
+    },
+    {
+      code: '<Trans><Plural value={count} label="item" other={variable} /></Trans>',
+      errors: errorsForTrans,
+    },
+    {
+      code: '<Trans><Select value={gender} title="text" other={variable} /></Trans>',
+      errors: errorsForTrans,
+    },
+    {
+      code: '<Trans><SelectOrdinal value={count} className="text" other={variable} /></Trans>',
+      errors: errorsForTrans,
+    },
+    {
+      code: '<Trans><Plural value={count} other={<Plural value={nested} other={variable}>ignored text</Plural>} /></Trans>',
+      errors: errorsForTrans,
     },
   ],
 })
